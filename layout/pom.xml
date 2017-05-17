@@ -40,12 +40,6 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>com.revinate</groupId>
-            <artifactId>assertj-json</artifactId>
-            <scope>test</scope>
-        </dependency>
-
     </dependencies>
 
 </project>

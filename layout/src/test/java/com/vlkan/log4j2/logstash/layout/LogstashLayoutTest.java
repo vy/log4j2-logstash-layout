@@ -1,26 +1,28 @@
 package com.vlkan.log4j2.logstash.layout;
 
-import com.jayway.jsonpath.DocumentContext;
-import com.jayway.jsonpath.JsonPath;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vlkan.log4j2.logstash.layout.LogstashLayout.FieldName;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.util.BiConsumer;
-import org.assertj.core.api.AbstractCharSequenceAssert;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.List;
 
-import static com.revinate.assertj.json.JsonPathAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class LogstashLayoutTest {
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private static final String ROOT_TEMPLATE = "{\"foo\": \"bar\", \"baz\": [1, 2, 3]}";
 
     @Test
-    public void test_serialized_event() {
+    public void test_serialized_event() throws IOException {
         LoggerContext loggerContext = (LoggerContext) LogManager.getContext(false);
         Configuration loggerConfig = loggerContext.getConfiguration();
         for (LogEvent logEvent : LogEventFixture.LOG_EVENTS) {
@@ -28,7 +30,7 @@ public class LogstashLayoutTest {
         }
     }
 
-    private void checkLogEvent(Configuration config, LogEvent logEvent) {
+    private void checkLogEvent(Configuration config, LogEvent logEvent) throws IOException {
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
                 .setConfiguration(config)
@@ -36,68 +38,62 @@ public class LogstashLayoutTest {
                 .setRootTemplate(ROOT_TEMPLATE)
                 .build();
         String serializedLogEvent = layout.toSerializable(logEvent);
-        DocumentContext context = JsonPath.parse(serializedLogEvent);
-        checkRootTemplate(context);
-        checkBasicFields(logEvent, context);
-        checkException(logEvent, context);
-        checkContextData(logEvent, context);
-        checkContextStack(logEvent, context);
+        JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
+        checkRootTemplate(rootNode);
+        checkBasicFields(logEvent, rootNode);
+        checkException(logEvent, rootNode);
+        checkContextData(logEvent, rootNode);
+        checkContextStack(logEvent, rootNode);
     }
 
-    private static void checkRootTemplate(DocumentContext context) {
-        assertJsonPath(context, "foo").isEqualTo("bar");
-        assertJsonPath(context, "baz", 0).isEqualTo("1");
-        assertJsonPath(context, "baz", 1).isEqualTo("2");
-        assertJsonPath(context, "baz", 2).isEqualTo("3");
+    private static void checkRootTemplate(JsonNode rootNode) {
+        assertThat(point(rootNode, "foo").asText()).isEqualTo("bar");
+        assertThat(point(rootNode, "baz", 0).asInt()).isEqualTo(1);
+        assertThat(point(rootNode, "baz", 1).asInt()).isEqualTo(2);
+        assertThat(point(rootNode, "baz", 2).asInt()).isEqualTo(3);
     }
 
-    private static void checkBasicFields(LogEvent logEvent, DocumentContext context) {
-        assertJsonPath(context, FieldName.MESSAGE).isEqualTo(logEvent.getMessage().getFormattedMessage());
-        assertJsonPath(context, FieldName.FIELDS, FieldName.Fields.LEVEL).isEqualTo(logEvent.getLevel().name());
-        assertJsonPath(context, FieldName.FIELDS, FieldName.Fields.LOGGER_NAME).isEqualTo(logEvent.getLoggerName());
-        assertJsonPath(context, FieldName.FIELDS, FieldName.Fields.THREAD_NAME).isEqualTo(logEvent.getThreadName());
+    private static void checkBasicFields(LogEvent logEvent, JsonNode rootNode) {
+        assertThat(point(rootNode, FieldName.MESSAGE).asText()).isEqualTo(logEvent.getMessage().getFormattedMessage());
+        assertThat(point(rootNode, FieldName.FIELDS, FieldName.Fields.LEVEL).asText()).isEqualTo(logEvent.getLevel().name());
+        assertThat(point(rootNode, FieldName.FIELDS, FieldName.Fields.LOGGER_NAME).asText()).isEqualTo(logEvent.getLoggerName());
+        assertThat(point(rootNode, FieldName.FIELDS, FieldName.Fields.THREAD_NAME).asText()).isEqualTo(logEvent.getThreadName());
     }
 
-    private static void checkException(LogEvent logEvent, DocumentContext context) {
+    private static void checkException(LogEvent logEvent, JsonNode rootNode) {
         Throwable thrown = logEvent.getThrown();
         if (thrown != null) {
-            assertJsonPath(context, FieldName.FIELDS, FieldName.Fields.EXCEPTION, FieldName.Fields.Exception.EXCEPTION_CLASS).isEqualTo(thrown.getClass().getCanonicalName());
-            assertJsonPath(context, FieldName.FIELDS, FieldName.Fields.EXCEPTION, FieldName.Fields.Exception.EXCEPTION_MESSAGE).isEqualTo(thrown.getMessage());
+            assertThat(point(rootNode, FieldName.FIELDS, FieldName.Fields.EXCEPTION, FieldName.Fields.Exception.EXCEPTION_CLASS).asText()).isEqualTo(thrown.getClass().getCanonicalName());
+            assertThat(point(rootNode, FieldName.FIELDS, FieldName.Fields.EXCEPTION, FieldName.Fields.Exception.EXCEPTION_MESSAGE).asText()).isEqualTo(thrown.getMessage());
         }
     }
 
-    private static void checkContextData(LogEvent logEvent, final DocumentContext context) {
+    private static void checkContextData(LogEvent logEvent, final JsonNode rootNode) {
         logEvent.getContextData().forEach(new BiConsumer<String, Object>() {
             @Override
             public void accept(String key, Object value) {
-                assertJsonPath(context, FieldName.FIELDS, FieldName.Fields.CONTEXT_DATA, key).isEqualTo(value);
+                assertThat(point(rootNode, FieldName.FIELDS, FieldName.Fields.CONTEXT_DATA, key).asText()).isEqualTo(value);
             }
         });
     }
 
-    private static void checkContextStack(LogEvent logEvent, DocumentContext context) {
+    private static void checkContextStack(LogEvent logEvent, JsonNode rootNode) {
         List<String> contextStacks = logEvent.getContextStack().asList();
         for (int contextStackIndex = 0; contextStackIndex < contextStacks.size(); contextStackIndex++) {
             String contextStack = contextStacks.get(contextStackIndex);
-            assertJsonPath(context, FieldName.FIELDS, FieldName.Fields.CONTEXT_STACK, contextStackIndex).isEqualTo(contextStack);
+            assertThat(point(rootNode, FieldName.FIELDS, FieldName.Fields.CONTEXT_STACK, contextStackIndex).asText()).isEqualTo(contextStack);
         }
     }
 
-    private static AbstractCharSequenceAssert<?, String> assertJsonPath(DocumentContext context, Object... fields) {
-        String jsonPath = createJsonPath(fields);
-        return assertThat(context).jsonPathAsString(jsonPath);
+    private static JsonNode point(JsonNode node, Object... fields) {
+        String pointer = createJsonPointer(fields);
+        return node.at(pointer);
     }
 
-    private static String createJsonPath(Object... fields) {
-        StringBuilder jsonPathBuilder = new StringBuilder("$");
+    private static String createJsonPointer(Object... fields) {
+        StringBuilder jsonPathBuilder = new StringBuilder();
         for (Object field : fields) {
-            jsonPathBuilder.append("[");
-            if (field instanceof String) {
-                jsonPathBuilder.append("'").append(field).append("'");
-            } else {
-                jsonPathBuilder.append(field);
-            }
-            jsonPathBuilder.append("]");
+            jsonPathBuilder.append("/").append(field);
         }
         return jsonPathBuilder.toString();
     }
