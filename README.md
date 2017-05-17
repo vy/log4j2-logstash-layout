@@ -1,3 +1,6 @@
+[![Build Status](https://secure.travis-ci.org/vy/log4j2-logstash-layout.svg)](http://travis-ci.org/vy/hrrs)
+[![Maven Central](https://img.shields.io/maven-central/v/com.vlkan.log4j2/log4j2-logstash-layout-parent.svg)](https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.vlkan.log4j2%22)
+
 `LogstashLayout` plugin provides a [Log4j 2.x](https://logging.apache.org/log4j/2.x/)
 layout formatted in JSON that is consumable by
 [Logstash](https://www.elastic.co/products/logstash). Compared to
@@ -9,19 +12,23 @@ timestamp formatting (`dateTimeFormatPattern`) and additional JSON fields
 
 # Usage
 
-Add the `log4j2-logstash-layout` dependency to your POM file:
+Add the `log4j2-logstash-layout` dependency to your POM file
+
+```xml
+<dependency>
+    <groupId>com.vlkan.log4j2</groupId>
+    <artifactId>log4j2-logstash-layout</artifactId>
+    <version>${log4j2-logstash-layout.version}</version>
+</dependency>
+```
+
+together with a valid `log4j-core` dependency:
 
 ```xml
 <dependency>
     <groupId>org.apache.logging.log4j</groupId>
     <artifactId>log4j-core</artifactId>
     <version>${log4j2.version}</version>
-</dependency>
-
-<dependency>
-    <groupId>com.vlkan.log4j2</groupId>
-    <artifactId>log4j2-logstash-layout</artifactId>
-    <version>${log4j2-logstash-layout.version}</version>
 </dependency>
 ```
 
