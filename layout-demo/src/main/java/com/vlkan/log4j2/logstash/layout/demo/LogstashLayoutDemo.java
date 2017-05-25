@@ -7,6 +7,7 @@ public enum LogstashLayoutDemo {;
 
     public static void main(String[] args) {
         Logger logger = LogManager.getLogger(LogstashLayoutDemo.class);
+        logger.info("Hello, world!");
         RuntimeException error = new RuntimeException("test");
         logger.error("Hello, error!", error);
     }

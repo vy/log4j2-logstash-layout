@@ -1,0 +1,19 @@
+{
+  "mdc": "__mdc__",
+  "exception": {
+    "exception_class": "__exceptionClassName__",
+    "exception_message": "__exceptionMessage__",
+    "stacktrace": "__exceptionStackTrace__"
+  },
+  "line_number": "__sourceLineNumber__",
+  "class": "__sourceClassName__",
+  "@version": 1,
+  "source_host": "__sourceHost__",
+  "message": "__message__",
+  "thread_name": "__threadName__",
+  "@timestamp": "__timestamp__",
+  "level": "__level__",
+  "file": "__sourceFileName__",
+  "method": "__sourceMethodName__",
+  "logger_name": "__loggerName__"
+}
