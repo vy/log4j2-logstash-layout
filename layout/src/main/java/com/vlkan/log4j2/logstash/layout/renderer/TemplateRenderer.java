@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vlkan.log4j2.logstash.layout.resolver.TemplateResolver;
 import com.vlkan.log4j2.logstash.layout.resolver.TemplateResolverContext;
+import com.vlkan.log4j2.logstash.layout.util.JacksonNewlineAddingPrettyPrinter;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.core.LogEvent;
 
@@ -33,7 +34,9 @@ public class TemplateRenderer {
     private TemplateRenderer(Builder builder) {
         this.resolverContext = builder.resolverContext;
         this.objectMapper = resolverContext.getObjectMapper();
-        this.objectWriter = builder.prettyPrintEnabled ? objectMapper.writerWithDefaultPrettyPrinter() : objectMapper.writer();
+        this.objectWriter = builder.prettyPrintEnabled
+                ? objectMapper.writerWithDefaultPrettyPrinter()
+                : objectMapper.writer(new JacksonNewlineAddingPrettyPrinter());
         this.templateRootNode = readTemplate(objectMapper, builder.template);
         this.resolverByName = createResolverByName(builder.resolvers);
     }
