@@ -92,6 +92,8 @@ This generates an output as follows:
 | `stackTraceEnabled` | boolean | includes stack traces (defaults to `false`) |
 | `dateTimeFormatPattern` | String | timestamp formatter pattern (defaults to `yyyy-MM-dd'T'HH:mm:ss.SSSZZZ`) |
 | `timeZoneId` | String | time zone id (defaults to `TimeZone.getDefault().getID()`) |
+| `mdcKeyPattern` | String | regex to filter MDC keys |
+| `ndcPattern` | String | regex to filter NDC items |
 | `templateUri` | String | JSON template for generating the output (defaults to `classpath:LogstashJsonEventLayoutV1.json`) |
 
 `templateUri` denotes the URI pointing to the JSON template that will be used

@@ -61,6 +61,8 @@ public class LogstashLayout extends AbstractStringLayout {
                 .setTimestampFormat(timestampFormat)
                 .setLocationInfoEnabled(builder.locationInfoEnabled)
                 .setStackTraceEnabled(builder.stackTraceEnabled)
+                .setMdcKeyPattern(builder.mdcKeyPattern)
+                .setNdcPattern(builder.ndcPattern)
                 .build();
         this.renderer = TemplateRenderer
                 .newBuilder()
@@ -116,6 +118,12 @@ public class LogstashLayout extends AbstractStringLayout {
 
         @PluginBuilderAttribute
         private String templateUri = "classpath:LogstashJsonEventLayoutV1.json";
+
+        @PluginBuilderAttribute
+        private String mdcKeyPattern;
+
+        @PluginBuilderAttribute
+        private String ndcPattern;
 
         private Builder() {
             // Do nothing.
@@ -184,6 +192,24 @@ public class LogstashLayout extends AbstractStringLayout {
             return this;
         }
 
+        public String getMdcKeyPattern() {
+            return mdcKeyPattern;
+        }
+
+        public Builder setMdcKeyPattern(String mdcKeyPattern) {
+            this.mdcKeyPattern = mdcKeyPattern;
+            return this;
+        }
+
+        public String getNdcPattern() {
+            return ndcPattern;
+        }
+
+        public Builder setNdcPattern(String ndcPattern) {
+            this.ndcPattern = ndcPattern;
+            return this;
+        }
+
         @Override
         public LogstashLayout build() {
             validate();
@@ -205,6 +231,8 @@ public class LogstashLayout extends AbstractStringLayout {
                     ", dateTimeFormatPattern='" + dateTimeFormatPattern + '\'' +
                     ", timeZoneId='" + timeZoneId + '\'' +
                     ", templateUri='" + templateUri + '\'' +
+                    ", mdcKeyPattern='" + mdcKeyPattern + '\'' +
+                    ", ndcPattern='" + ndcPattern + '\'' +
                     '}';
         }
 

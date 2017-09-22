@@ -2,6 +2,8 @@ package com.vlkan.log4j2.logstash.layout;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.MissingNode;
 import com.vlkan.log4j2.logstash.layout.util.Throwables;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LogEvent;
@@ -11,7 +13,10 @@ import org.apache.logging.log4j.util.BiConsumer;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,12 +37,20 @@ public class LogstashLayoutTest {
     }
 
     private void checkLogEvent(Configuration config, LogEvent logEvent, String lookupTestKey, String lookupTestVal) throws IOException {
+        Set<String> mdcKeys = logEvent.getContextData().toMap().keySet();
+        String firstMdcKey = mdcKeys.iterator().next();
+        String firstMdcKeyExcludingRegex = mdcKeys.isEmpty() ? null : String.format("^(?!%s).*$", Pattern.quote(firstMdcKey));
+        List<String> ndcItems = logEvent.getContextStack().asList();
+        String firstNdcItem = ndcItems.get(0);
+        String firstNdcItemExcludingRegex = ndcItems.isEmpty() ? null : String.format("^(?!%s).*$", Pattern.quote(firstNdcItem));
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
                 .setConfiguration(config)
                 .setTemplateUri("classpath:LogstashTestLayout.json")
                 .setStackTraceEnabled(true)
                 .setLocationInfoEnabled(true)
+                .setMdcKeyPattern(firstMdcKeyExcludingRegex)
+                .setNdcPattern(firstNdcItemExcludingRegex)
                 .build();
         String serializedLogEvent = layout.toSerializable(logEvent);
         JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
@@ -45,8 +58,8 @@ public class LogstashLayoutTest {
         checkBasicFields(logEvent, rootNode);
         checkSource(logEvent, rootNode);
         checkException(logEvent, rootNode);
-        checkContextData(logEvent, rootNode);
-        checkContextStack(logEvent, rootNode);
+        checkContextData(logEvent, firstMdcKeyExcludingRegex, rootNode);
+        checkContextStack(logEvent, firstNdcItemExcludingRegex, rootNode);
         checkLookupTest(lookupTestKey, lookupTestVal, rootNode);
     }
 
@@ -77,21 +90,45 @@ public class LogstashLayoutTest {
         }
     }
 
-    private static void checkContextData(LogEvent logEvent, final JsonNode rootNode) {
+    private static void checkContextData(LogEvent logEvent, String mdcKeyRegex, final JsonNode rootNode) {
+        final Pattern mdcKeyPattern = mdcKeyRegex == null ? null : Pattern.compile(mdcKeyRegex);
         logEvent.getContextData().forEach(new BiConsumer<String, Object>() {
             @Override
             public void accept(String key, Object value) {
-                assertThat(point(rootNode, "mdc", key).asText()).isEqualTo(value);
+                JsonNode node = point(rootNode, "mdc", key);
+                boolean matches = mdcKeyPattern == null || mdcKeyPattern.matcher(key).matches();
+                if (matches) {
+                    assertThat(node.asText()).isEqualTo(value);
+                } else {
+                    assertThat(node).isEqualTo(MissingNode.getInstance());
+                }
             }
         });
     }
 
-    private static void checkContextStack(LogEvent logEvent, JsonNode rootNode) {
-        List<String> contextStacks = logEvent.getContextStack().asList();
-        for (int contextStackIndex = 0; contextStackIndex < contextStacks.size(); contextStackIndex++) {
-            String contextStack = contextStacks.get(contextStackIndex);
-            assertThat(point(rootNode, "ndc", contextStackIndex).asText()).isEqualTo(contextStack);
+    private static void checkContextStack(LogEvent logEvent, String ndcRegex, JsonNode rootNode) {
+        Pattern ndcPattern = ndcRegex == null ? null : Pattern.compile(ndcRegex);
+
+        // Determine the expected context stack.
+        List<String> initialContextStack = logEvent.getContextStack().asList();
+        List<String> expectedContextStack = new ArrayList<>();
+        for (String contextStackItem : initialContextStack) {
+            boolean matches = ndcPattern == null || ndcPattern.matcher(contextStackItem).matches();
+            if (matches) {
+                expectedContextStack.add(contextStackItem);
+            }
         }
+
+        // Determine the actual context stack.
+        ArrayNode contextStack = (ArrayNode) point(rootNode, "ndc");
+        List<String> actualContextStack = new ArrayList<>();
+        for (JsonNode contextStackItem : contextStack) {
+            actualContextStack.add(contextStackItem.asText());
+        }
+
+        // Compare expected and actual context stacks.
+        assertThat(actualContextStack).isEqualTo(expectedContextStack);
+
     }
 
     private static void checkLookupTest(String lookupTestKey, String lookupTestVal, JsonNode rootNode) {

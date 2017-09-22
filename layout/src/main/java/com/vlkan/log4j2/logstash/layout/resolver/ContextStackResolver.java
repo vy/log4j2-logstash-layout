@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.apache.logging.log4j.ThreadContext;
 import org.apache.logging.log4j.core.LogEvent;
 
+import java.util.regex.Pattern;
+
 /**
  * Add Nested Diagnostic Context (NDC).
  */
@@ -31,9 +33,13 @@ public class ContextStackResolver implements TemplateResolver {
         if (contextStack.getDepth() == 0) {
             return null;
         }
+        Pattern itemPattern = context.getNdcPattern();
         ArrayNode contextStackNode = context.getObjectMapper().createArrayNode();
         for (String contextStackItem : contextStack.asList()) {
-            contextStackNode.add(contextStackItem);
+            boolean matches = itemPattern == null || itemPattern.matcher(contextStackItem).matches();
+            if (matches) {
+                contextStackNode.add(contextStackItem);
+            }
         }
         return contextStackNode;
     }

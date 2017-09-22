@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.core.util.datetime.FastDateFormat;
 
+import java.util.regex.Pattern;
+
 public class TemplateResolverContext {
 
     private final ObjectMapper objectMapper;
@@ -14,11 +16,17 @@ public class TemplateResolverContext {
 
     private final boolean stackTraceEnabled;
 
+    private final Pattern mdcKeyPattern;
+
+    private final Pattern ndcPattern;
+
     public TemplateResolverContext(Builder builder) {
         this.objectMapper = builder.objectMapper;
         this.timestampFormat = builder.timestampFormat;
         this.locationInfoEnabled = builder.locationInfoEnabled;
         this.stackTraceEnabled = builder.stackTraceEnabled;
+        this.mdcKeyPattern = builder.mdcKeyPattern == null ? null : Pattern.compile(builder.mdcKeyPattern);
+        this.ndcPattern = builder.ndcPattern == null ? null : Pattern.compile(builder.ndcPattern);
     }
 
     public ObjectMapper getObjectMapper() {
@@ -37,6 +45,14 @@ public class TemplateResolverContext {
         return stackTraceEnabled;
     }
 
+    public Pattern getMdcKeyPattern() {
+        return mdcKeyPattern;
+    }
+
+    public Pattern getNdcPattern() {
+        return ndcPattern;
+    }
+
     public static Builder newBuilder() {
         return new Builder();
     }
@@ -50,6 +66,10 @@ public class TemplateResolverContext {
         private boolean locationInfoEnabled;
 
         private boolean stackTraceEnabled;
+
+        private String mdcKeyPattern;
+
+        private String ndcPattern;
 
         private Builder() {
             // Do nothing.
@@ -88,6 +108,24 @@ public class TemplateResolverContext {
 
         public Builder setStackTraceEnabled(boolean stackTraceEnabled) {
             this.stackTraceEnabled = stackTraceEnabled;
+            return this;
+        }
+
+        public String getMdcKeyPattern() {
+            return mdcKeyPattern;
+        }
+
+        public Builder setMdcKeyPattern(String mdcKeyPattern) {
+            this.mdcKeyPattern = mdcKeyPattern;
+            return this;
+        }
+
+        public String getNdcPattern() {
+            return ndcPattern;
+        }
+
+        public Builder setNdcPattern(String ndcPattern) {
+            this.ndcPattern = ndcPattern;
             return this;
         }
 

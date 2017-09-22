@@ -6,6 +6,8 @@ import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.util.BiConsumer;
 import org.apache.logging.log4j.util.ReadOnlyStringMap;
 
+import java.util.regex.Pattern;
+
 /**
  * Add Mapped Diagnostic Context (MDC).
  */
@@ -32,11 +34,15 @@ public class ContextDataResolver implements TemplateResolver {
         if (contextData == null || contextData.isEmpty()) {
             return null;
         }
+        final Pattern keyPattern = context.getMdcKeyPattern();
         final ObjectNode contextDataNode = context.getObjectMapper().createObjectNode();
         contextData.forEach(new BiConsumer<String, String>() {
             @Override
             public void accept(String key, String value) {
-                contextDataNode.put(key, value);
+                boolean keyMatches = keyPattern == null || keyPattern.matcher(key).matches();
+                if (keyMatches) {
+                    contextDataNode.put(key, value);
+                }
             }
         });
         return contextDataNode;
