@@ -14,6 +14,9 @@ import org.apache.logging.log4j.core.config.plugins.PluginBuilderAttribute;
 import org.apache.logging.log4j.core.config.plugins.PluginBuilderFactory;
 import org.apache.logging.log4j.core.config.plugins.PluginConfiguration;
 import org.apache.logging.log4j.core.layout.AbstractStringLayout;
+import org.apache.logging.log4j.core.lookup.Interpolator;
+import org.apache.logging.log4j.core.lookup.MapLookup;
+import org.apache.logging.log4j.core.lookup.StrSubstitutor;
 import org.apache.logging.log4j.core.util.datetime.FastDateFormat;
 
 import java.nio.charset.StandardCharsets;
@@ -51,6 +54,7 @@ public class LogstashLayout extends AbstractStringLayout {
         String template = Uris.readUri(builder.templateUri);
         FastDateFormat timestampFormat = readDateFormat(builder);
         ObjectMapper objectMapper = new ObjectMapper();
+        StrSubstitutor substitutor = createInterpolator(builder.config);
         TemplateResolverContext resolverContext = TemplateResolverContext
                 .newBuilder()
                 .setObjectMapper(objectMapper)
@@ -60,11 +64,20 @@ public class LogstashLayout extends AbstractStringLayout {
                 .build();
         this.renderer = TemplateRenderer
                 .newBuilder()
+                .setSubstitutor(substitutor)
                 .setResolverContext(resolverContext)
                 .setPrettyPrintEnabled(builder.prettyPrintEnabled)
                 .setTemplate(template)
                 .setResolvers(RESOLVERS)
                 .build();
+    }
+
+    private static StrSubstitutor createInterpolator(Configuration config) {
+        Map<String, String> properties = config.getProperties();
+        MapLookup mapLookup = new MapLookup(properties);
+        List<String> pluginPackages = config.getPluginPackages();
+        Interpolator interpolator = new Interpolator(mapLookup, pluginPackages);
+        return new StrSubstitutor(interpolator);
     }
 
     private static FastDateFormat readDateFormat(Builder builder) {

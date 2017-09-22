@@ -21,14 +21,17 @@ public class LogstashLayoutTest {
 
     @Test
     public void test_serialized_event() throws IOException {
+        String lookupTestKey = "lookup_test_key";
+        String lookupTestVal = String.format("lookup_test_value_%d", (int) (1000 * Math.random()));
+        System.setProperty(lookupTestKey, lookupTestVal);
         LoggerContext loggerContext = (LoggerContext) LogManager.getContext(false);
         Configuration loggerConfig = loggerContext.getConfiguration();
         for (LogEvent logEvent : LogEventFixture.LOG_EVENTS) {
-            checkLogEvent(loggerConfig, logEvent);
+            checkLogEvent(loggerConfig, logEvent, lookupTestKey, lookupTestVal);
         }
     }
 
-    private void checkLogEvent(Configuration config, LogEvent logEvent) throws IOException {
+    private void checkLogEvent(Configuration config, LogEvent logEvent, String lookupTestKey, String lookupTestVal) throws IOException {
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
                 .setConfiguration(config)
@@ -44,6 +47,7 @@ public class LogstashLayoutTest {
         checkException(logEvent, rootNode);
         checkContextData(logEvent, rootNode);
         checkContextStack(logEvent, rootNode);
+        checkLookupTest(lookupTestKey, lookupTestVal, rootNode);
     }
 
     private static void checkConstants(JsonNode rootNode) {
@@ -88,6 +92,10 @@ public class LogstashLayoutTest {
             String contextStack = contextStacks.get(contextStackIndex);
             assertThat(point(rootNode, "ndc", contextStackIndex).asText()).isEqualTo(contextStack);
         }
+    }
+
+    private static void checkLookupTest(String lookupTestKey, String lookupTestVal, JsonNode rootNode) {
+        assertThat(point(rootNode, lookupTestKey).asText()).isEqualTo(lookupTestVal);
     }
 
     private static JsonNode point(JsonNode node, Object... fields) {

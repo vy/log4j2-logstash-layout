@@ -7,11 +7,13 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import com.vlkan.log4j2.logstash.layout.resolver.TemplateResolver;
 import com.vlkan.log4j2.logstash.layout.resolver.TemplateResolverContext;
 import com.vlkan.log4j2.logstash.layout.util.JacksonNewlineAddingPrettyPrinter;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.lookup.StrSubstitutor;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -20,6 +22,8 @@ import java.util.Map;
 import java.util.Set;
 
 public class TemplateRenderer {
+
+    private final StrSubstitutor substitutor;
 
     private final TemplateResolverContext resolverContext;
 
@@ -32,6 +36,7 @@ public class TemplateRenderer {
     private final Map<String, TemplateResolver> resolverByName;
 
     private TemplateRenderer(Builder builder) {
+        this.substitutor = builder.substitutor;
         this.resolverContext = builder.resolverContext;
         this.objectMapper = resolverContext.getObjectMapper();
         this.objectWriter = builder.prettyPrintEnabled
@@ -109,19 +114,23 @@ public class TemplateRenderer {
     }
 
     private JsonNode resolveStringNode(LogEvent event, JsonNode textNode) {
-        String resolverName = getResolverName(textNode.asText());
+        String text = textNode.asText();
+        String resolverName = getResolverName(text);
         if (resolverName != null) {
             TemplateResolver resolver = resolverByName.get(resolverName);
             if (resolver != null) {
                 return resolver.resolve(resolverContext, event);
             }
+        } else {
+            String replacedText = substitutor.replace(event, text);
+            return new TextNode(replacedText);
         }
         return textNode;
     }
 
     private static String getResolverName(String fieldValue) {
-        return fieldValue.startsWith("__") && fieldValue.endsWith("__")
-                ? fieldValue.substring(2, fieldValue.length()-2)
+        return fieldValue.startsWith("${json:") && fieldValue.endsWith("}")
+                ? fieldValue.substring(7, fieldValue.length() - 1)
                 : null;
     }
 
@@ -130,6 +139,8 @@ public class TemplateRenderer {
     }
 
     public static class Builder {
+
+        private StrSubstitutor substitutor;
 
         private TemplateResolverContext resolverContext;
 
@@ -141,6 +152,15 @@ public class TemplateRenderer {
 
         private Builder() {
             // Do nothing.
+        }
+
+        public StrSubstitutor getSubstitutor() {
+            return substitutor;
+        }
+
+        public Builder setSubstitutor(StrSubstitutor substitutor) {
+            this.substitutor = substitutor;
+            return this;
         }
 
         public TemplateResolverContext getResolverContext() {
@@ -185,6 +205,7 @@ public class TemplateRenderer {
         }
 
         private void validate() {
+            Validate.notNull(substitutor, "substitutor");
             Validate.notNull(resolverContext, "resolverContext");
             Validate.notBlank(template, "template");
             Validate.notNull(resolvers, "resolvers");

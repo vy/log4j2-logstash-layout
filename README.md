@@ -101,26 +101,28 @@ in `LogstashJsonEventLayoutV1.json` within the classpath:
 
 ```json
 {
-  "mdc": "__mdc__",
-  "ndc": "__ndc__",
+  "mdc": "${json:mdc}",
+  "ndc": "${json:ndc}",
   "exception": {
-    "exception_class": "__exceptionClassName__",
-    "exception_message": "__exceptionMessage__",
-    "stacktrace": "__exceptionStackTrace__"
+    "exception_class": "${json:exceptionClassName}",
+    "exception_message": "${json:exceptionMessage}",
+    "stacktrace": "${json:exceptionStackTrace}"
   },
-  "line_number": "__sourceLineNumber__",
-  "class": "__sourceClassName__",
+  "line_number": "${json:sourceLineNumber}",
+  "class": "${json:sourceClassName}",
   "@version": 1,
-  "source_host": "__sourceHost__",
-  "message": "__message__",
-  "thread_name": "__threadName__",
-  "@timestamp": "__timestamp__",
-  "level": "__level__",
-  "file": "__sourceFileName__",
-  "method": "__sourceMethodName__",
-  "logger_name": "__loggerName__"
+  "source_host": "${json:sourceHost}",
+  "message": "${json:message}",
+  "thread_name": "${json:threadName}",
+  "@timestamp": "${json:timestamp}",
+  "level": "${json:level}",
+  "file": "${json:sourceFileName}",
+  "method": "${json:sourceMethodName}",
+  "logger_name": "${json:loggerName}"
 }
 ```
+
+In addition to `${json:<logstash-variable-name>}` lookups, 
 
 In case of need, you can create your own templates with a structure tailored
 to your needs. That is, you can add new fields, remove or rename existing
@@ -147,6 +149,12 @@ rendering the JSON output.
 | `sourceMethodName` | `logEvent.getSource().getMethodName()` |
 | `threadName` | `logEvent.getThreadName()` |
 | `timestamp` | `logEvent.getTimeMillis()` formatted using `dateTimeFormatPattern` and `timeZoneId` |
+
+[Log4j 2.x Lookups](https://logging.apache.org/log4j/2.0/manual/lookups.html)
+(e.g., `${java:version}`, `${env:USER}`, `${date:MM-dd-yyyy}`) are supported
+in templates too. Though note that while `${json:...}` template variables is
+expected to occupy an entire field, that is, `"level": "${json:level}"`, a
+lookup can be mixed within a regular text: `"myCustomField": "Hello, ${env:USER}!"`.
 
 See `layout-demo` directory for a sample application using the `LogstashLayout`.
 
