@@ -221,4 +221,99 @@ public class LogstashLayoutTest {
         // then
         assertThat(result.trim()).isEqualTo("{\"reference_to_default_property\":\"my_value\"}");
     }
+
+    @Test
+    public void test_root_cause_disabled() throws Exception {
+        // given
+        final LogEvent event = Log4jLogEvent.newBuilder()
+                .setLoggerName("a.B")
+                .setLevel(Level.ERROR)
+                .setMessage(new SimpleMessage("Request failed"))
+                .setThrown(new RuntimeException("Internal Server Error"))
+                .build();
+
+        // when
+        final LogstashLayout layout = LogstashLayout.newBuilder()
+                .setConfiguration(ConfigurationBuilderFactory.newConfigurationBuilder().build())
+                .setStackTraceEnabled(true)
+                .setTemplate("{\"ex_class\": \"${json:exceptionClassName}\", \"ex_message\": \"${json:exceptionMessage}\", \"stacktrace\": \"${json:exceptionStackTrace}\",\n" +
+                        "\"root_ex_class\": \"${json:rootCauseExceptionClassName}\", \"root_ex_message\": \"${json:rootCauseExceptionMessage}\", \"root_ex_stacktrace\": \"${json:rootCauseExceptionStackTrace}\"}")
+                .build();
+
+        final String result = layout.toSerializable(event);
+
+        final JsonNode rootNode = OBJECT_MAPPER.readTree(result);
+
+        // then
+        assertThat(point(rootNode, "ex_class").asText()).isEqualTo("java.lang.RuntimeException");
+        assertThat(point(rootNode, "ex_message").asText()).isEqualTo("Internal Server Error");
+        assertThat(point(rootNode, "stacktrace").asText()).startsWith("java.lang.RuntimeException: Internal Server Error");
+        assertThat(rootNode.has("root_ex_class")).isFalse();
+        assertThat(rootNode.has("root_ex_message")).isFalse();
+        assertThat(rootNode.has("root_ex_stacktrace")).isFalse();
+    }
+
+    @Test
+    public void test_root_cause_enabled() throws Exception {
+        // given
+        final LogEvent event = Log4jLogEvent.newBuilder()
+                .setLoggerName("a.B")
+                .setLevel(Level.ERROR)
+                .setMessage(new SimpleMessage("Request failed"))
+                .setThrown(new RuntimeException("Internal Server Error", new IllegalArgumentException("Client Side Error")))
+                .build();
+
+        // when
+        final LogstashLayout layout = LogstashLayout.newBuilder()
+                .setConfiguration(ConfigurationBuilderFactory.newConfigurationBuilder().build())
+                .setStackTraceEnabled(true)
+                .setRootCauseEnabled(true)
+                .setTemplate("{\"ex_class\": \"${json:exceptionClassName}\", \"ex_message\": \"${json:exceptionMessage}\", \"stacktrace\": \"${json:exceptionStackTrace}\",\n" +
+                        "\"root_ex_class\": \"${json:rootCauseExceptionClassName}\", \"root_ex_message\": \"${json:rootCauseExceptionMessage}\", \"root_ex_stacktrace\": \"${json:rootCauseExceptionStackTrace}\"}")
+                .build();
+
+        final String result = layout.toSerializable(event);
+
+        final JsonNode rootNode = OBJECT_MAPPER.readTree(result);
+
+        // then
+        assertThat(point(rootNode, "ex_class").asText()).isEqualTo("java.lang.RuntimeException");
+        assertThat(point(rootNode, "ex_message").asText()).isEqualTo("Internal Server Error");
+        assertThat(point(rootNode, "stacktrace").asText()).startsWith("java.lang.RuntimeException: Internal Server Error");
+        assertThat(point(rootNode, "root_ex_class").asText()).isEqualTo("java.lang.IllegalArgumentException");
+        assertThat(point(rootNode, "root_ex_message").asText()).isEqualTo("Client Side Error");
+        assertThat(point(rootNode, "root_ex_stacktrace").asText()).startsWith("java.lang.IllegalArgumentException: Client Side Error");
+    }
+
+    @Test
+    public void test_root_cause_equal_to_thrown() throws Exception {
+        // given
+        final LogEvent event = Log4jLogEvent.newBuilder()
+                .setLoggerName("a.B")
+                .setLevel(Level.ERROR)
+                .setMessage(new SimpleMessage("Request failed"))
+                .setThrown(new RuntimeException("Internal Server Error"))
+                .build();
+
+        // when
+        final LogstashLayout layout = LogstashLayout.newBuilder()
+                .setConfiguration(ConfigurationBuilderFactory.newConfigurationBuilder().build())
+                .setStackTraceEnabled(true)
+                .setRootCauseEnabled(true)
+                .setTemplate("{\"ex_class\": \"${json:exceptionClassName}\", \"ex_message\": \"${json:exceptionMessage}\", \"stacktrace\": \"${json:exceptionStackTrace}\",\n" +
+                        "\"root_ex_class\": \"${json:rootCauseExceptionClassName}\", \"root_ex_message\": \"${json:rootCauseExceptionMessage}\", \"root_ex_stacktrace\": \"${json:rootCauseExceptionStackTrace}\"}")
+                .build();
+
+        final String result = layout.toSerializable(event);
+
+        final JsonNode rootNode = OBJECT_MAPPER.readTree(result);
+
+        // then
+        assertThat(point(rootNode, "ex_class").asText()).isEqualTo("java.lang.RuntimeException");
+        assertThat(point(rootNode, "ex_message").asText()).isEqualTo("Internal Server Error");
+        assertThat(point(rootNode, "stacktrace").asText()).startsWith("java.lang.RuntimeException: Internal Server Error");
+        assertThat(point(rootNode, "root_ex_class").asText()).isEqualTo("java.lang.RuntimeException");
+        assertThat(point(rootNode, "root_ex_message").asText()).isEqualTo("Internal Server Error");
+        assertThat(point(rootNode, "root_ex_stacktrace").asText()).startsWith("java.lang.RuntimeException: Internal Server Error");
+    }
 }
