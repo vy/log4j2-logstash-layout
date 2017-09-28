@@ -55,7 +55,7 @@ public class LogstashLayout extends AbstractStringLayout {
         String template = StringUtils.isBlank(builder.template) ? Uris.readUri(builder.templateUri) : builder.template;
         FastDateFormat timestampFormat = readDateFormat(builder);
         ObjectMapper objectMapper = new ObjectMapper();
-        StrSubstitutor substitutor = createInterpolator(builder.config);
+        StrSubstitutor substitutor = builder.config.getStrSubstitutor();
         TemplateResolverContext resolverContext = TemplateResolverContext
                 .newBuilder()
                 .setObjectMapper(objectMapper)
@@ -73,14 +73,6 @@ public class LogstashLayout extends AbstractStringLayout {
                 .setTemplate(template)
                 .setResolvers(RESOLVERS)
                 .build();
-    }
-
-    private static StrSubstitutor createInterpolator(Configuration config) {
-        Map<String, String> properties = config.getProperties();
-        MapLookup mapLookup = new MapLookup(properties);
-        List<String> pluginPackages = config.getPluginPackages();
-        Interpolator interpolator = new Interpolator(mapLookup, pluginPackages);
-        return new StrSubstitutor(interpolator);
     }
 
     private static FastDateFormat readDateFormat(Builder builder) {

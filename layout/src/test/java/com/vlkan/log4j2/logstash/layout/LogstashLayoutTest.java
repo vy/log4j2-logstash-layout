@@ -198,4 +198,27 @@ public class LogstashLayoutTest {
         // then
         assertThat(result.trim()).isEqualTo("{\"@timestamp\":\"2017-09-28T17:13:29.098+02:00\",\"static_field\":\"external_template\"}");
     }
+
+    @Test
+    public void test_default_interpolator() throws Exception {
+        // given
+        final LogEvent event = Log4jLogEvent.newBuilder()
+                .setLoggerName("a.B")
+                .setLevel(Level.INFO)
+                .setMessage(new SimpleMessage("Hello, World"))
+                .build();
+
+        // when
+        final Configuration config = ConfigurationBuilderFactory.newConfigurationBuilder().addProperty("my_property", "my_value").build();
+
+        final LogstashLayout layout = LogstashLayout.newBuilder()
+                .setConfiguration(config)
+                .setTemplate("{\"reference_to_default_property\": \"${my_property}\"}")
+                .build();
+
+        final String result = layout.toSerializable(event);
+
+        // then
+        assertThat(result.trim()).isEqualTo("{\"reference_to_default_property\":\"my_value\"}");
+    }
 }
