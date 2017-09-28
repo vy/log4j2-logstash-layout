@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vlkan.log4j2.logstash.layout.renderer.TemplateRenderer;
 import com.vlkan.log4j2.logstash.layout.resolver.*;
 import com.vlkan.log4j2.logstash.layout.util.Uris;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
@@ -51,7 +52,7 @@ public class LogstashLayout extends AbstractStringLayout {
 
     private LogstashLayout(Builder builder) {
         super(builder.config, StandardCharsets.UTF_8, null, null);
-        String template = Uris.readUri(builder.templateUri);
+        String template = StringUtils.isBlank(builder.template) ? Uris.readUri(builder.templateUri) : builder.template;
         FastDateFormat timestampFormat = readDateFormat(builder);
         ObjectMapper objectMapper = new ObjectMapper();
         StrSubstitutor substitutor = createInterpolator(builder.config);
@@ -115,6 +116,9 @@ public class LogstashLayout extends AbstractStringLayout {
 
         @PluginBuilderAttribute
         private String timeZoneId = TimeZone.getDefault().getID();
+
+        @PluginBuilderAttribute
+        private String template;
 
         @PluginBuilderAttribute
         private String templateUri = "classpath:LogstashJsonEventLayoutV1.json";
@@ -183,12 +187,23 @@ public class LogstashLayout extends AbstractStringLayout {
             return this;
         }
 
+        public String getTemplate() {
+            return template;
+        }
+
+        public Builder setTemplate(String template) {
+            this.template = template;
+            this.templateUri = null;
+            return this;
+        }
+
         public String getTemplateUri() {
             return templateUri;
         }
 
         public Builder setTemplateUri(String templateUri) {
             this.templateUri = templateUri;
+            this.template = null;
             return this;
         }
 
@@ -220,7 +235,12 @@ public class LogstashLayout extends AbstractStringLayout {
             Validate.notNull(config, "config");
             Validate.notBlank(dateTimeFormatPattern, "dateTimeFormatPattern");
             Validate.notBlank(timeZoneId, "timeZoneId");
-            Validate.notBlank(templateUri, "templateUri");
+            Validate.isTrue(!StringUtils.isBlank(template) || !StringUtils.isBlank(templateUri), "either `template` or `templateUri` must be set");
+            // apparently, injector doesn't use setters, so we can't validate that only one of `template` or `templateUri` has been set
+            if (!StringUtils.isBlank(template)) {
+                // we don't want to propagate ambiguity
+                templateUri = null;
+            }
         }
 
         @Override
@@ -230,6 +250,7 @@ public class LogstashLayout extends AbstractStringLayout {
                     ", stackTraceEnabled=" + stackTraceEnabled +
                     ", dateTimeFormatPattern='" + dateTimeFormatPattern + '\'' +
                     ", timeZoneId='" + timeZoneId + '\'' +
+                    ", template='" + template + '\'' +
                     ", templateUri='" + templateUri + '\'' +
                     ", mdcKeyPattern='" + mdcKeyPattern + '\'' +
                     ", ndcPattern='" + ndcPattern + '\'' +

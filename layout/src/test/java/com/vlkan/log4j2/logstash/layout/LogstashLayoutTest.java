@@ -5,14 +5,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.MissingNode;
 import com.vlkan.log4j2.logstash.layout.util.Throwables;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilderFactory;
+import org.apache.logging.log4j.core.impl.Log4jLogEvent;
+import org.apache.logging.log4j.message.SimpleMessage;
 import org.apache.logging.log4j.util.BiConsumer;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -148,4 +153,49 @@ public class LogstashLayoutTest {
         return jsonPathBuilder.toString();
     }
 
+    @Test
+    public void test_inlined_template() throws Exception {
+        // given
+        final LogEvent event = Log4jLogEvent.newBuilder()
+                .setLoggerName("a.B")
+                .setLevel(Level.INFO)
+                .setMessage(new SimpleMessage("Hello, World"))
+                .setTimeMillis(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").parse("2017-09-28T17:13:29.098+02:00").getTime())
+                .build();
+
+        // when
+        final LogstashLayout layout = LogstashLayout.newBuilder()
+                .setConfiguration(ConfigurationBuilderFactory.newConfigurationBuilder().build())
+                .setTemplate("{\"@timestamp\": \"${json:timestamp}\", \"static_field\": \"inlined_template\"}")
+                .setTimeZoneId("Europe/Amsterdam")
+                .build();
+
+        final String result = layout.toSerializable(event);
+
+        // then
+        assertThat(result.trim()).isEqualTo("{\"@timestamp\":\"2017-09-28T17:13:29.098+02:00\",\"static_field\":\"inlined_template\"}");
+    }
+
+    @Test
+    public void test_external_template() throws Exception {
+        // given
+        final LogEvent event = Log4jLogEvent.newBuilder()
+                .setLoggerName("a.B")
+                .setLevel(Level.INFO)
+                .setMessage(new SimpleMessage("Hello, World"))
+                .setTimeMillis(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").parse("2017-09-28T17:13:29.098+02:00").getTime())
+                .build();
+
+        // when
+        final LogstashLayout layout = LogstashLayout.newBuilder()
+                .setConfiguration(ConfigurationBuilderFactory.newConfigurationBuilder().build())
+                .setTemplateUri("classpath:com/vlkan/log4j2/logstash/layout/test_external_template.json")
+                .setTimeZoneId("Europe/Amsterdam")
+                .build();
+
+        final String result = layout.toSerializable(event);
+
+        // then
+        assertThat(result.trim()).isEqualTo("{\"@timestamp\":\"2017-09-28T17:13:29.098+02:00\",\"static_field\":\"external_template\"}");
+    }
 }
