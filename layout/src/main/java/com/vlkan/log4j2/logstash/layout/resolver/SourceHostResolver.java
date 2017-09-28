@@ -7,6 +7,13 @@ import org.apache.logging.log4j.core.LogEvent;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+/**
+ * @deprecated Instead, use standard property {@code ${hostName}} that is part of {@code log4j-core} module.
+ *
+ * @see org.apache.logging.log4j.core.util.NetUtils#getLocalHostname()
+ * @see org.apache.logging.log4j.core.LoggerContext#setConfiguration(org.apache.logging.log4j.core.config.Configuration)
+ */
+@Deprecated
 public class SourceHostResolver implements TemplateResolver {
 
     private static final SourceHostResolver INSTANCE = new SourceHostResolver();

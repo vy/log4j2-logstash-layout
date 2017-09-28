@@ -151,7 +151,7 @@ rendering the JSON output.
 | `ndc` | Nested Diagnostic Context `String[]` returned by `logEvent.getContextStack()` |
 | `sourceClassName` | `logEvent.getSource().getClassName()` |
 | `sourceFileName` | `logEvent.getSource().getFileName()` (inactive when `locationInfoEnabled=false`) |
-| `sourceHost` | `InetAddress.getLocalHost().getHostName()` |
+| `sourceHost` | `InetAddress.getLocalHost().getHostName()` (**deprecated**; instead, use standard property `${hostName}`) |
 | `sourceLineNumber` | `logEvent.getSource().getLineNumber()` (inactive when `locationInfoEnabled=false`) |
 | `sourceMethodName` | `logEvent.getSource().getMethodName()` |
 | `threadName` | `logEvent.getThreadName()` |
