@@ -5,21 +5,21 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import com.vlkan.log4j2.logstash.layout.util.Throwables;
 import org.apache.logging.log4j.core.LogEvent;
 
-public class RootCauseExceptionStackTraceResolver implements TemplateResolver {
+public class ExceptionRootCauseStackTraceResolver implements TemplateResolver {
 
-    private static final RootCauseExceptionStackTraceResolver INSTANCE = new RootCauseExceptionStackTraceResolver();
+    private static final ExceptionRootCauseStackTraceResolver INSTANCE = new ExceptionRootCauseStackTraceResolver();
 
-    private RootCauseExceptionStackTraceResolver() {
+    private ExceptionRootCauseStackTraceResolver() {
         // Do nothing.
     }
 
-    public static RootCauseExceptionStackTraceResolver getInstance() {
+    public static ExceptionRootCauseStackTraceResolver getInstance() {
         return INSTANCE;
     }
 
     @Override
     public String getName() {
-        return "rootCauseExceptionStackTrace";
+        return "exceptionRootCauseStackTrace";
     }
 
     @Override
@@ -28,7 +28,9 @@ public class RootCauseExceptionStackTraceResolver implements TemplateResolver {
         if (!context.isStackTraceEnabled() || exception == null) {
             return null;
         }
-        final String exceptionStackTrace = Throwables.serializeStackTrace(Throwables.getRootCause(exception));
+        Throwable rootCause = Throwables.getRootCause(exception);
+        final String exceptionStackTrace = Throwables.serializeStackTrace(rootCause);
         return new TextNode(exceptionStackTrace);
     }
+
 }

@@ -120,14 +120,12 @@ public class TemplateRenderer {
             TemplateResolver resolver = resolverByName.get(resolverName);
             if (resolver != null) {
                 return resolver.resolve(resolverContext, event);
-            } else {
-                // in such a case it's better to completely remove the property rather than leave behind something like `"root_exception_class": "${json:rootCauseExceptionClassName}"`
-                return null;
             }
         } else {
             String replacedText = substitutor.replace(event, text);
             return new TextNode(replacedText);
         }
+        return textNode;
     }
 
     private static String getResolverName(String fieldValue) {

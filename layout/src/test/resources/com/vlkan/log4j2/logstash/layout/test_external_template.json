@@ -1,4 +1,0 @@
-{
-  "@timestamp": "${json:timestamp}",
-  "static_field": "external_template"
-}

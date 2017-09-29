@@ -3,7 +3,9 @@ package com.vlkan.log4j2.logstash.layout;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.MissingNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vlkan.log4j2.logstash.layout.util.Throwables;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -11,6 +13,7 @@ import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilderFactory;
+import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 import org.apache.logging.log4j.core.impl.Log4jLogEvent;
 import org.apache.logging.log4j.message.SimpleMessage;
 import org.apache.logging.log4j.util.BiConsumer;
@@ -26,6 +29,8 @@ import java.util.regex.Pattern;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class LogstashLayoutTest {
+
+    private static final JsonNodeFactory JSON_NODE_FACTORY = JsonNodeFactory.instance;
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -154,166 +159,170 @@ public class LogstashLayoutTest {
     }
 
     @Test
-    public void test_inlined_template() throws Exception {
-        // given
-        final LogEvent event = Log4jLogEvent.newBuilder()
-                .setLoggerName("a.B")
+    public void test_inline_template() throws Exception {
+
+        // Create the log event.
+        SimpleMessage message = new SimpleMessage("Hello, World");
+        String timestamp = "2017-09-28T17:13:29.098+02:00";
+        long timeMillis = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").parse(timestamp).getTime();
+        LogEvent logEvent = Log4jLogEvent
+                .newBuilder()
+                .setLoggerName(LogstashLayoutTest.class.getSimpleName())
                 .setLevel(Level.INFO)
-                .setMessage(new SimpleMessage("Hello, World"))
-                .setTimeMillis(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").parse("2017-09-28T17:13:29.098+02:00").getTime())
+                .setMessage(message)
+                .setTimeMillis(timeMillis)
                 .build();
 
-        // when
-        final LogstashLayout layout = LogstashLayout.newBuilder()
-                .setConfiguration(ConfigurationBuilderFactory.newConfigurationBuilder().build())
-                .setTemplate("{\"@timestamp\": \"${json:timestamp}\", \"static_field\": \"inlined_template\"}")
-                .setTimeZoneId("Europe/Amsterdam")
+        // Create the template.
+        ObjectNode templateRootNode = JSON_NODE_FACTORY.objectNode();
+        templateRootNode.put("@timestamp", "${json:timestamp}");
+        String staticFieldName = "staticFieldName";
+        String staticFieldValue = "staticFieldValue";
+        templateRootNode.put(staticFieldName, staticFieldValue);
+        String template = templateRootNode.toString();
+
+        // Create the layout.
+        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        LogstashLayout layout = LogstashLayout
+                .newBuilder()
+                .setConfiguration(configuration)
+                .setTemplate(template)
                 .build();
 
-        final String result = layout.toSerializable(event);
+        // Check the serialized event.
+        String serializedLogEvent = layout.toSerializable(logEvent);
+        JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
+        assertThat(point(rootNode, "@timestamp").asText()).isEqualTo(timestamp);
+        assertThat(point(rootNode, staticFieldName).asText()).isEqualTo(staticFieldValue);
 
-        // then
-        assertThat(result.trim()).isEqualTo("{\"@timestamp\":\"2017-09-28T17:13:29.098+02:00\",\"static_field\":\"inlined_template\"}");
     }
 
     @Test
-    public void test_external_template() throws Exception {
-        // given
-        final LogEvent event = Log4jLogEvent.newBuilder()
-                .setLoggerName("a.B")
+    public void test_property_injection() throws Exception {
+
+        // Create the log event.
+        SimpleMessage message = new SimpleMessage("Hello, World");
+        LogEvent logEvent = Log4jLogEvent
+                .newBuilder()
+                .setLoggerName(LogstashLayoutTest.class.getSimpleName())
                 .setLevel(Level.INFO)
-                .setMessage(new SimpleMessage("Hello, World"))
-                .setTimeMillis(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").parse("2017-09-28T17:13:29.098+02:00").getTime())
+                .setMessage(message)
                 .build();
 
-        // when
-        final LogstashLayout layout = LogstashLayout.newBuilder()
-                .setConfiguration(ConfigurationBuilderFactory.newConfigurationBuilder().build())
-                .setTemplateUri("classpath:com/vlkan/log4j2/logstash/layout/test_external_template.json")
-                .setTimeZoneId("Europe/Amsterdam")
+        // Create the template with property.
+        ObjectNode templateRootNode = JSON_NODE_FACTORY.objectNode();
+        String propertyName = "propertyName";
+        templateRootNode.put(propertyName, "${" + propertyName + "}");
+        String template = templateRootNode.toString();
+
+        // Create the layout with property.
+        String propertyValue = "propertyValue";
+        Configuration config = ConfigurationBuilderFactory
+                .newConfigurationBuilder()
+                .addProperty(propertyName, propertyValue)
                 .build();
-
-        final String result = layout.toSerializable(event);
-
-        // then
-        assertThat(result.trim()).isEqualTo("{\"@timestamp\":\"2017-09-28T17:13:29.098+02:00\",\"static_field\":\"external_template\"}");
-    }
-
-    @Test
-    public void test_default_interpolator() throws Exception {
-        // given
-        final LogEvent event = Log4jLogEvent.newBuilder()
-                .setLoggerName("a.B")
-                .setLevel(Level.INFO)
-                .setMessage(new SimpleMessage("Hello, World"))
-                .build();
-
-        // when
-        final Configuration config = ConfigurationBuilderFactory.newConfigurationBuilder().addProperty("my_property", "my_value").build();
-
-        final LogstashLayout layout = LogstashLayout.newBuilder()
+        LogstashLayout layout = LogstashLayout
+                .newBuilder()
                 .setConfiguration(config)
-                .setTemplate("{\"reference_to_default_property\": \"${my_property}\"}")
+                .setTemplate(template)
                 .build();
 
-        final String result = layout.toSerializable(event);
+        // Check the serialized event.
+        String serializedLogEvent = layout.toSerializable(logEvent);
+        JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
+        assertThat(point(rootNode, propertyName).asText()).isEqualTo(propertyValue);
 
-        // then
-        assertThat(result.trim()).isEqualTo("{\"reference_to_default_property\":\"my_value\"}");
     }
 
     @Test
-    public void test_root_cause_disabled() throws Exception {
-        // given
-        final LogEvent event = Log4jLogEvent.newBuilder()
-                .setLoggerName("a.B")
+    public void test_empty_root_cause() throws Exception {
+
+        // Create the log event.
+        SimpleMessage message = new SimpleMessage("Hello, World!");
+        RuntimeException exception = new RuntimeException("failure for test purposes");
+        LogEvent logEvent = Log4jLogEvent
+                .newBuilder()
+                .setLoggerName(LogstashLayoutTest.class.getSimpleName())
                 .setLevel(Level.ERROR)
-                .setMessage(new SimpleMessage("Request failed"))
-                .setThrown(new RuntimeException("Internal Server Error"))
+                .setMessage(message)
+                .setThrown(exception)
                 .build();
 
-        // when
-        final LogstashLayout layout = LogstashLayout.newBuilder()
-                .setConfiguration(ConfigurationBuilderFactory.newConfigurationBuilder().build())
+        // Create the template.
+        ObjectNode templateRootNode = JSON_NODE_FACTORY.objectNode();
+        templateRootNode.put("ex_class", "${json:exceptionClassName}");
+        templateRootNode.put("ex_message", "${json:exceptionMessage}");
+        templateRootNode.put("ex_stacktrace", "${json:exceptionStackTrace}");
+        templateRootNode.put("root_ex_class", "${json:exceptionRootCauseClassName}");
+        templateRootNode.put("root_ex_message", "${json:exceptionRootCauseMessage}");
+        templateRootNode.put("root_ex_stacktrace", "${json:exceptionRootCauseStackTrace}");
+        String template = templateRootNode.toString();
+
+        // Create the layout.
+        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        LogstashLayout layout = LogstashLayout
+                .newBuilder()
+                .setConfiguration(configuration)
                 .setStackTraceEnabled(true)
-                .setTemplate("{\"ex_class\": \"${json:exceptionClassName}\", \"ex_message\": \"${json:exceptionMessage}\", \"stacktrace\": \"${json:exceptionStackTrace}\",\n" +
-                        "\"root_ex_class\": \"${json:rootCauseExceptionClassName}\", \"root_ex_message\": \"${json:rootCauseExceptionMessage}\", \"root_ex_stacktrace\": \"${json:rootCauseExceptionStackTrace}\"}")
+                .setTemplate(template)
                 .build();
 
-        final String result = layout.toSerializable(event);
+        // Check the serialized event.
+        String serializedLogEvent = layout.toSerializable(logEvent);
+        JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
+        assertThat(point(rootNode, "ex_class").asText()).isEqualTo(exception.getClass().getCanonicalName());
+        assertThat(point(rootNode, "ex_message").asText()).isEqualTo(exception.getMessage());
+        assertThat(point(rootNode, "ex_stacktrace").asText()).startsWith(exception.getClass().getCanonicalName() + ": " + exception.getMessage());
+        assertThat(point(rootNode, "root_ex_class").asText()).isEqualTo(point(rootNode, "ex_class").asText());
+        assertThat(point(rootNode, "root_ex_message").asText()).isEqualTo(point(rootNode, "ex_message").asText());
+        assertThat(point(rootNode, "root_ex_stacktrace").asText()).isEqualTo(point(rootNode, "ex_stacktrace").asText());
 
-        final JsonNode rootNode = OBJECT_MAPPER.readTree(result);
-
-        // then
-        assertThat(point(rootNode, "ex_class").asText()).isEqualTo("java.lang.RuntimeException");
-        assertThat(point(rootNode, "ex_message").asText()).isEqualTo("Internal Server Error");
-        assertThat(point(rootNode, "stacktrace").asText()).startsWith("java.lang.RuntimeException: Internal Server Error");
-        assertThat(rootNode.has("root_ex_class")).isFalse();
-        assertThat(rootNode.has("root_ex_message")).isFalse();
-        assertThat(rootNode.has("root_ex_stacktrace")).isFalse();
     }
 
     @Test
-    public void test_root_cause_enabled() throws Exception {
-        // given
-        final LogEvent event = Log4jLogEvent.newBuilder()
-                .setLoggerName("a.B")
+    public void test_root_cause() throws Exception {
+
+        // Create the log event.
+        SimpleMessage message = new SimpleMessage("Hello, World!");
+        RuntimeException exceptionCause = new RuntimeException("failure cause for test purposes");
+        RuntimeException exception = new RuntimeException("failure for test purposes", exceptionCause);
+        LogEvent logEvent = Log4jLogEvent
+                .newBuilder()
+                .setLoggerName(LogstashLayoutTest.class.getSimpleName())
                 .setLevel(Level.ERROR)
-                .setMessage(new SimpleMessage("Request failed"))
-                .setThrown(new RuntimeException("Internal Server Error", new IllegalArgumentException("Client Side Error")))
+                .setMessage(message)
+                .setThrown(exception)
                 .build();
 
-        // when
-        final LogstashLayout layout = LogstashLayout.newBuilder()
-                .setConfiguration(ConfigurationBuilderFactory.newConfigurationBuilder().build())
+        // Create the template.
+        ObjectNode templateRootNode = JSON_NODE_FACTORY.objectNode();
+        templateRootNode.put("ex_class", "${json:exceptionClassName}");
+        templateRootNode.put("ex_message", "${json:exceptionMessage}");
+        templateRootNode.put("ex_stacktrace", "${json:exceptionStackTrace}");
+        templateRootNode.put("root_ex_class", "${json:exceptionRootCauseClassName}");
+        templateRootNode.put("root_ex_message", "${json:exceptionRootCauseMessage}");
+        templateRootNode.put("root_ex_stacktrace", "${json:exceptionRootCauseStackTrace}");
+        String template = templateRootNode.toString();
+
+        // Create the layout.
+        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        LogstashLayout layout = LogstashLayout
+                .newBuilder()
+                .setConfiguration(configuration)
                 .setStackTraceEnabled(true)
-                .setRootCauseEnabled(true)
-                .setTemplate("{\"ex_class\": \"${json:exceptionClassName}\", \"ex_message\": \"${json:exceptionMessage}\", \"stacktrace\": \"${json:exceptionStackTrace}\",\n" +
-                        "\"root_ex_class\": \"${json:rootCauseExceptionClassName}\", \"root_ex_message\": \"${json:rootCauseExceptionMessage}\", \"root_ex_stacktrace\": \"${json:rootCauseExceptionStackTrace}\"}")
+                .setTemplate(template)
                 .build();
 
-        final String result = layout.toSerializable(event);
+        // Check the serialized event.
+        String serializedLogEvent = layout.toSerializable(logEvent);
+        JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
+        assertThat(point(rootNode, "ex_class").asText()).isEqualTo(exception.getClass().getCanonicalName());
+        assertThat(point(rootNode, "ex_message").asText()).isEqualTo(exception.getMessage());
+        assertThat(point(rootNode, "ex_stacktrace").asText()).startsWith(exception.getClass().getCanonicalName() + ": " + exception.getMessage());
+        assertThat(point(rootNode, "root_ex_class").asText()).isEqualTo(exceptionCause.getClass().getCanonicalName());
+        assertThat(point(rootNode, "root_ex_message").asText()).isEqualTo(exceptionCause.getMessage());
+        assertThat(point(rootNode, "root_ex_stacktrace").asText()).startsWith(exceptionCause.getClass().getCanonicalName() + ": " + exceptionCause.getMessage());
 
-        final JsonNode rootNode = OBJECT_MAPPER.readTree(result);
-
-        // then
-        assertThat(point(rootNode, "ex_class").asText()).isEqualTo("java.lang.RuntimeException");
-        assertThat(point(rootNode, "ex_message").asText()).isEqualTo("Internal Server Error");
-        assertThat(point(rootNode, "stacktrace").asText()).startsWith("java.lang.RuntimeException: Internal Server Error");
-        assertThat(point(rootNode, "root_ex_class").asText()).isEqualTo("java.lang.IllegalArgumentException");
-        assertThat(point(rootNode, "root_ex_message").asText()).isEqualTo("Client Side Error");
-        assertThat(point(rootNode, "root_ex_stacktrace").asText()).startsWith("java.lang.IllegalArgumentException: Client Side Error");
     }
 
-    @Test
-    public void test_root_cause_equal_to_thrown() throws Exception {
-        // given
-        final LogEvent event = Log4jLogEvent.newBuilder()
-                .setLoggerName("a.B")
-                .setLevel(Level.ERROR)
-                .setMessage(new SimpleMessage("Request failed"))
-                .setThrown(new RuntimeException("Internal Server Error"))
-                .build();
-
-        // when
-        final LogstashLayout layout = LogstashLayout.newBuilder()
-                .setConfiguration(ConfigurationBuilderFactory.newConfigurationBuilder().build())
-                .setStackTraceEnabled(true)
-                .setRootCauseEnabled(true)
-                .setTemplate("{\"ex_class\": \"${json:exceptionClassName}\", \"ex_message\": \"${json:exceptionMessage}\", \"stacktrace\": \"${json:exceptionStackTrace}\",\n" +
-                        "\"root_ex_class\": \"${json:rootCauseExceptionClassName}\", \"root_ex_message\": \"${json:rootCauseExceptionMessage}\", \"root_ex_stacktrace\": \"${json:rootCauseExceptionStackTrace}\"}")
-                .build();
-
-        final String result = layout.toSerializable(event);
-
-        final JsonNode rootNode = OBJECT_MAPPER.readTree(result);
-
-        // then
-        assertThat(point(rootNode, "ex_class").asText()).isEqualTo("java.lang.RuntimeException");
-        assertThat(point(rootNode, "ex_message").asText()).isEqualTo("Internal Server Error");
-        assertThat(point(rootNode, "stacktrace").asText()).startsWith("java.lang.RuntimeException: Internal Server Error");
-        assertThat(point(rootNode, "root_ex_class").asText()).isEqualTo("java.lang.RuntimeException");
-        assertThat(point(rootNode, "root_ex_message").asText()).isEqualTo("Internal Server Error");
-        assertThat(point(rootNode, "root_ex_stacktrace").asText()).startsWith("java.lang.RuntimeException: Internal Server Error");
-    }
 }

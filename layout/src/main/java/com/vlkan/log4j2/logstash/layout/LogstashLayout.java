@@ -27,13 +27,16 @@ import java.util.*;
         printObject = true)
 public class LogstashLayout extends AbstractStringLayout {
 
-    private static final Set<TemplateResolver> DEFAULT_RESOLVERS =
+    private static final Set<TemplateResolver> RESOLVERS =
             Collections.unmodifiableSet(
                     new HashSet<>(Arrays.asList(
                             ContextDataResolver.getInstance(),
                             ContextStackResolver.getInstance(),
                             ExceptionClassNameResolver.getInstance(),
                             ExceptionMessageResolver.getInstance(),
+                            ExceptionRootCauseClassNameResolver.getInstance(),
+                            ExceptionRootCauseMessageResolver.getInstance(),
+                            ExceptionRootCauseStackTraceResolver.getInstance(),
                             ExceptionStackTraceResolver.getInstance(),
                             LevelResolver.getInstance(),
                             LoggerNameResolver.getInstance(),
@@ -44,13 +47,6 @@ public class LogstashLayout extends AbstractStringLayout {
                             SourceMethodNameResolver.getInstance(),
                             ThreadNameResolver.getInstance(),
                             TimestampResolver.getInstance())));
-
-    private static final Set<TemplateResolver> ROOT_CAUSE_EXCEPTION_RESOLVERS =
-            Collections.unmodifiableSet(
-                    new LinkedHashSet<>(Arrays.asList(
-                            RootCauseExceptionClassNameResolver.getInstance(),
-                            RootCauseExceptionMessageResolver.getInstance(),
-                            RootCauseExceptionStackTraceResolver.getInstance())));
 
     private final TemplateRenderer renderer;
 
@@ -69,14 +65,13 @@ public class LogstashLayout extends AbstractStringLayout {
                 .setMdcKeyPattern(builder.mdcKeyPattern)
                 .setNdcPattern(builder.ndcPattern)
                 .build();
-        final Set<TemplateResolver> resolvers = chooseResolvers(builder);
         this.renderer = TemplateRenderer
                 .newBuilder()
                 .setSubstitutor(substitutor)
                 .setResolverContext(resolverContext)
                 .setPrettyPrintEnabled(builder.prettyPrintEnabled)
                 .setTemplate(template)
-                .setResolvers(resolvers)
+                .setResolvers(RESOLVERS)
                 .build();
     }
 
@@ -89,16 +84,6 @@ public class LogstashLayout extends AbstractStringLayout {
     private static FastDateFormat readDateFormat(Builder builder) {
         TimeZone timeZone = TimeZone.getTimeZone(builder.timeZoneId);
         return FastDateFormat.getInstance(builder.dateTimeFormatPattern, timeZone);
-    }
-
-    private static Set<TemplateResolver> chooseResolvers(Builder builder) {
-        if (builder.isRootCauseEnabled()) {
-            final Set<TemplateResolver> moreResolvers = new LinkedHashSet<>(DEFAULT_RESOLVERS);
-            moreResolvers.addAll(ROOT_CAUSE_EXCEPTION_RESOLVERS);
-            return Collections.unmodifiableSet(moreResolvers);
-        } else {
-            return DEFAULT_RESOLVERS;
-        }
     }
 
     public String toSerializable(LogEvent event) {
@@ -123,9 +108,6 @@ public class LogstashLayout extends AbstractStringLayout {
 
         @PluginBuilderAttribute
         private boolean stackTraceEnabled = false;
-
-        @PluginBuilderAttribute
-        private boolean rootCauseEnabled = false;
 
         @PluginBuilderAttribute
         private String dateTimeFormatPattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZZZ";
@@ -182,15 +164,6 @@ public class LogstashLayout extends AbstractStringLayout {
 
         public Builder setStackTraceEnabled(boolean stackTraceEnabled) {
             this.stackTraceEnabled = stackTraceEnabled;
-            return this;
-        }
-
-        public boolean isRootCauseEnabled() {
-            return rootCauseEnabled;
-        }
-
-        public Builder setRootCauseEnabled(boolean rootCauseEnabled) {
-            this.rootCauseEnabled = rootCauseEnabled;
             return this;
         }
 
@@ -268,7 +241,6 @@ public class LogstashLayout extends AbstractStringLayout {
             return "Builder{prettyPrintEnabled=" + prettyPrintEnabled +
                     ", locationInfoEnabled=" + locationInfoEnabled +
                     ", stackTraceEnabled=" + stackTraceEnabled +
-                    ", rootCauseEnabled=" + rootCauseEnabled +
                     ", dateTimeFormatPattern='" + dateTimeFormatPattern + '\'' +
                     ", timeZoneId='" + timeZoneId + '\'' +
                     ", template='" + template + '\'' +

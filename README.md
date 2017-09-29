@@ -90,7 +90,6 @@ This generates an output as follows:
 | `prettyPrintEnabled` | boolean | enables pretty-printer (defaults to `false`) |
 | `locationInfoEnabled` | boolean | includes the filename and line number in the output (defaults to `false`) |
 | `stackTraceEnabled` | boolean | includes stack traces (defaults to `false`) |
-| `rootCauseEnabled` | boolean | includes the innermost cause of the exception (defaults to `false`) |
 | `dateTimeFormatPattern` | String | timestamp formatter pattern (defaults to `yyyy-MM-dd'T'HH:mm:ss.SSSZZZ`) |
 | `timeZoneId` | String | time zone id (defaults to `TimeZone.getDefault().getID()`) |
 | `mdcKeyPattern` | String | regex to filter MDC keys |
@@ -141,9 +140,9 @@ rendering the JSON output.
 | `exceptionClassName` | `logEvent.getThrown().getClass().getCanonicalName()` |
 | `exceptionMessage` | `logEvent.getThrown().getMessage()` |
 | `exceptionStackTrace` | `logEvent.getThrown().printStackTrace()` (inactive when `stackTraceEnabled=false`) |
-| `rootCauseExceptionClassName` | `Throwables.getRootCause(logEvent.getThrown()).getClass().getCanonicalName()` (inactive when `rootCauseEnabled=false`) |
-| `rootCauseExceptionMessage` | `Throwables.getRootCause(logEvent.getThrown()).getMessage()` (inactive when `rootCauseEnabled=false`) |
-| `rootCauseExceptionStackTrace` | `Throwables.getRootCause(logEvent.getThrown()).printStackTrace()` (inactive when `rootCauseEnabled=false` OR `stackTraceEnabled=false`) |
+| `exceptionRootCauseClassName` | the innermost `exceptionClassName` in causal chain |
+| `exceptionRootCauseMessage` | the innermost `exceptionMessage` in causal chain |
+| `exceptionRootCauseStackTrace` | the innermost `exceptionStackTrace` in causal chain |
 | `level` | `logEvent.getLevel()` |
 | `loggerName` | `logEvent.getLoggerName()` |
 | `mdc` | Mapped Diagnostic Context `Map<String, String>` returned by `logEvent.getContextData()` |

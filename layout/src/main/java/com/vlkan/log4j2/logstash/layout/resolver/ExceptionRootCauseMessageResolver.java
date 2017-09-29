@@ -5,21 +5,21 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import com.vlkan.log4j2.logstash.layout.util.Throwables;
 import org.apache.logging.log4j.core.LogEvent;
 
-public class RootCauseExceptionMessageResolver implements TemplateResolver {
+public class ExceptionRootCauseMessageResolver implements TemplateResolver {
 
-    private static final RootCauseExceptionMessageResolver INSTANCE = new RootCauseExceptionMessageResolver();
+    private static final ExceptionRootCauseMessageResolver INSTANCE = new ExceptionRootCauseMessageResolver();
 
-    private RootCauseExceptionMessageResolver() {
+    private ExceptionRootCauseMessageResolver() {
         // Do nothing.
     }
 
-    public static RootCauseExceptionMessageResolver getInstance() {
+    public static ExceptionRootCauseMessageResolver getInstance() {
         return INSTANCE;
     }
 
     @Override
     public String getName() {
-        return "rootCauseExceptionMessage";
+        return "exceptionRootCauseMessage";
     }
 
     @Override
@@ -28,7 +28,9 @@ public class RootCauseExceptionMessageResolver implements TemplateResolver {
         if (exception == null) {
             return null;
         }
-        final String exceptionMessage = Throwables.getRootCause(exception).getMessage();
-        return new TextNode(exceptionMessage);
+        Throwable rootCause = Throwables.getRootCause(exception);
+        final String rootCauseMessage = rootCause.getMessage();
+        return new TextNode(rootCauseMessage);
     }
+
 }
