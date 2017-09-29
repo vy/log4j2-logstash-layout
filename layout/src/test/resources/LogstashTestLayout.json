@@ -7,7 +7,7 @@
   "line_number": "${json:sourceLineNumber}",
   "class": "${json:sourceClassName}",
   "@version": 1,
-  "source_host": "${json:sourceHost}",
+  "source_host": "${hostName}",
   "message": "${json:message}",
   "thread_name": "${json:threadName}",
   "@timestamp": "${json:timestamp}",

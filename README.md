@@ -115,7 +115,7 @@ in `LogstashJsonEventLayoutV1.json` within the classpath:
   "line_number": "${json:sourceLineNumber}",
   "class": "${json:sourceClassName}",
   "@version": 1,
-  "source_host": "${json:sourceHost}",
+  "source_host": "${hostName}",
   "message": "${json:message}",
   "thread_name": "${json:threadName}",
   "@timestamp": "${json:timestamp}",
@@ -151,7 +151,6 @@ rendering the JSON output.
 | `ndc` | Nested Diagnostic Context `String[]` returned by `logEvent.getContextStack()` |
 | `sourceClassName` | `logEvent.getSource().getClassName()` |
 | `sourceFileName` | `logEvent.getSource().getFileName()` (inactive when `locationInfoEnabled=false`) |
-| `sourceHost` | `InetAddress.getLocalHost().getHostName()` (**deprecated**; instead, use standard property `${hostName}`) |
 | `sourceLineNumber` | `logEvent.getSource().getLineNumber()` (inactive when `locationInfoEnabled=false`) |
 | `sourceMethodName` | `logEvent.getSource().getMethodName()` |
 | `threadName` | `logEvent.getThreadName()` |

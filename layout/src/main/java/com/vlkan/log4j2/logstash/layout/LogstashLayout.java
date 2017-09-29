@@ -40,7 +40,6 @@ public class LogstashLayout extends AbstractStringLayout {
                             MessageResolver.getInstance(),
                             SourceClassNameResolver.getInstance(),
                             SourceFileNameResolver.getInstance(),
-                            SourceHostResolver.getInstance(),
                             SourceLineNumberResolver.getInstance(),
                             SourceMethodNameResolver.getInstance(),
                             ThreadNameResolver.getInstance(),
