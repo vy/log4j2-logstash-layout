@@ -21,9 +21,11 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -183,10 +185,12 @@ public class LogstashLayoutTest {
 
         // Create the layout.
         BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        String timeZoneId = TimeZone.getTimeZone("Europe/Amsterdam").getID();
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
                 .setConfiguration(configuration)
                 .setTemplate(template)
+                .setTimeZoneId(timeZoneId)
                 .build();
 
         // Check the serialized event.
