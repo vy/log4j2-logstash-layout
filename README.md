@@ -174,6 +174,11 @@ include separately.
 This might come handy if you want to use this plugin along with already
 compiled applications, e.g., Elasticsearch 5.x, which requires Log4j 2.x.
 
+Contributors
+============
+
+- [Yaroslav Skopets](https://github.com/yskopets)
+
 # License
 
 Copyright &copy; 2017 [Volkan Yazıcı](http://vlkan.com/)
