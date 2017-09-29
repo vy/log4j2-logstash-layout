@@ -56,7 +56,7 @@ public class LogstashLayout extends AbstractStringLayout {
 
     private LogstashLayout(Builder builder) {
         super(builder.config, StandardCharsets.UTF_8, null, null);
-        String template = StringUtils.isBlank(builder.template) ? Uris.readUri(builder.templateUri) : builder.template;
+        String template = readTemplate(builder);
         FastDateFormat timestampFormat = readDateFormat(builder);
         ObjectMapper objectMapper = new ObjectMapper();
         StrSubstitutor substitutor = builder.config.getStrSubstitutor();
@@ -78,6 +78,12 @@ public class LogstashLayout extends AbstractStringLayout {
                 .setTemplate(template)
                 .setResolvers(resolvers)
                 .build();
+    }
+
+    private static String readTemplate(Builder builder) {
+        return StringUtils.isBlank(builder.template)
+                ? Uris.readUri(builder.templateUri)
+                : builder.template;
     }
 
     private static FastDateFormat readDateFormat(Builder builder) {
@@ -128,7 +134,7 @@ public class LogstashLayout extends AbstractStringLayout {
         private String timeZoneId = TimeZone.getDefault().getID();
 
         @PluginBuilderAttribute
-        private String template;
+        private String template = null;
 
         @PluginBuilderAttribute
         private String templateUri = "classpath:LogstashJsonEventLayoutV1.json";
@@ -212,7 +218,6 @@ public class LogstashLayout extends AbstractStringLayout {
 
         public Builder setTemplate(String template) {
             this.template = template;
-            this.templateUri = null;
             return this;
         }
 
@@ -222,7 +227,6 @@ public class LogstashLayout extends AbstractStringLayout {
 
         public Builder setTemplateUri(String templateUri) {
             this.templateUri = templateUri;
-            this.template = null;
             return this;
         }
 
@@ -254,12 +258,9 @@ public class LogstashLayout extends AbstractStringLayout {
             Validate.notNull(config, "config");
             Validate.notBlank(dateTimeFormatPattern, "dateTimeFormatPattern");
             Validate.notBlank(timeZoneId, "timeZoneId");
-            Validate.isTrue(!StringUtils.isBlank(template) || !StringUtils.isBlank(templateUri), "either `template` or `templateUri` must be set");
-            // apparently, injector doesn't use setters, so we can't validate that only one of `template` or `templateUri` has been set
-            if (!StringUtils.isBlank(template)) {
-                // we don't want to propagate ambiguity
-                templateUri = null;
-            }
+            Validate.isTrue(
+                    !StringUtils.isBlank(template) || !StringUtils.isBlank(templateUri),
+                    "both template and templateUri are blank");
         }
 
         @Override
