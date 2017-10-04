@@ -23,7 +23,7 @@ public class SourceFileNameResolver implements TemplateResolver {
 
     @Override
     public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent) {
-        if (!context.isLocationInfoEnabled()) {
+        if (!context.isLocationInfoEnabled() || logEvent.getSource() == null) {
             return null;
         }
         String sourceFileName = logEvent.getSource().getFileName();

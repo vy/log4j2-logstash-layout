@@ -23,6 +23,9 @@ public class SourceClassNameResolver implements TemplateResolver {
 
     @Override
     public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent) {
+        if (!context.isLocationInfoEnabled() || logEvent.getSource() == null) {
+            return null;
+        }
         String sourceClassName = logEvent.getSource().getClassName();
         return new TextNode(sourceClassName);
     }
