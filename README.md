@@ -13,8 +13,8 @@ Log4j 1.x plugin. Compared to
 included in Log4j 2.x and `log4j-jsonevent-layout`, `LogstashLayout` provides
 the following additional features:
 
-- Additional fields can be added. (See `templateUri` parameter.)
-- JSON schema structure can be customized. (See `templateUri` parameter.)
+- Additional fields can be added. (See `template` and `templateUri` parameters.)
+- JSON schema structure can be customized. (See `template` and `templateUri` parameters.)
 - Timestamp formatting can be customized. (See `dateTimeFormatPattern`
   and `timeZoneId` parameters.)
 
