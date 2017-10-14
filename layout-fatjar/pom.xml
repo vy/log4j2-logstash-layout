@@ -17,6 +17,7 @@
             <groupId>com.vlkan.log4j2</groupId>
             <artifactId>log4j2-logstash-layout</artifactId>
             <version>${project.version}</version>
+            <optional>true</optional>
         </dependency>
 
     </dependencies>
