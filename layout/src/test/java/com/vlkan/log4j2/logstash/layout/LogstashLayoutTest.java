@@ -17,6 +17,7 @@ import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 import org.apache.logging.log4j.core.impl.Log4jLogEvent;
 import org.apache.logging.log4j.message.SimpleMessage;
 import org.apache.logging.log4j.util.BiConsumer;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -325,6 +326,44 @@ public class LogstashLayoutTest {
         assertThat(point(rootNode, "root_ex_class").asText()).isEqualTo(exceptionCause.getClass().getCanonicalName());
         assertThat(point(rootNode, "root_ex_message").asText()).isEqualTo(exceptionCause.getMessage());
         assertThat(point(rootNode, "root_ex_stacktrace").asText()).startsWith(exceptionCause.getClass().getCanonicalName() + ": " + exceptionCause.getMessage());
+
+    }
+
+    @Test
+    public void test_lineSeparator_suffix() {
+
+        // Create the log event.
+        SimpleMessage message = new SimpleMessage("Hello, World!");
+        LogEvent logEvent = Log4jLogEvent
+                .newBuilder()
+                .setLoggerName(LogstashLayoutTest.class.getSimpleName())
+                .setLevel(Level.INFO)
+                .setMessage(message)
+                .build();
+
+        // Check line separators.
+        SoftAssertions assertions = new SoftAssertions();
+        test_lineSeparator_suffix(logEvent, true, assertions);
+        test_lineSeparator_suffix(logEvent, false, assertions);
+        assertions.assertAll();
+
+    }
+
+    private void test_lineSeparator_suffix(LogEvent logEvent, boolean prettyPrintEnabled, SoftAssertions assertions) {
+
+        // Create the layout.
+        BuiltConfiguration config = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        LogstashLayout layout = LogstashLayout
+                .newBuilder()
+                .setConfiguration(config)
+                .setTemplateUri("classpath:LogstashJsonEventLayoutV1.json")
+                .setPrettyPrintEnabled(prettyPrintEnabled)
+                .build();
+
+        // Check the serialized event.
+        String serializedLogEvent = layout.toSerializable(logEvent);
+        String assertionCaption = String.format("testing lineSeperator (prettyPrintEnabled=%s)", prettyPrintEnabled);
+        assertions.assertThat(serializedLogEvent).as(assertionCaption).endsWith("}" + System.lineSeparator());
 
     }
 

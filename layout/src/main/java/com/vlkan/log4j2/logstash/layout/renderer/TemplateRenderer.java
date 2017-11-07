@@ -1,6 +1,6 @@
 package com.vlkan.log4j2.logstash.layout.renderer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -10,18 +10,25 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.vlkan.log4j2.logstash.layout.resolver.TemplateResolver;
 import com.vlkan.log4j2.logstash.layout.resolver.TemplateResolverContext;
-import com.vlkan.log4j2.logstash.layout.util.JacksonNewlineAddingPrettyPrinter;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.lookup.StrSubstitutor;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
 public class TemplateRenderer {
+
+    private static final Charset JSON_CHARSET = StandardCharsets.UTF_8;
+
+    private static final String JSON_CHARSET_NAME = JSON_CHARSET.name();
 
     private final StrSubstitutor substitutor;
 
@@ -39,11 +46,16 @@ public class TemplateRenderer {
         this.substitutor = builder.substitutor;
         this.resolverContext = builder.resolverContext;
         this.objectMapper = resolverContext.getObjectMapper();
-        this.objectWriter = builder.prettyPrintEnabled
-                ? objectMapper.writerWithDefaultPrettyPrinter()
-                : objectMapper.writer(new JacksonNewlineAddingPrettyPrinter());
+        this.objectWriter = createObjectWriter(objectMapper, builder.prettyPrintEnabled);
         this.templateRootNode = readTemplate(objectMapper, builder.template);
         this.resolverByName = createResolverByName(builder.resolvers);
+    }
+
+    private static ObjectWriter createObjectWriter(ObjectMapper objectMapper, boolean prettyPrintEnabled) {
+        ObjectWriter objectWriter = prettyPrintEnabled
+                ? objectMapper.writerWithDefaultPrettyPrinter()
+                : objectMapper.writer();
+        return objectWriter.withoutFeatures(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
     }
 
     private static ObjectNode readTemplate(ObjectMapper objectMapper, String template) {
@@ -70,8 +82,13 @@ public class TemplateRenderer {
     private String render(LogEvent event, ObjectNode srcRootNode) {
         JsonNode dstRootNode = resolveNode(event, srcRootNode);
         try {
-            return objectWriter.writeValueAsString(dstRootNode);
-        } catch (JsonProcessingException error) {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            try (OutputStreamWriter writer = new OutputStreamWriter(outputStream, JSON_CHARSET)) {
+                objectWriter.writeValue(writer, dstRootNode);
+                writer.write(System.lineSeparator());
+            }
+            return outputStream.toString(JSON_CHARSET_NAME);
+        } catch (IOException error) {
             throw new RuntimeException("failed serializing JSON", error);
         }
     }
