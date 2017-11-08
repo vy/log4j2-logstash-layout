@@ -6,7 +6,7 @@
     <parent>
         <artifactId>log4j2-logstash-layout-parent</artifactId>
         <groupId>com.vlkan.log4j2</groupId>
-        <version>0.9-SNAPSHOT</version>
+        <version>0.9</version>
     </parent>
 
     <artifactId>log4j2-logstash-layout-demo</artifactId>
