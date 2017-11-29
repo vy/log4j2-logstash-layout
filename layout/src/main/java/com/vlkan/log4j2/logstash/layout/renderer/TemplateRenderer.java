@@ -131,24 +131,57 @@ public class TemplateRenderer {
     }
 
     private JsonNode resolveStringNode(LogEvent event, JsonNode textNode) {
-        String text = textNode.asText();
-        String resolverName = getResolverName(text);
-        if (resolverName != null) {
-            TemplateResolver resolver = resolverByName.get(resolverName);
+        String fieldValue = textNode.asText();
+        TemplateResolverRequest resolverRequest = readResolverRequest(fieldValue);
+        if (resolverRequest != null) {
+            TemplateResolver resolver = resolverByName.get(resolverRequest.resolverName);
             if (resolver != null) {
-                return resolver.resolve(resolverContext, event);
+                return resolver.resolve(resolverContext, event, resolverRequest.resolverKey);
             }
         } else {
-            String replacedText = substitutor.replace(event, text);
+            String replacedText = substitutor.replace(event, fieldValue);
             return new TextNode(replacedText);
         }
         return textNode;
     }
 
-    private static String getResolverName(String fieldValue) {
-        return fieldValue.startsWith("${json:") && fieldValue.endsWith("}")
-                ? fieldValue.substring(7, fieldValue.length() - 1)
-                : null;
+    private static TemplateResolverRequest readResolverRequest(String fieldValue) {
+
+        // Bail-out if cannot spot the template signature.
+        if (!fieldValue.startsWith("${json:") || !fieldValue.endsWith("}")) {
+            return null;
+        }
+
+        // Try to read both resolver name and key.
+        int resolverNameStartIndex = 7;
+        int fieldNameSeparatorIndex = fieldValue.indexOf(':', resolverNameStartIndex);
+        if (fieldNameSeparatorIndex < 0) {
+            int resolverNameEndIndex = fieldValue.length() - 1;
+            String resolverName = fieldValue.substring(resolverNameStartIndex, resolverNameEndIndex);
+            return new TemplateResolverRequest(resolverName, null);
+        } else {
+            @SuppressWarnings("UnnecessaryLocalVariable")
+            int resolverNameEndIndex = fieldNameSeparatorIndex;
+            int resolverKeyStartIndex = fieldNameSeparatorIndex + 1;
+            int resolverKeyEndIndex = fieldValue.length() - 1;
+            String resolverName = fieldValue.substring(resolverNameStartIndex, resolverNameEndIndex);
+            String resolverKey = fieldValue.substring(resolverKeyStartIndex, resolverKeyEndIndex);
+            return new TemplateResolverRequest(resolverName, resolverKey);
+        }
+
+    }
+
+    private static class TemplateResolverRequest {
+
+        private final String resolverName;
+
+        private final String resolverKey;
+
+        private TemplateResolverRequest(String resolverName, String resolverKey) {
+            this.resolverName = resolverName;
+            this.resolverKey = resolverKey;
+        }
+
     }
 
     public static Builder newBuilder() {

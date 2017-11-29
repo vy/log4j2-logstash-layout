@@ -93,7 +93,7 @@ This generates an output as follows:
 | `stackTraceEnabled` | boolean | includes stack traces (defaults to `false`) |
 | `dateTimeFormatPattern` | String | timestamp formatter pattern (defaults to `yyyy-MM-dd'T'HH:mm:ss.SSSZZZ`) |
 | `timeZoneId` | String | time zone id (defaults to `TimeZone.getDefault().getID()`) |
-| `mdcKeyPattern` | String | regex to filter MDC keys |
+| `mdcKeyPattern` | String | regex to filter MDC keys (does not apply to direct `mdc:key` access) |
 | `ndcPattern` | String | regex to filter NDC items |
 | `template` | String | inline JSON template for generating the output (has priority over `templateUri`) |
 | `templateUri` | String | JSON template for generating the output (defaults to `classpath:LogstashJsonEventLayoutV1.json`) |
@@ -126,8 +126,6 @@ in `LogstashJsonEventLayoutV1.json` within the classpath:
 }
 ```
 
-In addition to `${json:<logstash-variable-name>}` lookups, 
-
 In case of need, you can create your own templates with a structure tailored
 to your needs. That is, you can add new fields, remove or rename existing
 ones, change the structure, etc. Please note that `templateUri` parameter only
@@ -147,6 +145,7 @@ rendering the JSON output.
 | `level` | `logEvent.getLevel()` |
 | `loggerName` | `logEvent.getLoggerName()` |
 | `mdc` | Mapped Diagnostic Context `Map<String, String>` returned by `logEvent.getContextData()` |
+| `mdc:key` | Mapped Diagnostic Context `String` associated with `key` (`mdcKeyPattern` is discarded) |
 | `message` | `logEvent.getMessage()` |
 | `ndc` | Nested Diagnostic Context `String[]` returned by `logEvent.getContextStack()` |
 | `sourceClassName` | `logEvent.getSource().getClassName()` |
@@ -155,6 +154,11 @@ rendering the JSON output.
 | `sourceMethodName` | `logEvent.getSource().getMethodName()` |
 | `threadName` | `logEvent.getThreadName()` |
 | `timestamp` | `logEvent.getTimeMillis()` formatted using `dateTimeFormatPattern` and `timeZoneId` |
+
+JSON field lookups are performed using the `${json:<variable-name>}` scheme
+where `<variable-name>` is defined as `<resolver-name>[:<resolver-key>]`.
+Characters following colon (`:`) are treated as the `resolver-key` of
+which as of now only supported by `mdc` resolver.
 
 [Log4j 2.x Lookups](https://logging.apache.org/log4j/2.0/manual/lookups.html)
 (e.g., `${java:version}`, `${env:USER}`, `${date:MM-dd-yyyy}`) are supported

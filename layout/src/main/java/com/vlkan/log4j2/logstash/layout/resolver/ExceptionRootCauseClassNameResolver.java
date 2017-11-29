@@ -23,7 +23,7 @@ public class ExceptionRootCauseClassNameResolver implements TemplateResolver {
     }
 
     @Override
-    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent) {
+    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent, String key) {
         final Throwable exception = logEvent.getThrown();
         if (exception == null) {
             return null;

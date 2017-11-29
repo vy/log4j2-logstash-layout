@@ -7,6 +7,6 @@ public interface TemplateResolver {
 
     String getName();
 
-    JsonNode resolve(TemplateResolverContext context, LogEvent logEvent);
+    JsonNode resolve(TemplateResolverContext context, LogEvent logEvent, String key);
 
 }

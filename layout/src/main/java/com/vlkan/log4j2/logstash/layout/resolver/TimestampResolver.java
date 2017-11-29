@@ -23,7 +23,7 @@ public class TimestampResolver implements TemplateResolver {
     }
 
     @Override
-    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent) {
+    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent, String key) {
         long timestampMillis = logEvent.getTimeMillis();
         FastDateFormat timestampFormat = context.getTimestampFormat();
         String timestamp = timestampFormat.format(timestampMillis);

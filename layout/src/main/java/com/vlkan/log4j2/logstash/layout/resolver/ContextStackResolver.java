@@ -28,7 +28,7 @@ public class ContextStackResolver implements TemplateResolver {
     }
 
     @Override
-    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent) {
+    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent, String key) {
         ThreadContext.ContextStack contextStack = logEvent.getContextStack();
         if (contextStack.getDepth() == 0) {
             return null;

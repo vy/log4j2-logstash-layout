@@ -22,7 +22,7 @@ public class MessageResolver implements TemplateResolver {
     }
 
     @Override
-    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent) {
+    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent, String key) {
         String message = logEvent.getMessage().getFormattedMessage();
         return new TextNode(message);
     }

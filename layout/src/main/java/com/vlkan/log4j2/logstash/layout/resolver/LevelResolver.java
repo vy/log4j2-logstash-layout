@@ -22,7 +22,7 @@ public class LevelResolver implements TemplateResolver {
     }
 
     @Override
-    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent) {
+    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent, String key) {
         String level = logEvent.getLevel().name();
         return new TextNode(level);
     }

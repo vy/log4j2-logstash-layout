@@ -2,6 +2,7 @@ package com.vlkan.log4j2.logstash.layout.resolver;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.util.BiConsumer;
 import org.apache.logging.log4j.util.ReadOnlyStringMap;
@@ -29,11 +30,22 @@ public class ContextDataResolver implements TemplateResolver {
     }
 
     @Override
-    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent) {
+    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent, String key) {
+
+        // Retrieve context data.
         ReadOnlyStringMap contextData = logEvent.getContextData();
         if (contextData == null || contextData.isEmpty()) {
             return null;
         }
+
+        // Check if key matches.
+        if (key != null) {
+            Object value = contextData.getValue(key);
+            String textValue = String.valueOf(value);
+            return new TextNode(textValue);
+        }
+
+        // Otherwise return all context data matching the MDC key pattern.
         final Pattern keyPattern = context.getMdcKeyPattern();
         final ObjectNode contextDataNode = context.getObjectMapper().createObjectNode();
         contextData.forEach(new BiConsumer<String, String>() {
@@ -46,6 +58,7 @@ public class ContextDataResolver implements TemplateResolver {
             }
         });
         return contextDataNode;
+
     }
 
 }

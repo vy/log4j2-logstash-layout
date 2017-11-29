@@ -17,6 +17,8 @@ import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 import org.apache.logging.log4j.core.impl.Log4jLogEvent;
 import org.apache.logging.log4j.message.SimpleMessage;
 import org.apache.logging.log4j.util.BiConsumer;
+import org.apache.logging.log4j.util.SortedArrayStringMap;
+import org.apache.logging.log4j.util.StringMap;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 
@@ -364,6 +366,55 @@ public class LogstashLayoutTest {
         String serializedLogEvent = layout.toSerializable(logEvent);
         String assertionCaption = String.format("testing lineSeperator (prettyPrintEnabled=%s)", prettyPrintEnabled);
         assertions.assertThat(serializedLogEvent).as(assertionCaption).endsWith("}" + System.lineSeparator());
+
+    }
+
+    @Test
+    public void test_mdc_key_access() throws IOException {
+
+        // Create the log event.
+        SimpleMessage message = new SimpleMessage("Hello, World!");
+        StringMap contextData = new SortedArrayStringMap();
+        String mdcDirectlyAccessedKey = "mdcKey1";
+        String mdcDirectlyAccessedValue = "mdcValue1";
+        contextData.putValue(mdcDirectlyAccessedKey, mdcDirectlyAccessedValue);
+        String mdcPatternMatchedKey = "mdcKey2";
+        String mdcPatternMatchedValue = "mdcValue2";
+        contextData.putValue(mdcPatternMatchedKey, mdcPatternMatchedValue);
+        String mdcPatternMismatchedKey = "mdcKey3";
+        String mdcPatternMismatchedValue = "mdcValue3";
+        contextData.putValue(mdcPatternMismatchedKey, mdcPatternMismatchedValue);
+        LogEvent logEvent = Log4jLogEvent
+                .newBuilder()
+                .setLoggerName(LogstashLayoutTest.class.getSimpleName())
+                .setLevel(Level.INFO)
+                .setMessage(message)
+                .setContextData(contextData)
+                .build();
+
+        // Create the template.
+        ObjectNode templateRootNode = JSON_NODE_FACTORY.objectNode();
+        String mdcFieldName = "mdc";
+        templateRootNode.put(mdcFieldName, "${json:mdc}");
+        templateRootNode.put(mdcDirectlyAccessedKey, String.format("${json:mdc:%s}", mdcDirectlyAccessedKey));
+        String template = templateRootNode.toString();
+
+        // Create the layout.
+        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        LogstashLayout layout = LogstashLayout
+                .newBuilder()
+                .setConfiguration(configuration)
+                .setStackTraceEnabled(true)
+                .setTemplate(template)
+                .setMdcKeyPattern(mdcPatternMatchedKey)
+                .build();
+
+        // Check the serialized event.
+        String serializedLogEvent = layout.toSerializable(logEvent);
+        JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
+        assertThat(point(rootNode, mdcDirectlyAccessedKey).asText()).isEqualTo(mdcDirectlyAccessedValue);
+        assertThat(point(rootNode, mdcFieldName, mdcPatternMatchedKey).asText()).isEqualTo(mdcPatternMatchedValue);
+        assertThat(point(rootNode, mdcFieldName, mdcPatternMismatchedKey).asText()).isNullOrEmpty();
 
     }
 

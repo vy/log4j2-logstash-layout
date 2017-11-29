@@ -22,7 +22,7 @@ public class ThreadNameResolver implements TemplateResolver {
     }
 
     @Override
-    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent) {
+    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent, String key) {
         String threadName = logEvent.getThreadName();
         return new TextNode(threadName);
     }

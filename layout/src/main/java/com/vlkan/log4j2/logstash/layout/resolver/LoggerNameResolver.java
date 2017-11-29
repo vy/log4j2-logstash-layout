@@ -22,7 +22,7 @@ public class LoggerNameResolver implements TemplateResolver {
     }
 
     @Override
-    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent) {
+    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent, String key) {
         String loggerName = logEvent.getLoggerName();
         return new TextNode(loggerName);
     }

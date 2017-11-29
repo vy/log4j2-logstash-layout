@@ -23,7 +23,7 @@ public class ExceptionStackTraceResolver implements TemplateResolver {
     }
 
     @Override
-    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent) {
+    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent, String key) {
         Throwable exception = logEvent.getThrown();
         if (!context.isStackTraceEnabled() || exception == null) {
             return null;

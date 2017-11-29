@@ -22,7 +22,7 @@ public class SourceMethodNameResolver implements TemplateResolver {
     }
 
     @Override
-    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent) {
+    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent, String key) {
         if (!context.isLocationInfoEnabled() || logEvent.getSource() == null) {
             return null;
         }
