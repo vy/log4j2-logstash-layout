@@ -179,6 +179,20 @@ include separately.
 This might come handy if you want to use this plugin along with already
 compiled applications, e.g., Elasticsearch 5.x, which requires Log4j 2.x.
 
+Appender Support
+================
+
+`log4j2-logstash-layout` is all about providing a highly customizable JSON
+schema for your logs. Though this does not necessarily mean that all of its
+features are expected to be supported by every appender in the market. For
+instance, while `prettyPrintEnabled=true` works fine with
+[log4j2-redis-appender](/vy/log4j2-redis-appender), it should be turned off
+for Logstash's `log4j-json` file input type. (See
+[Pretty printing in Logstash](/vy/log4j2-logstash-layout/issues/8) issue.)
+Make sure you configure `log4j2-logstash-layout` properly in a way that
+is aligned with your appender of preference.
+
+
 Contributors
 ============
 
