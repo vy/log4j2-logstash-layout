@@ -123,9 +123,7 @@ public class TemplateRenderer {
             String key = srcNodeField.getKey();
             JsonNode value = srcNodeField.getValue();
             JsonNode resolvedValue = resolveNode(event, value);
-            if (resolvedValue != null) {
-                dstNode.set(key, resolvedValue);
-            }
+            dstNode.set(key, resolvedValue);
         }
         return dstNode.size() > 0 ? dstNode : null;
     }

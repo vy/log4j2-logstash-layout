@@ -384,6 +384,9 @@ public class LogstashLayoutTest {
         String mdcPatternMismatchedKey = "mdcKey3";
         String mdcPatternMismatchedValue = "mdcValue3";
         contextData.putValue(mdcPatternMismatchedKey, mdcPatternMismatchedValue);
+        String mdcDirectlyAccessedNullPropertyKey = "mdcKey4";
+        String mdcDirectlyAccessedNullPropertyValue = null;
+        contextData.putValue(mdcDirectlyAccessedNullPropertyKey, mdcDirectlyAccessedNullPropertyValue);
         LogEvent logEvent = Log4jLogEvent
                 .newBuilder()
                 .setLoggerName(LogstashLayoutTest.class.getSimpleName())
@@ -397,6 +400,7 @@ public class LogstashLayoutTest {
         String mdcFieldName = "mdc";
         templateRootNode.put(mdcFieldName, "${json:mdc}");
         templateRootNode.put(mdcDirectlyAccessedKey, String.format("${json:mdc:%s}", mdcDirectlyAccessedKey));
+        templateRootNode.put(mdcDirectlyAccessedNullPropertyKey, String.format("${json:mdc:%s}", mdcDirectlyAccessedNullPropertyKey));
         String template = templateRootNode.toString();
 
         // Create the layout.
@@ -414,7 +418,8 @@ public class LogstashLayoutTest {
         JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
         assertThat(point(rootNode, mdcDirectlyAccessedKey).asText()).isEqualTo(mdcDirectlyAccessedValue);
         assertThat(point(rootNode, mdcFieldName, mdcPatternMatchedKey).asText()).isEqualTo(mdcPatternMatchedValue);
-        assertThat(point(rootNode, mdcFieldName, mdcPatternMismatchedKey).asText()).isNullOrEmpty();
+        assertThat(point(rootNode, mdcFieldName, mdcPatternMismatchedKey)).isInstanceOf(MissingNode.class);
+        assertThat(point(rootNode, mdcDirectlyAccessedNullPropertyKey).isNull()).isTrue();
 
     }
 

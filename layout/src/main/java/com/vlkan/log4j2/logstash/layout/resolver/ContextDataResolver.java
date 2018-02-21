@@ -41,6 +41,9 @@ public class ContextDataResolver implements TemplateResolver {
         // Check if key matches.
         if (key != null) {
             Object value = contextData.getValue(key);
+            if (value == null) {
+                return null;
+            }
             String textValue = String.valueOf(value);
             return new TextNode(textValue);
         }
