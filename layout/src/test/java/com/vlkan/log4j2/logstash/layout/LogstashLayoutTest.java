@@ -419,7 +419,69 @@ public class LogstashLayoutTest {
         assertThat(point(rootNode, mdcDirectlyAccessedKey).asText()).isEqualTo(mdcDirectlyAccessedValue);
         assertThat(point(rootNode, mdcFieldName, mdcPatternMatchedKey).asText()).isEqualTo(mdcPatternMatchedValue);
         assertThat(point(rootNode, mdcFieldName, mdcPatternMismatchedKey)).isInstanceOf(MissingNode.class);
-        assertThat(point(rootNode, mdcDirectlyAccessedNullPropertyKey).isNull()).isTrue();
+        assertThat(point(rootNode, mdcDirectlyAccessedNullPropertyKey)).isInstanceOf(MissingNode.class);
+
+    }
+
+    @Test
+    public void test_emptyPropertyExclusionEnabled() throws IOException {
+
+        // Create the log event.
+        SimpleMessage message = new SimpleMessage("Hello, World!");
+        StringMap contextData = new SortedArrayStringMap();
+        String mdcEmptyKey1 = "mdcKey1";
+        String mdcEmptyKey2 = "mdcKey2";
+        contextData.putValue(mdcEmptyKey1, "");
+        contextData.putValue(mdcEmptyKey2, null);
+        LogEvent logEvent = Log4jLogEvent
+                .newBuilder()
+                .setLoggerName(LogstashLayoutTest.class.getSimpleName())
+                .setLevel(Level.INFO)
+                .setMessage(message)
+                .setContextData(contextData)
+                .build();
+
+        // Create the template with property.
+        ObjectNode templateRootNode = JSON_NODE_FACTORY.objectNode();
+        String mdcFieldName = "mdc";
+        String emptyProperty1Name = "property1Name";
+        templateRootNode.put(emptyProperty1Name, "${" + emptyProperty1Name + "}");
+        templateRootNode.put(mdcFieldName, "${json:mdc}");
+        templateRootNode.put(mdcEmptyKey1, String.format("${json:mdc:%s}", mdcEmptyKey1));
+        templateRootNode.put(mdcEmptyKey2, String.format("${json:mdc:%s}", mdcEmptyKey2));
+        String template = templateRootNode.toString();
+
+        // Create the layout configuration.
+        Configuration config = ConfigurationBuilderFactory
+                .newConfigurationBuilder()
+                .addProperty(emptyProperty1Name, "")
+                .build();
+
+        for (boolean emptyPropertyExclusionEnabled : new boolean[] { true, false }) {
+
+            // Create the layout.
+            LogstashLayout layout = LogstashLayout
+                    .newBuilder()
+                    .setConfiguration(config)
+                    .setTemplate(template)
+                    .setEmptyPropertyExclusionEnabled(emptyPropertyExclusionEnabled)
+                    .build();
+
+            // Check serialized event.
+            String serializedLogEvent = layout.toSerializable(logEvent);
+            if (emptyPropertyExclusionEnabled) {
+                assertThat(serializedLogEvent).isEqualTo("{}");
+            } else {
+                JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
+                assertThat(point(rootNode, mdcEmptyKey1).asText()).isEmpty();
+                assertThat(point(rootNode, mdcEmptyKey2).isNull()).isTrue();
+                assertThat(point(rootNode, mdcFieldName)).isInstanceOf(ObjectNode.class);
+                assertThat(point(rootNode, mdcFieldName, mdcEmptyKey1).asText()).isEmpty();
+                assertThat(point(rootNode, mdcFieldName, mdcEmptyKey2).isNull()).isTrue();
+                assertThat(point(rootNode, emptyProperty1Name).asText()).isEmpty();
+            }
+
+        }
 
     }
 

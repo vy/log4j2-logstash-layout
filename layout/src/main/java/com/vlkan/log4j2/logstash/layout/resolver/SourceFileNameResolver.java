@@ -1,7 +1,9 @@
 package com.vlkan.log4j2.logstash.layout.resolver;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.core.LogEvent;
 
 public class SourceFileNameResolver implements TemplateResolver {
@@ -24,10 +26,13 @@ public class SourceFileNameResolver implements TemplateResolver {
     @Override
     public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent, String key) {
         if (!context.isLocationInfoEnabled() || logEvent.getSource() == null) {
-            return null;
+            return NullNode.getInstance();
         }
         String sourceFileName = logEvent.getSource().getFileName();
-        return new TextNode(sourceFileName);
+        boolean sourceFileNameExcluded = StringUtils.isEmpty(sourceFileName) && context.isEmptyPropertyExclusionEnabled();
+        return sourceFileNameExcluded
+                ? NullNode.getInstance()
+                : new TextNode(sourceFileName);
     }
 
 }

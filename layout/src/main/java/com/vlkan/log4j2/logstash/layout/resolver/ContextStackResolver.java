@@ -2,6 +2,7 @@ package com.vlkan.log4j2.logstash.layout.resolver;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.NullNode;
 import org.apache.logging.log4j.ThreadContext;
 import org.apache.logging.log4j.core.LogEvent;
 
@@ -31,7 +32,7 @@ public class ContextStackResolver implements TemplateResolver {
     public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent, String key) {
         ThreadContext.ContextStack contextStack = logEvent.getContextStack();
         if (contextStack.getDepth() == 0) {
-            return null;
+            return NullNode.getInstance();
         }
         Pattern itemPattern = context.getNdcPattern();
         ArrayNode contextStackNode = context.getObjectMapper().createArrayNode();

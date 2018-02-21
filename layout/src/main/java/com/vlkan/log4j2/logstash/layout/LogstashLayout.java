@@ -62,6 +62,7 @@ public class LogstashLayout extends AbstractStringLayout {
                 .setTimestampFormat(timestampFormat)
                 .setLocationInfoEnabled(builder.locationInfoEnabled)
                 .setStackTraceEnabled(builder.stackTraceEnabled)
+                .setEmptyPropertyExclusionEnabled(builder.emptyPropertyExclusionEnabled)
                 .setMdcKeyPattern(builder.mdcKeyPattern)
                 .setNdcPattern(builder.ndcPattern)
                 .build();
@@ -108,6 +109,9 @@ public class LogstashLayout extends AbstractStringLayout {
 
         @PluginBuilderAttribute
         private boolean stackTraceEnabled = false;
+
+        @PluginBuilderAttribute
+        private boolean emptyPropertyExclusionEnabled = true;
 
         @PluginBuilderAttribute
         private String dateTimeFormatPattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZZZ";
@@ -164,6 +168,15 @@ public class LogstashLayout extends AbstractStringLayout {
 
         public Builder setStackTraceEnabled(boolean stackTraceEnabled) {
             this.stackTraceEnabled = stackTraceEnabled;
+            return this;
+        }
+
+        public boolean isEmptyPropertyExclusionEnabled() {
+            return emptyPropertyExclusionEnabled;
+        }
+
+        public Builder setEmptyPropertyExclusionEnabled(boolean blankPropertyExclusionEnabled) {
+            this.emptyPropertyExclusionEnabled = blankPropertyExclusionEnabled;
             return this;
         }
 
@@ -241,6 +254,7 @@ public class LogstashLayout extends AbstractStringLayout {
             return "Builder{prettyPrintEnabled=" + prettyPrintEnabled +
                     ", locationInfoEnabled=" + locationInfoEnabled +
                     ", stackTraceEnabled=" + stackTraceEnabled +
+                    ", emptyPropertyExclusionEnabled=" + emptyPropertyExclusionEnabled +
                     ", dateTimeFormatPattern='" + dateTimeFormatPattern + '\'' +
                     ", timeZoneId='" + timeZoneId + '\'' +
                     ", template='" + template + '\'' +

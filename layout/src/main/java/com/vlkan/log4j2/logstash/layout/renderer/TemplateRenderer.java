@@ -6,10 +6,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
+import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.vlkan.log4j2.logstash.layout.resolver.TemplateResolver;
 import com.vlkan.log4j2.logstash.layout.resolver.TemplateResolverContext;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.lookup.StrSubstitutor;
@@ -23,6 +25,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 
 public class TemplateRenderer {
 
@@ -80,7 +84,14 @@ public class TemplateRenderer {
     }
 
     private String render(LogEvent event, ObjectNode srcRootNode) {
+
+        // Resolve node and bail-out if empty.
         JsonNode dstRootNode = resolveNode(event, srcRootNode);
+        if (dstRootNode.isNull()) {
+            return "{}";
+        }
+
+        // Serialize resolved node.
         try {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             try (OutputStreamWriter writer = new OutputStreamWriter(outputStream, JSON_CHARSET)) {
@@ -91,6 +102,7 @@ public class TemplateRenderer {
         } catch (IOException error) {
             throw new RuntimeException("failed serializing JSON", error);
         }
+
     }
 
     private JsonNode resolveNode(LogEvent event, JsonNode node) {
@@ -104,43 +116,63 @@ public class TemplateRenderer {
     }
 
     private JsonNode resolveArrayNode(LogEvent event, JsonNode srcNode) {
-        ArrayNode dstNode = objectMapper.createArrayNode();
+        ArrayNode dstNode = null;
         for (int nodeIndex = 0; nodeIndex < srcNode.size(); nodeIndex++) {
             JsonNode srcChildNode = srcNode.get(nodeIndex);
             JsonNode dstChildNode = resolveNode(event, srcChildNode);
-            if (dstChildNode != null) {
+            boolean dstChildNodeExcluded = dstChildNode.isNull() && resolverContext.isEmptyPropertyExclusionEnabled();
+            if (!dstChildNodeExcluded) {
+                if (dstNode == null) {
+                    dstNode = objectMapper.createArrayNode();
+                }
                 dstNode.add(dstChildNode);
             }
         }
-        return dstNode.size() > 0 ? dstNode : null;
+        return firstNonNull(dstNode, NullNode.getInstance());
     }
 
     private JsonNode resolveObjectNode(LogEvent event, JsonNode srcNode) {
-        ObjectNode dstNode = objectMapper.createObjectNode();
+        ObjectNode dstNode = null;
         Iterator<Map.Entry<String, JsonNode>> srcNodeFieldIterator = srcNode.fields();
         while (srcNodeFieldIterator.hasNext()) {
             Map.Entry<String, JsonNode> srcNodeField = srcNodeFieldIterator.next();
             String key = srcNodeField.getKey();
             JsonNode value = srcNodeField.getValue();
             JsonNode resolvedValue = resolveNode(event, value);
-            dstNode.set(key, resolvedValue);
+            boolean resolvedValueExcluded = resolvedValue.isNull() && resolverContext.isEmptyPropertyExclusionEnabled();
+            if (!resolvedValueExcluded) {
+                if (dstNode == null) {
+                    dstNode = objectMapper.createObjectNode();
+                }
+                dstNode.set(key, resolvedValue);
+            }
         }
-        return dstNode.size() > 0 ? dstNode : null;
+        return firstNonNull(dstNode, NullNode.getInstance());
     }
 
     private JsonNode resolveStringNode(LogEvent event, JsonNode textNode) {
+
+        // Short-circuit if content is blank and not allowed.
         String fieldValue = textNode.asText();
+        if (StringUtils.isEmpty(fieldValue) && resolverContext.isEmptyPropertyExclusionEnabled()) {
+            return NullNode.getInstance();
+        }
+
+        // Try to resolve the directive.
         TemplateResolverRequest resolverRequest = readResolverRequest(fieldValue);
         if (resolverRequest != null) {
             TemplateResolver resolver = resolverByName.get(resolverRequest.resolverName);
             if (resolver != null) {
                 return resolver.resolve(resolverContext, event, resolverRequest.resolverKey);
             }
-        } else {
-            String replacedText = substitutor.replace(event, fieldValue);
-            return new TextNode(replacedText);
         }
-        return textNode;
+
+        // Fallback to the Log4j substitutor.
+        String replacedText = substitutor.replace(event, fieldValue);
+        return StringUtils.isEmpty(replacedText) && resolverContext.isEmptyPropertyExclusionEnabled()
+                ? NullNode.getInstance()
+                : new TextNode(replacedText);
+
     }
 
     private static TemplateResolverRequest readResolverRequest(String fieldValue) {

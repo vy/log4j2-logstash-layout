@@ -16,6 +16,8 @@ public class TemplateResolverContext {
 
     private final boolean stackTraceEnabled;
 
+    private final boolean emptyPropertyExclusionEnabled;
+
     private final Pattern mdcKeyPattern;
 
     private final Pattern ndcPattern;
@@ -25,6 +27,7 @@ public class TemplateResolverContext {
         this.timestampFormat = builder.timestampFormat;
         this.locationInfoEnabled = builder.locationInfoEnabled;
         this.stackTraceEnabled = builder.stackTraceEnabled;
+        this.emptyPropertyExclusionEnabled = builder.emptyPropertyExclusionEnabled;
         this.mdcKeyPattern = builder.mdcKeyPattern == null ? null : Pattern.compile(builder.mdcKeyPattern);
         this.ndcPattern = builder.ndcPattern == null ? null : Pattern.compile(builder.ndcPattern);
     }
@@ -43,6 +46,10 @@ public class TemplateResolverContext {
 
     public boolean isStackTraceEnabled() {
         return stackTraceEnabled;
+    }
+
+    public boolean isEmptyPropertyExclusionEnabled() {
+        return emptyPropertyExclusionEnabled;
     }
 
     public Pattern getMdcKeyPattern() {
@@ -66,6 +73,8 @@ public class TemplateResolverContext {
         private boolean locationInfoEnabled;
 
         private boolean stackTraceEnabled;
+
+        private boolean emptyPropertyExclusionEnabled;
 
         private String mdcKeyPattern;
 
@@ -108,6 +117,15 @@ public class TemplateResolverContext {
 
         public Builder setStackTraceEnabled(boolean stackTraceEnabled) {
             this.stackTraceEnabled = stackTraceEnabled;
+            return this;
+        }
+
+        public boolean isEmptyPropertyExclusionEnabled() {
+            return emptyPropertyExclusionEnabled;
+        }
+
+        public Builder setEmptyPropertyExclusionEnabled(boolean emptyPropertyExclusionEnabled) {
+            this.emptyPropertyExclusionEnabled = emptyPropertyExclusionEnabled;
             return this;
         }
 
