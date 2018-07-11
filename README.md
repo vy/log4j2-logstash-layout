@@ -1,6 +1,6 @@
 [![Build Status](https://secure.travis-ci.org/vy/log4j2-logstash-layout.svg)](http://travis-ci.org/vy/log4j2-logstash-layout)
 [![Maven Central](https://img.shields.io/maven-central/v/com.vlkan.log4j2/log4j2-logstash-layout-parent.svg)](https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.vlkan.log4j2%22)
-[![License](https://img.shields.io/github/license/vy/log4j2-redis-appender.svg)](http://www.apache.org/licenses/LICENSE-2.0.txt)
+[![License](https://img.shields.io/github/license/vy/log4j2-logstash-layout.svg)](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 `LogstashLayout` plugin provides a [Log4j 2.x](https://logging.apache.org/log4j/2.x/)
 layout with customizable and [Logstash](https://www.elastic.co/products/logstash)-friendly
