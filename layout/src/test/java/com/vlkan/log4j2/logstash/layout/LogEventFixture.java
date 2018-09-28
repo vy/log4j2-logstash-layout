@@ -65,6 +65,7 @@ public enum LogEventFixture {;
         StringMap contextData = ContextDataFactory.createContextData();
         contextData.putValue("MDC.A" + id, "A_Value");
         contextData.putValue("MDC.B" + id, "B_Value");
+        contextData.putValue("MDC.C" + id, "10");
         return contextData;
     }
 
