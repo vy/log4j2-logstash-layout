@@ -67,7 +67,7 @@ public class LogstashLayoutTest {
                 .setNdcPattern(firstNdcItemExcludingRegex)
                 .build();
         String serializedLogEvent = layout.toSerializable(logEvent);
-        JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
+        JsonNode rootNode = OBJECT_MAPPER.readValue(serializedLogEvent, JsonNode.class);
         checkConstants(rootNode);
         checkBasicFields(logEvent, rootNode);
         checkSource(logEvent, rootNode);
@@ -112,7 +112,8 @@ public class LogstashLayoutTest {
                 JsonNode node = point(rootNode, "mdc", key);
                 boolean matches = mdcKeyPattern == null || mdcKeyPattern.matcher(key).matches();
                 if (matches) {
-                    assertThat(node.asText()).isEqualTo(value);
+                    JsonNode valueNode = OBJECT_MAPPER.convertValue(value, JsonNode.class);
+                    assertThat(node).isEqualTo(valueNode);
                 } else {
                     assertThat(node).isEqualTo(MissingNode.getInstance());
                 }

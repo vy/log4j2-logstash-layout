@@ -63,8 +63,10 @@ public enum LogEventFixture {;
 
     private static StringMap createContextData(String id) {
         StringMap contextData = ContextDataFactory.createContextData();
-        contextData.putValue("MDC.A" + id, "A_Value");
-        contextData.putValue("MDC.B" + id, "B_Value");
+        contextData.putValue("MDC.String." + id, "String");
+        contextData.putValue("MDC.Double." + id, Math.PI);
+        contextData.putValue("MDC.Integer." + id, 10);
+        contextData.putValue("MDC.Long." + id, Long.MAX_VALUE);
         return contextData;
     }
 
