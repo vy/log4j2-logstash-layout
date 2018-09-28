@@ -1,6 +1,7 @@
 package com.vlkan.log4j2.logstash.layout.resolver;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.BigIntegerNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
@@ -9,9 +10,11 @@ import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.util.BiConsumer;
 import org.apache.logging.log4j.util.ReadOnlyStringMap;
 
+import java.math.BigInteger;
 import java.util.regex.Pattern;
 
 import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
+import static org.apache.commons.lang3.StringUtils.isNumeric;
 
 /**
  * Add Mapped Diagnostic Context (MDC).
@@ -50,9 +53,16 @@ public class ContextDataResolver implements TemplateResolver {
             }
             String textValue = String.valueOf(value);
             boolean textValueExcluded = textValue.isEmpty() && context.isEmptyPropertyExclusionEnabled();
-            return textValueExcluded
-                    ? NullNode.getInstance()
-                    : new TextNode(textValue);
+
+            if (textValueExcluded) {
+                return NullNode.getInstance();
+            } else {
+                if (isNumeric(textValue)) {
+                    return new BigIntegerNode(new BigInteger(textValue));
+                } else {
+                    return new TextNode(textValue);
+                }
+            }
         }
 
         // Otherwise return all context data matching the MDC key pattern.
@@ -68,7 +78,11 @@ public class ContextDataResolver implements TemplateResolver {
                         if (contextDataNode[0] == null) {
                             contextDataNode[0] = context.getObjectMapper().createObjectNode();
                         }
-                        contextDataNode[0].put(key, value);
+                        if (isNumeric(value)) {
+                            contextDataNode[0].put(key, new BigInteger(value));
+                        } else {
+                            contextDataNode[0].put(key, value);
+                        }
                     }
                 }
             }
