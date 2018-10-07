@@ -28,7 +28,7 @@ public class MessageJSONResolver implements TemplateResolver {
 
     @Override
     public String getName() {
-        return "message_json";
+        return "messageJson";
     }
 
     private JsonNode readTree(String message) {
