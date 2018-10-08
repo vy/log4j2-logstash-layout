@@ -5,10 +5,16 @@ import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.message.Message;
+import org.apache.logging.log4j.message.MultiformatMessage;
+
+import java.io.IOException;
 
 public class MessageResolver implements TemplateResolver {
 
     private static final MessageResolver INSTANCE = new MessageResolver();
+
+    private static final String[] FORMATS = { "JSON" };
 
     private MessageResolver() {
         // Do nothing.
@@ -25,11 +31,80 @@ public class MessageResolver implements TemplateResolver {
 
     @Override
     public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent, String key) {
-        String message = logEvent.getMessage().getFormattedMessage();
-        boolean messageExcluded = StringUtils.isEmpty(message) && context.isEmptyPropertyExclusionEnabled();
+        Message message = logEvent.getMessage();
+        return FORMATS[0].equalsIgnoreCase(key)
+                ? resolveJson(context, message)
+                : resolveText(context, message);
+    }
+
+    private JsonNode resolveText(TemplateResolverContext context, Message message) {
+        String formattedMessage = message.getFormattedMessage();
+        boolean messageExcluded = StringUtils.isEmpty(formattedMessage) && context.isEmptyPropertyExclusionEnabled();
         return messageExcluded
                 ? NullNode.getInstance()
-                : new TextNode(message);
+                : new TextNode(formattedMessage);
+    }
+
+    private JsonNode resolveJson(TemplateResolverContext context, Message message) {
+
+        // Check message type.
+        if (!(message instanceof MultiformatMessage)) {
+            return NullNode.getInstance();
+        }
+        MultiformatMessage multiformatMessage = (MultiformatMessage) message;
+
+        // Check formatter's JSON support.
+        boolean jsonSupported = false;
+        String[] formats = multiformatMessage.getFormats();
+        for (String format : formats) {
+            if (FORMATS[0].equalsIgnoreCase(format)) {
+                jsonSupported = true;
+                break;
+            }
+        }
+        if (!jsonSupported) {
+            return NullNode.getInstance();
+        }
+
+        // Read JSON.
+        String messageJson = multiformatMessage.getFormattedMessage(FORMATS);
+        JsonNode jsonNode = readMessageJson(context, messageJson);
+        boolean nodeExcluded = isNodeExcluded(context, jsonNode);
+        return nodeExcluded
+                ? NullNode.getInstance()
+                : jsonNode;
+
+    }
+
+    private static JsonNode readMessageJson(TemplateResolverContext context, String messageJson) {
+        try {
+            return context.getObjectMapper().readTree(messageJson);
+        } catch (IOException error) {
+            throw new RuntimeException("JSON message read failure", error);
+        }
+    }
+
+    private static boolean isNodeExcluded(TemplateResolverContext context, JsonNode jsonNode) {
+
+        if (!context.isEmptyPropertyExclusionEnabled()) {
+            return false;
+        }
+
+        if (jsonNode.isNull()) {
+            return true;
+        }
+
+        if (jsonNode.isTextual() && StringUtils.isEmpty(jsonNode.asText())) {
+            return true;
+        }
+
+        // noinspection RedundantIfStatement
+        if (jsonNode.isContainerNode() && jsonNode.size() == 0) {
+            return true;
+        }
+
+        return false;
+
     }
 
 }
