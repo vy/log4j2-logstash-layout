@@ -44,13 +44,13 @@ public class MessageJSONResolver implements TemplateResolver {
     @Override
     public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent, String key) {
         Message msg = logEvent.getMessage();
-        try {
+        if (msg instanceof MultiformatMessage) {
             String message = ((MultiformatMessage) msg).getFormattedMessage(FORMATS);
             boolean messageExcluded = StringUtils.isEmpty(message) && context.isEmptyPropertyExclusionEnabled();
             return messageExcluded
-                    ? NullNode.getInstance()
-                    : readTree(message, context.getObjectMapper());
-        } catch (ClassCastException e) {
+                ? NullNode.getInstance()
+                : readTree(message, context.getObjectMapper());
+        } else {
             String message = msg.getFormattedMessage();
             boolean messageExcluded = StringUtils.isEmpty(message) && context.isEmptyPropertyExclusionEnabled();
             if (messageExcluded) {
