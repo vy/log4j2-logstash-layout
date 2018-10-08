@@ -488,7 +488,7 @@ public class LogstashLayoutTest {
     }
 
     @Test
-    public void test_messageJson() throws IOException {
+    public void test_message_json() throws IOException {
 
         // Create the log event.
         StringMapMessage message = new StringMapMessage();
@@ -503,7 +503,7 @@ public class LogstashLayoutTest {
 
         // Create the template.
         ObjectNode templateRootNode = JSON_NODE_FACTORY.objectNode();
-        templateRootNode.put("message", "${json:messageJson}");
+        templateRootNode.put("message", "${json:message:json}");
         String template = templateRootNode.toString();
 
         // Create the layout.
@@ -524,7 +524,7 @@ public class LogstashLayoutTest {
     }
 
     @Test
-    public void test_messageJson_fallback() throws IOException {
+    public void test_message_json_fallback() throws IOException {
 
         // Create the log event.
         SimpleMessage message = new SimpleMessage("Hello, World!");
@@ -537,7 +537,7 @@ public class LogstashLayoutTest {
 
         // Create the template.
         ObjectNode templateRootNode = JSON_NODE_FACTORY.objectNode();
-        templateRootNode.put("message", "${json:messageJson}");
+        templateRootNode.put("message", "${json:message:json}");
         String template = templateRootNode.toString();
 
         // Create the layout.

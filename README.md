@@ -146,8 +146,9 @@ rendering the JSON output.
 | `level` | `logEvent.getLevel()` |
 | `loggerName` | `logEvent.getLoggerName()` |
 | `mdc` | Mapped Diagnostic Context `Map<String, String>` returned by `logEvent.getContextData()` |
-| `mdc:key` | Mapped Diagnostic Context `String` associated with `key` (`mdcKeyPattern` is discarded) |
-| `message` | `logEvent.getMessage()` |
+| `mdc:<key>` | Mapped Diagnostic Context `String` associated with `key` (`mdcKeyPattern` is discarded) |
+| `message` | `logEvent.getFormattedMessage()` |
+| `message:json` | if `logEvent.getMessage()` is of type `MultiformatMessage` and supports JSON, its read value, otherwise, `{"message": <formattedMessage>}` object |
 | `ndc` | Nested Diagnostic Context `String[]` returned by `logEvent.getContextStack()` |
 | `sourceClassName` | `logEvent.getSource().getClassName()` |
 | `sourceFileName` | `logEvent.getSource().getFileName()` (inactive when `locationInfoEnabled=false`) |
@@ -159,7 +160,8 @@ rendering the JSON output.
 JSON field lookups are performed using the `${json:<variable-name>}` scheme
 where `<variable-name>` is defined as `<resolver-name>[:<resolver-key>]`.
 Characters following colon (`:`) are treated as the `resolver-key` of
-which as of now only supported by `mdc` resolver.
+which as of now only supported in forms `mdc:<key>` and
+`message:json`.
 
 [Log4j 2.x Lookups](https://logging.apache.org/log4j/2.0/manual/lookups.html)
 (e.g., `${java:version}`, `${env:USER}`, `${date:MM-dd-yyyy}`) are supported
@@ -193,10 +195,11 @@ for Logstash's `log4j-json` file input type. (See
 Make sure you configure `log4j2-logstash-layout` properly in a way that
 is aligned with your appender of preference.
 
-
 Contributors
 ============
 
+- [Eric Schwartz](https://github.com/emschwar)
+- [Michael K. Edwards](https://github.com/mkedwards)
 - [Yaroslav Skopets](https://github.com/yskopets)
 
 # License
