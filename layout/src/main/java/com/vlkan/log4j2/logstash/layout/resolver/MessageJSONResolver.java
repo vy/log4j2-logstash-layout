@@ -31,12 +31,12 @@ public class MessageJSONResolver implements TemplateResolver {
         return "messageJson";
     }
 
-    private JsonNode readTree(String message) {
+    private JsonNode readTree(String message, ObjectMapper mapper) {
         try {
-            return MAPPER.readTree(message);
+            return mapper.readTree(message);
         } catch (IOException e) {
-            ObjectNode node = MAPPER.createObjectNode();
-            node.put("message", new TextNode(message));
+            ObjectNode node = mapper.createObjectNode();
+            node.set("message", new TextNode(message));
             return node;
         }
     }
@@ -49,15 +49,15 @@ public class MessageJSONResolver implements TemplateResolver {
             boolean messageExcluded = StringUtils.isEmpty(message) && context.isEmptyPropertyExclusionEnabled();
             return messageExcluded
                     ? NullNode.getInstance()
-                    : readTree(message);
+                    : readTree(message, context.getObjectMapper());
         } catch (ClassCastException e) {
             String message = msg.getFormattedMessage();
             boolean messageExcluded = StringUtils.isEmpty(message) && context.isEmptyPropertyExclusionEnabled();
             if (messageExcluded) {
                 return NullNode.getInstance();
             }
-            ObjectNode node = MAPPER.createObjectNode();
-            node.put("message", new TextNode(message));
+            ObjectNode node = context.getObjectMapper().createObjectNode();
+            node.set("message", new TextNode(message));
             return node;
         }
     }
