@@ -16,6 +16,7 @@ import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilderFact
 import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 import org.apache.logging.log4j.core.impl.Log4jLogEvent;
 import org.apache.logging.log4j.message.SimpleMessage;
+import org.apache.logging.log4j.message.StringMapMessage;
 import org.apache.logging.log4j.util.BiConsumer;
 import org.apache.logging.log4j.util.SortedArrayStringMap;
 import org.apache.logging.log4j.util.StringMap;
@@ -483,6 +484,75 @@ public class LogstashLayoutTest {
             }
 
         }
+
+    }
+
+    @Test
+    public void test_messageJson() throws IOException {
+
+        // Create the log event.
+        StringMapMessage message = new StringMapMessage();
+        message.put("message", "Hello, World!");
+        message.put("bottle", "Kickapoo Joy Juice");
+        LogEvent logEvent = Log4jLogEvent
+                .newBuilder()
+                .setLoggerName(LogstashLayoutTest.class.getSimpleName())
+                .setLevel(Level.INFO)
+                .setMessage(message)
+                .build();
+
+        // Create the template.
+        ObjectNode templateRootNode = JSON_NODE_FACTORY.objectNode();
+        templateRootNode.put("message", "${json:messageJson}");
+        String template = templateRootNode.toString();
+
+        // Create the layout.
+        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        LogstashLayout layout = LogstashLayout
+                .newBuilder()
+                .setConfiguration(configuration)
+                .setStackTraceEnabled(true)
+                .setTemplate(template)
+                .build();
+
+        // Check the serialized event.
+        String serializedLogEvent = layout.toSerializable(logEvent);
+        JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
+        assertThat(point(rootNode, "message", "message").asText()).isEqualTo("Hello, World!");
+        assertThat(point(rootNode, "message", "bottle").asText()).isEqualTo("Kickapoo Joy Juice");
+
+    }
+
+    @Test
+    public void test_messageJson_fallback() throws IOException {
+
+        // Create the log event.
+        SimpleMessage message = new SimpleMessage("Hello, World!");
+        LogEvent logEvent = Log4jLogEvent
+                .newBuilder()
+                .setLoggerName(LogstashLayoutTest.class.getSimpleName())
+                .setLevel(Level.INFO)
+                .setMessage(message)
+                .build();
+
+        // Create the template.
+        ObjectNode templateRootNode = JSON_NODE_FACTORY.objectNode();
+        templateRootNode.put("message", "${json:messageJson}");
+        String template = templateRootNode.toString();
+
+        // Create the layout.
+        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        LogstashLayout layout = LogstashLayout
+                .newBuilder()
+                .setConfiguration(configuration)
+                .setStackTraceEnabled(true)
+                .setTemplate(template)
+                .build();
+
+        // Check the serialized event.
+        String serializedLogEvent = layout.toSerializable(logEvent);
+        JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
+        assertThat(point(rootNode, "message", "message").asText()).isEqualTo("Hello, World!");
 
     }
 
