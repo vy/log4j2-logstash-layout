@@ -523,4 +523,37 @@ public class LogstashLayoutTest {
 
     }
 
+    @Test
+    public void test_message_json_fallback() throws IOException {
+
+        // Create the log event.
+        SimpleMessage message = new SimpleMessage("Hello, World!");
+        LogEvent logEvent = Log4jLogEvent
+                .newBuilder()
+                .setLoggerName(LogstashLayoutTest.class.getSimpleName())
+                .setLevel(Level.INFO)
+                .setMessage(message)
+                .build();
+
+        // Create the template.
+        ObjectNode templateRootNode = JSON_NODE_FACTORY.objectNode();
+        templateRootNode.put("message", "${json:message:json}");
+        String template = templateRootNode.toString();
+
+        // Create the layout.
+        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        LogstashLayout layout = LogstashLayout
+                .newBuilder()
+                .setConfiguration(configuration)
+                .setStackTraceEnabled(true)
+                .setTemplate(template)
+                .build();
+
+        // Check the serialized event.
+        String serializedLogEvent = layout.toSerializable(logEvent);
+        JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
+        assertThat(point(rootNode, "message", "message").asText()).isEqualTo("Hello, World!");
+
+    }
+
 }
