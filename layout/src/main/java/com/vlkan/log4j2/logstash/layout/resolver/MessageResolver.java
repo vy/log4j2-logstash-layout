@@ -2,6 +2,7 @@ package com.vlkan.log4j2.logstash.layout.resolver;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.NullNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.core.LogEvent;
@@ -49,7 +50,9 @@ public class MessageResolver implements TemplateResolver {
 
         // Check message type.
         if (!(message instanceof MultiformatMessage)) {
-            return NullNode.getInstance();
+            ObjectNode node = context.getObjectMapper().createObjectNode();
+            node.set("message", resolveText(context, message));
+            return node;
         }
         MultiformatMessage multiformatMessage = (MultiformatMessage) message;
 
@@ -63,7 +66,9 @@ public class MessageResolver implements TemplateResolver {
             }
         }
         if (!jsonSupported) {
-            return NullNode.getInstance();
+            ObjectNode node = context.getObjectMapper().createObjectNode();
+            node.set("message", resolveText(context, message));
+            return node;
         }
 
         // Read JSON.
