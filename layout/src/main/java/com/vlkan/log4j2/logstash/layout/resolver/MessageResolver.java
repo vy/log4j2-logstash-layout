@@ -1,9 +1,12 @@
 package com.vlkan.log4j2.logstash.layout.resolver;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import com.fasterxml.jackson.databind.util.TokenBuffer;
+import com.vlkan.log4j2.logstash.layout.util.Streamable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.message.Message;
@@ -49,6 +52,15 @@ public class MessageResolver implements TemplateResolver {
     }
 
     private static JsonNode resolveJson(TemplateResolverContext context, Message message) {
+        if (message instanceof Streamable) {
+            TokenBuffer buffer = new TokenBuffer(context.getObjectMapper(), false);
+            ((Streamable) message).streamTo(buffer);
+            try {
+                return context.getObjectMapper().readTree(buffer.asParser());
+            } catch (IOException error) {
+                throw new RuntimeException("JSON TokenBuffer read failure", error);
+            }
+        }
 
         // Check message type.
         if (!(message instanceof MultiformatMessage)) {
