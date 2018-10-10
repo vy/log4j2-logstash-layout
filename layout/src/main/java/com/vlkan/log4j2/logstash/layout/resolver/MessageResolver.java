@@ -53,12 +53,12 @@ public class MessageResolver implements TemplateResolver {
 
     private static JsonNode resolveJson(TemplateResolverContext context, Message message) {
         if (message instanceof Streamable) {
-            TokenBuffer buffer = new TokenBuffer(context.getObjectMapper(), false);
-            ((Streamable) message).streamTo(buffer);
             try {
+                TokenBuffer buffer = new TokenBuffer(context.getObjectMapper(), false);
+                ((Streamable) message).streamTo(buffer);
                 return context.getObjectMapper().readTree(buffer.asParser());
             } catch (IOException error) {
-                throw new RuntimeException("JSON TokenBuffer read failure", error);
+                throw new RuntimeException("JSON Streamable failure", error);
             }
         }
 
