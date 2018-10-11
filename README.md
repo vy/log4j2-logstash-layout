@@ -195,6 +195,15 @@ for Logstash's `log4j-json` file input type. (See
 Make sure you configure `log4j2-logstash-layout` properly in a way that
 is aligned with your appender of preference.
 
+Performance
+===========
+
+The source code ships a [JMH](https://openjdk.java.net/projects/code-tools/jmh/)
+benchmark, where you can measure the rendering performance of your preferred
+platform. As of this writing, using a *single thread* on an Intel i7 2.70GHz
+processor powering Java HotSpot 1.8.0_161, the `log4j2-logstash-layout` can
+render ~29k `LogEvent`/sec with a GC allocation rate of ~3 GB/sec.
+
 Contributors
 ============
 

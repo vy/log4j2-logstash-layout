@@ -29,7 +29,7 @@ public class LogstashLayout extends AbstractStringLayout {
 
     private static final Set<TemplateResolver> RESOLVERS =
             Collections.unmodifiableSet(
-                    new HashSet<>(Arrays.asList(
+                    new LinkedHashSet<>(Arrays.asList(
                             ContextDataResolver.getInstance(),
                             ContextStackResolver.getInstance(),
                             ExceptionClassNameResolver.getInstance(),

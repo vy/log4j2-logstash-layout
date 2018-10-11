@@ -23,7 +23,7 @@ public enum LogEventFixture {;
 
     public static final LogEvent[] LOG_EVENTS = new LogEvent[] { LOG_EVENT_1, LOG_EVENT_2, LOG_EVENT_3, LOG_EVENT_4 };
 
-    private static LogEvent createLogEvent(String id) {
+    public static LogEvent createLogEvent(String id) {
 
         // Create exception.
         Exception sourceHelper = new Exception();
