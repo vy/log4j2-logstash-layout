@@ -5,25 +5,20 @@ import com.fasterxml.jackson.databind.node.LongNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import org.apache.logging.log4j.core.LogEvent;
 
-public class SourceLineNumberResolver implements TemplateResolver {
+class SourceLineNumberResolver implements TemplateResolver {
 
-    private static final SourceLineNumberResolver INSTANCE = new SourceLineNumberResolver();
+    private final TemplateResolverContext context;
 
-    private SourceLineNumberResolver() {
-        // Do nothing.
+    SourceLineNumberResolver(TemplateResolverContext context) {
+        this.context = context;
     }
 
-    public static SourceLineNumberResolver getInstance() {
-        return INSTANCE;
-    }
-
-    @Override
-    public String getName() {
+    static String getName() {
         return "sourceLineNumber";
     }
 
     @Override
-    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent, String key) {
+    public JsonNode resolve(LogEvent logEvent) {
         if (!context.isLocationInfoEnabled() || logEvent.getSource() == null) {
             return NullNode.getInstance();
         }

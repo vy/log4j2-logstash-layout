@@ -2,6 +2,7 @@ package com.vlkan.log4j2.logstash.layout.resolver;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.Validate;
+import org.apache.logging.log4j.core.lookup.StrSubstitutor;
 import org.apache.logging.log4j.core.util.datetime.FastDateFormat;
 
 import java.util.regex.Pattern;
@@ -9,6 +10,8 @@ import java.util.regex.Pattern;
 public class TemplateResolverContext {
 
     private final ObjectMapper objectMapper;
+
+    private final StrSubstitutor substitutor;
 
     private final FastDateFormat timestampFormat;
 
@@ -24,6 +27,7 @@ public class TemplateResolverContext {
 
     public TemplateResolverContext(Builder builder) {
         this.objectMapper = builder.objectMapper;
+        this.substitutor = builder.substitutor;
         this.timestampFormat = builder.timestampFormat;
         this.locationInfoEnabled = builder.locationInfoEnabled;
         this.stackTraceEnabled = builder.stackTraceEnabled;
@@ -34,6 +38,10 @@ public class TemplateResolverContext {
 
     public ObjectMapper getObjectMapper() {
         return objectMapper;
+    }
+
+    public StrSubstitutor getSubstitutor() {
+        return substitutor;
     }
 
     public FastDateFormat getTimestampFormat() {
@@ -68,6 +76,8 @@ public class TemplateResolverContext {
 
         private ObjectMapper objectMapper;
 
+        private StrSubstitutor substitutor;
+
         private FastDateFormat timestampFormat;
 
         private boolean locationInfoEnabled;
@@ -90,6 +100,15 @@ public class TemplateResolverContext {
 
         public Builder setObjectMapper(ObjectMapper objectMapper) {
             this.objectMapper = objectMapper;
+            return this;
+        }
+
+        public StrSubstitutor getSubstitutor() {
+            return substitutor;
+        }
+
+        public Builder setSubstitutor(StrSubstitutor substitutor) {
+            this.substitutor = substitutor;
             return this;
         }
 
@@ -154,6 +173,7 @@ public class TemplateResolverContext {
 
         private void validate() {
             Validate.notNull(objectMapper, "objectMapper");
+            Validate.notNull(substitutor, "substitutor");
             Validate.notNull(timestampFormat, "timestampFormat");
         }
 

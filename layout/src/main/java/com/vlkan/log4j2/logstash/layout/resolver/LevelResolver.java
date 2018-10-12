@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import org.apache.logging.log4j.core.LogEvent;
 
-public class LevelResolver implements TemplateResolver {
+class LevelResolver implements TemplateResolver {
 
     private static final LevelResolver INSTANCE = new LevelResolver();
 
@@ -12,17 +12,16 @@ public class LevelResolver implements TemplateResolver {
         // Do nothing.
     }
 
-    public static LevelResolver getInstance() {
+    static LevelResolver getInstance() {
         return INSTANCE;
     }
 
-    @Override
-    public String getName() {
+    static String getName() {
         return "level";
     }
 
     @Override
-    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent, String key) {
+    public JsonNode resolve(LogEvent logEvent) {
         String level = logEvent.getLevel().name();
         return new TextNode(level);
     }

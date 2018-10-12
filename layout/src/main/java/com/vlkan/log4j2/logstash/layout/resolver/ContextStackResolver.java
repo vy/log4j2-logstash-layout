@@ -11,25 +11,20 @@ import java.util.regex.Pattern;
 /**
  * Add Nested Diagnostic Context (NDC).
  */
-public class ContextStackResolver implements TemplateResolver {
+class ContextStackResolver implements TemplateResolver {
 
-    private static final ContextStackResolver INSTANCE = new ContextStackResolver();
+    private final TemplateResolverContext context;
 
-    private ContextStackResolver() {
-        // Do nothing.
+    ContextStackResolver(TemplateResolverContext context) {
+        this.context = context;
     }
 
-    public static ContextStackResolver getInstance() {
-        return INSTANCE;
-    }
-
-    @Override
-    public String getName() {
+    static String getName() {
         return "ndc";
     }
 
     @Override
-    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent, String key) {
+    public JsonNode resolve(LogEvent logEvent) {
         ThreadContext.ContextStack contextStack = logEvent.getContextStack();
         if (contextStack.getDepth() == 0) {
             return NullNode.getInstance();

@@ -6,25 +6,20 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.core.LogEvent;
 
-public class LoggerNameResolver implements TemplateResolver {
+class LoggerNameResolver implements TemplateResolver {
 
-    private static final LoggerNameResolver INSTANCE = new LoggerNameResolver();
+    private final TemplateResolverContext context;
 
-    private LoggerNameResolver() {
-        // Do nothing.
+    LoggerNameResolver(TemplateResolverContext context) {
+        this.context = context;
     }
 
-    public static LoggerNameResolver getInstance() {
-        return INSTANCE;
-    }
-
-    @Override
-    public String getName() {
+    static String getName() {
         return "loggerName";
     }
 
     @Override
-    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent, String key) {
+    public JsonNode resolve(LogEvent logEvent) {
         String loggerName = logEvent.getLoggerName();
         boolean loggerNameExcluded = StringUtils.isEmpty(loggerName) && context.isEmptyPropertyExclusionEnabled();
         return loggerNameExcluded

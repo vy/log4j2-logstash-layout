@@ -6,25 +6,20 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.core.LogEvent;
 
-public class SourceMethodNameResolver implements TemplateResolver {
+class SourceMethodNameResolver implements TemplateResolver {
 
-    private static final SourceMethodNameResolver INSTANCE = new SourceMethodNameResolver();
+    private final TemplateResolverContext context;
 
-    private SourceMethodNameResolver() {
-        // Do nothing.
+    SourceMethodNameResolver(TemplateResolverContext context) {
+        this.context = context;
     }
 
-    public static SourceMethodNameResolver getInstance() {
-        return INSTANCE;
-    }
-
-    @Override
-    public String getName() {
+    static String getName() {
         return "sourceMethodName";
     }
 
     @Override
-    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent, String key) {
+    public JsonNode resolve(LogEvent logEvent) {
         if (!context.isLocationInfoEnabled() || logEvent.getSource() == null) {
             return NullNode.getInstance();
         }

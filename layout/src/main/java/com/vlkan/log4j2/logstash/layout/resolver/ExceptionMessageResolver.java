@@ -6,25 +6,20 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.core.LogEvent;
 
-public class ExceptionMessageResolver implements TemplateResolver {
+class ExceptionMessageResolver implements TemplateResolver {
 
-    private static final ExceptionMessageResolver INSTANCE = new ExceptionMessageResolver();
+    private final TemplateResolverContext context;
 
-    private ExceptionMessageResolver() {
-        // Do nothing.
+    ExceptionMessageResolver(TemplateResolverContext context) {
+        this.context = context;
     }
 
-    public static ExceptionMessageResolver getInstance() {
-        return INSTANCE;
-    }
-
-    @Override
-    public String getName() {
+    static String getName() {
         return "exceptionMessage";
     }
 
     @Override
-    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent, String key) {
+    public JsonNode resolve(LogEvent logEvent) {
         Throwable exception = logEvent.getThrown();
         if (exception == null) {
             return NullNode.getInstance();

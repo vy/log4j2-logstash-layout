@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import org.apache.logging.log4j.core.LogEvent;
 
-public class ExceptionClassNameResolver implements TemplateResolver {
+class ExceptionClassNameResolver implements TemplateResolver {
 
     private static final ExceptionClassNameResolver INSTANCE = new ExceptionClassNameResolver();
 
@@ -13,17 +13,16 @@ public class ExceptionClassNameResolver implements TemplateResolver {
         // Do nothing.
     }
 
-    public static ExceptionClassNameResolver getInstance() {
+    static ExceptionClassNameResolver getInstance() {
         return INSTANCE;
     }
 
-    @Override
-    public String getName() {
+    static String getName() {
         return "exceptionClassName";
     }
 
     @Override
-    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent, String key) {
+    public JsonNode resolve(LogEvent logEvent) {
         Throwable exception = logEvent.getThrown();
         if (exception == null) {
             return NullNode.getInstance();

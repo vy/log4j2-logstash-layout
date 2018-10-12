@@ -27,27 +27,6 @@ import java.util.*;
         printObject = true)
 public class LogstashLayout extends AbstractStringLayout {
 
-    private static final Set<TemplateResolver> RESOLVERS =
-            Collections.unmodifiableSet(
-                    new LinkedHashSet<>(Arrays.asList(
-                            ContextDataResolver.getInstance(),
-                            ContextStackResolver.getInstance(),
-                            ExceptionClassNameResolver.getInstance(),
-                            ExceptionMessageResolver.getInstance(),
-                            ExceptionRootCauseClassNameResolver.getInstance(),
-                            ExceptionRootCauseMessageResolver.getInstance(),
-                            ExceptionRootCauseStackTraceResolver.getInstance(),
-                            ExceptionStackTraceResolver.getInstance(),
-                            LevelResolver.getInstance(),
-                            LoggerNameResolver.getInstance(),
-                            MessageResolver.getInstance(),
-                            SourceClassNameResolver.getInstance(),
-                            SourceFileNameResolver.getInstance(),
-                            SourceLineNumberResolver.getInstance(),
-                            SourceMethodNameResolver.getInstance(),
-                            ThreadNameResolver.getInstance(),
-                            TimestampResolver.getInstance())));
-
     private final TemplateRenderer renderer;
 
     private LogstashLayout(Builder builder) {
@@ -59,6 +38,7 @@ public class LogstashLayout extends AbstractStringLayout {
         TemplateResolverContext resolverContext = TemplateResolverContext
                 .newBuilder()
                 .setObjectMapper(objectMapper)
+                .setSubstitutor(substitutor)
                 .setTimestampFormat(timestampFormat)
                 .setLocationInfoEnabled(builder.locationInfoEnabled)
                 .setStackTraceEnabled(builder.stackTraceEnabled)
@@ -68,11 +48,9 @@ public class LogstashLayout extends AbstractStringLayout {
                 .build();
         this.renderer = TemplateRenderer
                 .newBuilder()
-                .setSubstitutor(substitutor)
                 .setResolverContext(resolverContext)
                 .setPrettyPrintEnabled(builder.prettyPrintEnabled)
                 .setTemplate(template)
-                .setResolvers(RESOLVERS)
                 .build();
     }
 

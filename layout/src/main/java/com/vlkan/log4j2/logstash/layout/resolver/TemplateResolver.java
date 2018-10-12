@@ -5,8 +5,6 @@ import org.apache.logging.log4j.core.LogEvent;
 
 public interface TemplateResolver {
 
-    String getName();
-
-    JsonNode resolve(TemplateResolverContext context, LogEvent logEvent, String key);
+    JsonNode resolve(LogEvent logEvent);
 
 }

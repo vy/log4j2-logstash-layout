@@ -11,36 +11,34 @@ import org.apache.logging.log4j.message.MultiformatMessage;
 
 import java.io.IOException;
 
-public class MessageResolver implements TemplateResolver {
-
-    private static final MessageResolver INSTANCE = new MessageResolver();
+class MessageResolver implements TemplateResolver {
 
     private static final String NAME = "message";
 
     private static final String[] FORMATS = { "JSON" };
 
-    private MessageResolver() {
-        // Do nothing.
+    private final TemplateResolverContext context;
+
+    private final String key;
+
+    MessageResolver(TemplateResolverContext context, String key) {
+        this.context = context;
+        this.key = key;
     }
 
-    public static MessageResolver getInstance() {
-        return INSTANCE;
-    }
-
-    @Override
-    public String getName() {
+    static String getName() {
         return NAME;
     }
 
     @Override
-    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent, String key) {
+    public JsonNode resolve(LogEvent logEvent) {
         Message message = logEvent.getMessage();
         return FORMATS[0].equalsIgnoreCase(key)
-                ? resolveJson(context, message)
-                : resolveText(context, message);
+                ? resolveJson(message)
+                : resolveText(message);
     }
 
-    private static JsonNode resolveText(TemplateResolverContext context, Message message) {
+    private JsonNode resolveText(Message message) {
         String formattedMessage = message.getFormattedMessage();
         boolean messageExcluded = StringUtils.isEmpty(formattedMessage) && context.isEmptyPropertyExclusionEnabled();
         return messageExcluded
@@ -48,11 +46,11 @@ public class MessageResolver implements TemplateResolver {
                 : new TextNode(formattedMessage);
     }
 
-    private static JsonNode resolveJson(TemplateResolverContext context, Message message) {
+    private JsonNode resolveJson(Message message) {
 
         // Check message type.
         if (!(message instanceof MultiformatMessage)) {
-            return createMessageObject(context, message);
+            return createMessageObject(message);
         }
         MultiformatMessage multiformatMessage = (MultiformatMessage) message;
 
@@ -66,13 +64,13 @@ public class MessageResolver implements TemplateResolver {
             }
         }
         if (!jsonSupported) {
-            return createMessageObject(context, message);
+            return createMessageObject(message);
         }
 
         // Read JSON.
         String messageJson = multiformatMessage.getFormattedMessage(FORMATS);
         JsonNode jsonNode = readMessageJson(context, messageJson);
-        boolean nodeExcluded = isNodeExcluded(context, jsonNode);
+        boolean nodeExcluded = isNodeExcluded(jsonNode);
         return nodeExcluded
                 ? NullNode.getInstance()
                 : jsonNode;
@@ -87,10 +85,10 @@ public class MessageResolver implements TemplateResolver {
         }
     }
 
-    private static JsonNode createMessageObject(TemplateResolverContext context, Message message) {
+    private JsonNode createMessageObject(Message message) {
 
         // Resolve text node.
-        JsonNode textNode = resolveText(context, message);
+        JsonNode textNode = resolveText(message);
         if (textNode.isNull()) {
             return NullNode.getInstance();
         }
@@ -102,7 +100,7 @@ public class MessageResolver implements TemplateResolver {
 
     }
 
-    private static boolean isNodeExcluded(TemplateResolverContext context, JsonNode jsonNode) {
+    private boolean isNodeExcluded(JsonNode jsonNode) {
 
         if (!context.isEmptyPropertyExclusionEnabled()) {
             return false;

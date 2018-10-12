@@ -7,25 +7,20 @@ import com.vlkan.log4j2.logstash.layout.util.Throwables;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.core.LogEvent;
 
-public class ExceptionRootCauseMessageResolver implements TemplateResolver {
+class ExceptionRootCauseMessageResolver implements TemplateResolver {
 
-    private static final ExceptionRootCauseMessageResolver INSTANCE = new ExceptionRootCauseMessageResolver();
+    private final TemplateResolverContext context;
 
-    private ExceptionRootCauseMessageResolver() {
-        // Do nothing.
+    ExceptionRootCauseMessageResolver(TemplateResolverContext context) {
+        this.context = context;
     }
 
-    public static ExceptionRootCauseMessageResolver getInstance() {
-        return INSTANCE;
-    }
-
-    @Override
-    public String getName() {
+    static String getName() {
         return "exceptionRootCauseMessage";
     }
 
     @Override
-    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent, String key) {
+    public JsonNode resolve(LogEvent logEvent) {
         Throwable exception = logEvent.getThrown();
         if (exception == null) {
             return NullNode.getInstance();

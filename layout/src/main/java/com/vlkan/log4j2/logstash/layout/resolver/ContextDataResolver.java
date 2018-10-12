@@ -14,25 +14,23 @@ import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 /**
  * Add Mapped Diagnostic Context (MDC).
  */
-public class ContextDataResolver implements TemplateResolver {
+class ContextDataResolver implements TemplateResolver {
 
-    private static final ContextDataResolver INSTANCE = new ContextDataResolver();
+    private final TemplateResolverContext context;
 
-    private ContextDataResolver() {
-        // Do nothing.
+    private final String key;
+
+    ContextDataResolver(TemplateResolverContext context, String key) {
+        this.context = context;
+        this.key = key;
     }
 
-    public static ContextDataResolver getInstance() {
-        return INSTANCE;
-    }
-
-    @Override
-    public String getName() {
+    static String getName() {
         return "mdc";
     }
 
     @Override
-    public JsonNode resolve(final TemplateResolverContext context, LogEvent logEvent, String key) {
+    public JsonNode resolve(LogEvent logEvent) {
 
         // Retrieve context data.
         ReadOnlyStringMap contextData = logEvent.getContextData();

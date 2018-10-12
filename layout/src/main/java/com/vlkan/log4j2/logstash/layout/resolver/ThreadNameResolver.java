@@ -6,25 +6,20 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.core.LogEvent;
 
-public class ThreadNameResolver implements TemplateResolver {
+class ThreadNameResolver implements TemplateResolver {
 
-    private static final ThreadNameResolver INSTANCE = new ThreadNameResolver();
+    private final TemplateResolverContext context;
 
-    private ThreadNameResolver() {
-        // Do nothing.
+    ThreadNameResolver(TemplateResolverContext context) {
+        this.context = context;
     }
 
-    public static ThreadNameResolver getInstance() {
-        return INSTANCE;
-    }
-
-    @Override
-    public String getName() {
+    static String getName() {
         return "threadName";
     }
 
     @Override
-    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent, String key) {
+    public JsonNode resolve(LogEvent logEvent) {
         String threadName = logEvent.getThreadName();
         boolean threadNameExcluded = StringUtils.isEmpty(threadName) && context.isEmptyPropertyExclusionEnabled();
         return threadNameExcluded

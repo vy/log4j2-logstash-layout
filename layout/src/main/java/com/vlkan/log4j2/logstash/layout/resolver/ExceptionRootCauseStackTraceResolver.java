@@ -6,25 +6,20 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import com.vlkan.log4j2.logstash.layout.util.Throwables;
 import org.apache.logging.log4j.core.LogEvent;
 
-public class ExceptionRootCauseStackTraceResolver implements TemplateResolver {
+class ExceptionRootCauseStackTraceResolver implements TemplateResolver {
 
-    private static final ExceptionRootCauseStackTraceResolver INSTANCE = new ExceptionRootCauseStackTraceResolver();
+    private final TemplateResolverContext context;
 
-    private ExceptionRootCauseStackTraceResolver() {
-        // Do nothing.
+    ExceptionRootCauseStackTraceResolver(TemplateResolverContext context) {
+        this.context = context;
     }
 
-    public static ExceptionRootCauseStackTraceResolver getInstance() {
-        return INSTANCE;
-    }
-
-    @Override
-    public String getName() {
+    static String getName() {
         return "exceptionRootCauseStackTrace";
     }
 
     @Override
-    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent, String key) {
+    public JsonNode resolve(LogEvent logEvent) {
         Throwable exception = logEvent.getThrown();
         if (!context.isStackTraceEnabled() || exception == null) {
             return NullNode.getInstance();

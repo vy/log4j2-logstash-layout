@@ -5,25 +5,20 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.util.datetime.FastDateFormat;
 
-public class TimestampResolver implements TemplateResolver {
+class TimestampResolver implements TemplateResolver {
 
-    private static final TimestampResolver INSTANCE = new TimestampResolver();
+    private final TemplateResolverContext context;
 
-    private TimestampResolver() {
-        // Do nothing.
+    TimestampResolver(TemplateResolverContext context) {
+        this.context = context;
     }
 
-    public static TimestampResolver getInstance() {
-        return INSTANCE;
-    }
-
-    @Override
-    public String getName() {
+    static String getName() {
         return "timestamp";
     }
 
     @Override
-    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent, String key) {
+    public JsonNode resolve(LogEvent logEvent) {
         long timestampMillis = logEvent.getTimeMillis();
         FastDateFormat timestampFormat = context.getTimestampFormat();
         String timestamp = timestampFormat.format(timestampMillis);

@@ -6,25 +6,20 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.core.LogEvent;
 
-public class SourceFileNameResolver implements TemplateResolver {
+class SourceFileNameResolver implements TemplateResolver {
 
-    private static final SourceFileNameResolver INSTANCE = new SourceFileNameResolver();
+    private final TemplateResolverContext context;
 
-    private SourceFileNameResolver() {
-        // Do nothing.
+    SourceFileNameResolver(TemplateResolverContext context) {
+        this.context = context;
     }
 
-    public static SourceFileNameResolver getInstance() {
-        return INSTANCE;
-    }
-
-    @Override
-    public String getName() {
+    static String getName() {
         return "sourceFileName";
     }
 
     @Override
-    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent, String key) {
+    public JsonNode resolve(LogEvent logEvent) {
         if (!context.isLocationInfoEnabled() || logEvent.getSource() == null) {
             return NullNode.getInstance();
         }

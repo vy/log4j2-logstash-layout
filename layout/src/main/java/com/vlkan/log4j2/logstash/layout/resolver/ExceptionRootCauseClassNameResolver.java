@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import com.vlkan.log4j2.logstash.layout.util.Throwables;
 import org.apache.logging.log4j.core.LogEvent;
 
-public class ExceptionRootCauseClassNameResolver implements TemplateResolver {
+class ExceptionRootCauseClassNameResolver implements TemplateResolver {
 
     private static final ExceptionRootCauseClassNameResolver INSTANCE = new ExceptionRootCauseClassNameResolver();
 
@@ -14,17 +14,16 @@ public class ExceptionRootCauseClassNameResolver implements TemplateResolver {
         // Do nothing.
     }
 
-    public static ExceptionRootCauseClassNameResolver getInstance() {
+    static ExceptionRootCauseClassNameResolver getInstance() {
         return INSTANCE;
     }
 
-    @Override
-    public String getName() {
+    static String getName() {
         return "exceptionRootCauseClassName";
     }
 
     @Override
-    public JsonNode resolve(TemplateResolverContext context, LogEvent logEvent, String key) {
+    public JsonNode resolve(LogEvent logEvent) {
         Throwable exception = logEvent.getThrown();
         if (exception == null) {
             return NullNode.getInstance();
