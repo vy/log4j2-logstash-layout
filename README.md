@@ -98,6 +98,9 @@ This generates an output as follows:
 | `ndcPattern` | String | regex to filter NDC items |
 | `template` | String | inline JSON template for generating the output (has priority over `templateUri`) |
 | `templateUri` | String | JSON template for generating the output (defaults to `classpath:LogstashJsonEventLayoutV1.json`) |
+| `lineSeparator` | String | used to separate log outputs (defaults to `System.lineSeparator()`) |
+| `maxByteCount` | int | used to cap the internal `byte[]` buffer (defaults to 0) |
+| `threadLocalByteBufferEnabled` | boolean | enables thread-local caching of internal `byte[]` buffer and requires `maxByteCount` to be greater than 0 (defaults to `false`) |
 
 `templateUri` denotes the URI pointing to the JSON template that will be used
 while formatting the log events. By default, `LogstashLayout` ships the
@@ -198,11 +201,37 @@ is aligned with your appender of preference.
 Performance
 ===========
 
-The source code ships a [JMH](https://openjdk.java.net/projects/code-tools/jmh/)
-benchmark, where you can measure the rendering performance of your preferred
-platform. As of this writing, using a *single thread* on an Intel i7 2.70GHz
-processor powering Java HotSpot 1.8.0_161, the `log4j2-logstash-layout` can
-render ~29k `LogEvent`/sec with a GC allocation rate of ~3 GB/sec.
+The source code ships `LogstashLayout`
+[JMH](https://openjdk.java.net/projects/code-tools/jmh/) benchmark to measure
+the rendering performance of the plugin for different `LogEvent` profiles:
+
+- **full**: `LogEvent` contains MDC, NDC, and an exception. In addition to
+  existing defaults, stack traces and location information are enabled in
+  `LogstashLayout`. This profile represents the heavyweight `LogEvent`s.
+
+- **lite:** `LogEvent` has no MDC, NDC, or exception attachment. This profile
+  represents the lightweight `LogEvent`s.
+
+- **none:** *Lite* `LogEvent`s are passed to a no-op serializer constantly
+  returning '{}'. This profile stands for reference purposes to determine
+  the additional overhead introduced by the plugin.
+
+To give an idea, we ran the benchmark with the following settings:
+
+- **CPU:** Intel i7 2.70GHz (x86-64)
+- **JVM:** Java HotSpot 1.8.0_161
+- **OS:** Xubuntu 18.04.1 (4.15.0-34-generic, x86-64)
+- **`maxByteCount`:** 1024 * 512
+- **`threadLocalByteBufferEnabled`:** `true`
+
+The results for the **single-threaded execution of 1,000 `LogEvent`s** are as
+follows:
+
+| Profile | Slowdown (×) | Throughput (ops/sec) | GC Alloc. Rate (MB/sec) |
+| ------- | ------------:| --------------------:| -----------------------:|
+| None    |            1 |            1,058,691 |                      ~0 |
+| Lite    |        3,540 |                  299 |                   5,210 |
+| Full    |       27,145 |                   32 |                   3,091 |
 
 Contributors
 ============

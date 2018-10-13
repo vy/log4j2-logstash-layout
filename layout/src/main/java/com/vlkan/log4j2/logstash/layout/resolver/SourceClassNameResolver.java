@@ -1,10 +1,10 @@
 package com.vlkan.log4j2.logstash.layout.resolver;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.NullNode;
-import com.fasterxml.jackson.databind.node.TextNode;
+import com.fasterxml.jackson.core.JsonGenerator;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.core.LogEvent;
+
+import java.io.IOException;
 
 class SourceClassNameResolver implements TemplateResolver {
 
@@ -19,15 +19,16 @@ class SourceClassNameResolver implements TemplateResolver {
     }
 
     @Override
-    public JsonNode resolve(LogEvent logEvent) {
-        if (!context.isLocationInfoEnabled() || logEvent.getSource() == null) {
-            return NullNode.getInstance();
+    public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
+        if (context.isLocationInfoEnabled() && logEvent.getSource() != null) {
+            String sourceClassName = logEvent.getSource().getClassName();
+            boolean sourceClassNameExcluded = StringUtils.isEmpty(sourceClassName) && context.isEmptyPropertyExclusionEnabled();
+            if (!sourceClassNameExcluded) {
+                jsonGenerator.writeString(sourceClassName);
+                return;
+            }
         }
-        String sourceClassName = logEvent.getSource().getClassName();
-        boolean sourceClassNameExcluded = StringUtils.isEmpty(sourceClassName) && context.isEmptyPropertyExclusionEnabled();
-        return sourceClassNameExcluded
-                ? NullNode.getInstance()
-                : new TextNode(sourceClassName);
+        jsonGenerator.writeNull();
     }
 
 }

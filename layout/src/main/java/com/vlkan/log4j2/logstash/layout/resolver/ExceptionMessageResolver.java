@@ -1,10 +1,10 @@
 package com.vlkan.log4j2.logstash.layout.resolver;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.NullNode;
-import com.fasterxml.jackson.databind.node.TextNode;
+import com.fasterxml.jackson.core.JsonGenerator;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.core.LogEvent;
+
+import java.io.IOException;
 
 class ExceptionMessageResolver implements TemplateResolver {
 
@@ -19,16 +19,17 @@ class ExceptionMessageResolver implements TemplateResolver {
     }
 
     @Override
-    public JsonNode resolve(LogEvent logEvent) {
+    public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
         Throwable exception = logEvent.getThrown();
-        if (exception == null) {
-            return NullNode.getInstance();
+        if (exception != null) {
+            String exceptionMessage = exception.getMessage();
+            boolean exceptionMessageExcluded = StringUtils.isEmpty(exceptionMessage) && context.isEmptyPropertyExclusionEnabled();
+            if (!exceptionMessageExcluded) {
+                jsonGenerator.writeString(exceptionMessage);
+                return;
+            }
         }
-        String exceptionMessage = exception.getMessage();
-        boolean exceptionMessageExcluded = StringUtils.isEmpty(exceptionMessage) && context.isEmptyPropertyExclusionEnabled();
-        return exceptionMessageExcluded
-                ? NullNode.getInstance()
-                : new TextNode(exceptionMessage);
+        jsonGenerator.writeNull();
     }
 
 }

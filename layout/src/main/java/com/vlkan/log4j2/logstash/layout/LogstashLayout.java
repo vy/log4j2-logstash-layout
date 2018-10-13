@@ -1,8 +1,14 @@
 package com.vlkan.log4j2.logstash.layout;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.filter.FilteringGeneratorDelegate;
+import com.fasterxml.jackson.core.filter.TokenFilter;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vlkan.log4j2.logstash.layout.renderer.TemplateRenderer;
-import com.vlkan.log4j2.logstash.layout.resolver.*;
+import com.vlkan.log4j2.logstash.layout.resolver.TemplateResolver;
+import com.vlkan.log4j2.logstash.layout.resolver.TemplateResolverContext;
+import com.vlkan.log4j2.logstash.layout.resolver.TemplateResolvers;
 import com.vlkan.log4j2.logstash.layout.util.Uris;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -17,9 +23,13 @@ import org.apache.logging.log4j.core.config.plugins.PluginConfiguration;
 import org.apache.logging.log4j.core.layout.AbstractStringLayout;
 import org.apache.logging.log4j.core.lookup.StrSubstitutor;
 import org.apache.logging.log4j.core.util.datetime.FastDateFormat;
+import org.apache.logging.log4j.util.Supplier;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.TimeZone;
 
 @Plugin(name = "LogstashLayout",
         category = Node.CATEGORY,
@@ -27,10 +37,24 @@ import java.util.*;
         printObject = true)
 public class LogstashLayout extends AbstractStringLayout {
 
-    private final TemplateRenderer renderer;
+    private static final Charset CHARSET = StandardCharsets.UTF_8;
+
+    private static final byte[] EMPTY_OBJECT_JSON_BYTES = "{}".getBytes(CHARSET);
+
+    private final TemplateResolver resolver;
+
+    private final JsonFactory jsonFactory;
+
+    private final TokenFilter tokenFilter;
+
+    private final boolean prettyPrintEnabled;
+
+    private final byte[] lineSeparatorBytes;
+
+    private final Supplier<ByteArrayOutputStream> outputStreamSupplier;
 
     private LogstashLayout(Builder builder) {
-        super(builder.config, StandardCharsets.UTF_8, null, null);
+        super(builder.config, CHARSET, null, null);
         String template = readTemplate(builder);
         FastDateFormat timestampFormat = readDateFormat(builder);
         ObjectMapper objectMapper = new ObjectMapper();
@@ -46,12 +70,68 @@ public class LogstashLayout extends AbstractStringLayout {
                 .setMdcKeyPattern(builder.mdcKeyPattern)
                 .setNdcPattern(builder.ndcPattern)
                 .build();
-        this.renderer = TemplateRenderer
-                .newBuilder()
-                .setResolverContext(resolverContext)
-                .setPrettyPrintEnabled(builder.prettyPrintEnabled)
-                .setTemplate(template)
-                .build();
+        this.resolver = TemplateResolvers.ofTemplate(resolverContext, template);
+        this.jsonFactory = new JsonFactory(objectMapper);
+        this.tokenFilter = builder.emptyPropertyExclusionEnabled
+                ? NullExcludingTokenFilter.INSTANCE
+                : null;
+        this.prettyPrintEnabled = builder.prettyPrintEnabled;
+        this.lineSeparatorBytes = builder.lineSeparator.getBytes(CHARSET);
+        this.outputStreamSupplier = createOutputStreamSupplier(builder.maxByteCount, builder.threadLocalByteBufferEnabled);
+    }
+
+    private static Supplier<ByteArrayOutputStream> createOutputStreamSupplier(
+            final int maxByteCount,
+            boolean threadLocalByteBufferEnabled) {
+
+        // Create the (optionally) capped output stream.
+        final Supplier<ByteArrayOutputStream> outputStreamSupplier = createOutputStreamSupplier(maxByteCount);
+        if (!threadLocalByteBufferEnabled) {
+            return outputStreamSupplier;
+        }
+
+        // Create the thread-local reference using the above supplier.
+        final ThreadLocal<ByteArrayOutputStream> outputStreamRef = new ThreadLocal<ByteArrayOutputStream>() {
+
+            @Override
+            protected ByteArrayOutputStream initialValue() {
+                return outputStreamSupplier.get();
+            }
+
+        };
+
+        // Wrap the thread-local reference into another supplier.
+        return new Supplier<ByteArrayOutputStream>() {
+            @Override
+            public ByteArrayOutputStream get() {
+                ByteArrayOutputStream outputStream = outputStreamRef.get();
+                outputStream.reset();
+                return outputStream;
+            }
+        };
+
+    }
+
+    private static Supplier<ByteArrayOutputStream> createOutputStreamSupplier(final int maxByteCount) {
+
+        // Create a capped stream.
+        if (maxByteCount > 0) {
+            return new Supplier<ByteArrayOutputStream>() {
+                @Override
+                public ByteArrayOutputStream get() {
+                    return new ByteArrayOutputStream(maxByteCount);
+                }
+            };
+        }
+
+        // Fallback to an unlimited stream.
+        return new Supplier<ByteArrayOutputStream>() {
+            @Override
+            public ByteArrayOutputStream get() {
+                return new ByteArrayOutputStream();
+            }
+        };
+
     }
 
     private static String readTemplate(Builder builder) {
@@ -66,7 +146,36 @@ public class LogstashLayout extends AbstractStringLayout {
     }
 
     public String toSerializable(LogEvent event) {
-        return renderer.render(event);
+        try {
+            ByteArrayOutputStream outputStream = outputStreamSupplier.get();
+            JsonGenerator jsonGenerator = jsonFactory.createGenerator(outputStream);
+            if (prettyPrintEnabled) {
+                jsonGenerator.setPrettyPrinter(new DefaultPrettyPrinter());
+            }
+            JsonGenerator jsonGeneratorDelegate = tokenFilter != null
+                    ? new FilteringGeneratorDelegate(jsonGenerator, tokenFilter, true, true)
+                    : jsonGenerator;
+            resolver.resolve(event, jsonGeneratorDelegate);
+            jsonGeneratorDelegate.flush();
+            if (outputStream.size() == 0) {
+                outputStream.write(EMPTY_OBJECT_JSON_BYTES);
+            }
+            outputStream.write(lineSeparatorBytes);
+            return outputStream.toString(CHARSET.name());
+        } catch (IOException error) {
+            throw new RuntimeException("failed serializing JSON", error);
+        }
+    }
+
+    private static class NullExcludingTokenFilter extends TokenFilter {
+
+        private static final NullExcludingTokenFilter INSTANCE = new NullExcludingTokenFilter();
+
+        @Override
+        public boolean includeNull() {
+            return false;
+        }
+
     }
 
     @PluginBuilderFactory
@@ -108,6 +217,15 @@ public class LogstashLayout extends AbstractStringLayout {
 
         @PluginBuilderAttribute
         private String ndcPattern;
+
+        @PluginBuilderAttribute
+        private String lineSeparator = System.lineSeparator();
+
+        @PluginBuilderAttribute
+        private int maxByteCount = 0;
+
+        @PluginBuilderAttribute
+        private boolean threadLocalByteBufferEnabled = false;
 
         private Builder() {
             // Do nothing.
@@ -212,6 +330,33 @@ public class LogstashLayout extends AbstractStringLayout {
             return this;
         }
 
+        public String getLineSeparator() {
+            return lineSeparator;
+        }
+
+        public Builder setLineSeparator(String lineSeparator) {
+            this.lineSeparator = lineSeparator;
+            return this;
+        }
+
+        public int getMaxByteCount() {
+            return maxByteCount;
+        }
+
+        public Builder setMaxByteCount(int maxByteCount) {
+            this.maxByteCount = maxByteCount;
+            return this;
+        }
+
+        public boolean isThreadLocalByteBufferEnabled() {
+            return threadLocalByteBufferEnabled;
+        }
+
+        public Builder setThreadLocalByteBufferEnabled(boolean threadLocalByteBufferEnabled) {
+            this.threadLocalByteBufferEnabled = threadLocalByteBufferEnabled;
+            return this;
+        }
+
         @Override
         public LogstashLayout build() {
             validate();
@@ -225,10 +370,14 @@ public class LogstashLayout extends AbstractStringLayout {
             Validate.isTrue(
                     !StringUtils.isBlank(template) || !StringUtils.isBlank(templateUri),
                     "both template and templateUri are blank");
+            if (threadLocalByteBufferEnabled) {
+                Validate.isTrue(maxByteCount > 0, "threadLocalByteBufferEnabled requires a valid maxByteCount");
+            }
         }
 
         @Override
         public String toString() {
+            String escapedLineSeparator = lineSeparator.replace("\\", "\\\\");
             return "Builder{prettyPrintEnabled=" + prettyPrintEnabled +
                     ", locationInfoEnabled=" + locationInfoEnabled +
                     ", stackTraceEnabled=" + stackTraceEnabled +
@@ -238,7 +387,9 @@ public class LogstashLayout extends AbstractStringLayout {
                     ", template='" + template + '\'' +
                     ", templateUri='" + templateUri + '\'' +
                     ", mdcKeyPattern='" + mdcKeyPattern + '\'' +
-                    ", ndcPattern='" + ndcPattern + '\'' +
+                    ", lineSeparator='" + escapedLineSeparator + '\'' +
+                    ", maxByteCount='" + maxByteCount + '\'' +
+                    ", threadLocalByteBufferEnabled='" + threadLocalByteBufferEnabled + '\'' +
                     '}';
         }
 

@@ -8,9 +8,7 @@ import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vlkan.log4j2.logstash.layout.util.Throwables;
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LogEvent;
-import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilderFactory;
 import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
@@ -20,7 +18,6 @@ import org.apache.logging.log4j.message.StringMapMessage;
 import org.apache.logging.log4j.util.BiConsumer;
 import org.apache.logging.log4j.util.SortedArrayStringMap;
 import org.apache.logging.log4j.util.StringMap;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -44,14 +41,12 @@ public class LogstashLayoutTest {
         String lookupTestKey = "lookup_test_key";
         String lookupTestVal = String.format("lookup_test_value_%d", (int) (1000 * Math.random()));
         System.setProperty(lookupTestKey, lookupTestVal);
-        LoggerContext loggerContext = (LoggerContext) LogManager.getContext(false);
-        Configuration loggerConfig = loggerContext.getConfiguration();
         for (LogEvent logEvent : LogEventFixture.LOG_EVENTS) {
-            checkLogEvent(loggerConfig, logEvent, lookupTestKey, lookupTestVal);
+            checkLogEvent(logEvent, lookupTestKey, lookupTestVal);
         }
     }
 
-    private void checkLogEvent(Configuration config, LogEvent logEvent, String lookupTestKey, String lookupTestVal) throws IOException {
+    private void checkLogEvent(LogEvent logEvent, String lookupTestKey, String lookupTestVal) throws IOException {
         Set<String> mdcKeys = logEvent.getContextData().toMap().keySet();
         String firstMdcKey = mdcKeys.iterator().next();
         String firstMdcKeyExcludingRegex = mdcKeys.isEmpty() ? null : String.format("^(?!%s).*$", Pattern.quote(firstMdcKey));
@@ -60,7 +55,7 @@ public class LogstashLayoutTest {
         String firstNdcItemExcludingRegex = ndcItems.isEmpty() ? null : String.format("^(?!%s).*$", Pattern.quote(firstNdcItem));
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
-                .setConfiguration(config)
+                .setConfiguration(Log4jFixture.CONFIGURATION)
                 .setTemplateUri("classpath:LogstashTestLayout.json")
                 .setStackTraceEnabled(true)
                 .setLocationInfoEnabled(true)
@@ -346,14 +341,12 @@ public class LogstashLayoutTest {
                 .build();
 
         // Check line separators.
-        SoftAssertions assertions = new SoftAssertions();
-        test_lineSeparator_suffix(logEvent, true, assertions);
-        test_lineSeparator_suffix(logEvent, false, assertions);
-        assertions.assertAll();
+        test_lineSeparator_suffix(logEvent, true);
+        test_lineSeparator_suffix(logEvent, false);
 
     }
 
-    private void test_lineSeparator_suffix(LogEvent logEvent, boolean prettyPrintEnabled, SoftAssertions assertions) {
+    private void test_lineSeparator_suffix(LogEvent logEvent, boolean prettyPrintEnabled) {
 
         // Create the layout.
         BuiltConfiguration config = ConfigurationBuilderFactory.newConfigurationBuilder().build();
@@ -367,7 +360,7 @@ public class LogstashLayoutTest {
         // Check the serialized event.
         String serializedLogEvent = layout.toSerializable(logEvent);
         String assertionCaption = String.format("testing lineSeperator (prettyPrintEnabled=%s)", prettyPrintEnabled);
-        assertions.assertThat(serializedLogEvent).as(assertionCaption).endsWith("}" + System.lineSeparator());
+        assertThat(serializedLogEvent).as(assertionCaption).endsWith("}" + System.lineSeparator());
 
     }
 
@@ -443,7 +436,7 @@ public class LogstashLayoutTest {
                 .setContextData(contextData)
                 .build();
 
-        // Create the template with property.
+        // Create template node with empty property and MDC fields.
         ObjectNode templateRootNode = JSON_NODE_FACTORY.objectNode();
         String mdcFieldName = "mdc";
         String emptyProperty1Name = "property1Name";
@@ -451,6 +444,21 @@ public class LogstashLayoutTest {
         templateRootNode.put(mdcFieldName, "${json:mdc}");
         templateRootNode.put(mdcEmptyKey1, String.format("${json:mdc:%s}", mdcEmptyKey1));
         templateRootNode.put(mdcEmptyKey2, String.format("${json:mdc:%s}", mdcEmptyKey2));
+
+        // Put a "blankObject": {"emptyArray": []} field into template.
+        String blankObjectFieldName = "blankObject";
+        ObjectNode blankObjectNode = JSON_NODE_FACTORY.objectNode();
+        String emptyArrayFieldName = "emptyArray";
+        ArrayNode emptyArrayNode = JSON_NODE_FACTORY.arrayNode();
+        blankObjectNode.set(emptyArrayFieldName, emptyArrayNode);
+        templateRootNode.set(blankObjectFieldName, blankObjectNode);
+
+        // Put an "emptyObject": {} field into the template.
+        String emptyObjectFieldName = "emptyObject";
+        ObjectNode emptyObjectNode = JSON_NODE_FACTORY.objectNode();
+        templateRootNode.set(emptyObjectFieldName, emptyObjectNode);
+
+        // Render the template.
         String template = templateRootNode.toString();
 
         // Create the layout configuration.
@@ -472,8 +480,10 @@ public class LogstashLayoutTest {
             // Check serialized event.
             String serializedLogEvent = layout.toSerializable(logEvent);
             if (emptyPropertyExclusionEnabled) {
-                assertThat(serializedLogEvent).isEqualTo("{}");
+                assertThat(serializedLogEvent).isEqualTo("{}" + System.lineSeparator());
             } else {
+
+                // Check property and MDC fields.
                 JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
                 assertThat(point(rootNode, mdcEmptyKey1).asText()).isEmpty();
                 assertThat(point(rootNode, mdcEmptyKey2).isNull()).isTrue();
@@ -481,6 +491,15 @@ public class LogstashLayoutTest {
                 assertThat(point(rootNode, mdcFieldName, mdcEmptyKey1).asText()).isEmpty();
                 assertThat(point(rootNode, mdcFieldName, mdcEmptyKey2).isNull()).isTrue();
                 assertThat(point(rootNode, emptyProperty1Name).asText()).isEmpty();
+
+                // Check "blankObject": {"emptyArray": []} field.
+                assertThat(point(rootNode, blankObjectFieldName, emptyArrayFieldName).isArray()).isTrue();
+                assertThat(point(rootNode, blankObjectFieldName, emptyArrayFieldName).size()).isZero();
+
+                // Check "emptyObject": {} field.
+                assertThat(point(rootNode, emptyObjectFieldName).isObject()).isTrue();
+                assertThat(point(rootNode, emptyObjectFieldName).size()).isZero();
+
             }
 
         }

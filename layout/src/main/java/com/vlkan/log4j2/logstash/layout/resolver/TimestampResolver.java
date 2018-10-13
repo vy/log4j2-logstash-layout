@@ -1,9 +1,10 @@
 package com.vlkan.log4j2.logstash.layout.resolver;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.TextNode;
+import com.fasterxml.jackson.core.JsonGenerator;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.util.datetime.FastDateFormat;
+
+import java.io.IOException;
 
 class TimestampResolver implements TemplateResolver {
 
@@ -18,11 +19,11 @@ class TimestampResolver implements TemplateResolver {
     }
 
     @Override
-    public JsonNode resolve(LogEvent logEvent) {
+    public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
         long timestampMillis = logEvent.getTimeMillis();
         FastDateFormat timestampFormat = context.getTimestampFormat();
         String timestamp = timestampFormat.format(timestampMillis);
-        return new TextNode(timestamp);
+        jsonGenerator.writeString(timestamp);
     }
 
 }

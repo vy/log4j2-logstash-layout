@@ -1,17 +1,41 @@
 package com.vlkan.log4j2.logstash.layout.resolver;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.*;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.core.LogEvent;
 
+import java.io.IOException;
 import java.util.*;
-
-import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 
 public enum TemplateResolvers {;
 
     private static final Map<String, TemplateResolverFactory<? extends TemplateResolver>> RESOLVER_FACTORY_BY_NAME = createResolverFactoryByName();
+
+    private static final TemplateResolver EMPTY_ARRAY_RESOLVER = new TemplateResolver() {
+        @Override
+        public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
+            jsonGenerator.writeStartArray();
+            jsonGenerator.writeEndArray();
+        }
+    };
+
+    private static final TemplateResolver EMPTY_OBJECT_RESOLVER = new TemplateResolver() {
+        @Override
+        public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
+            jsonGenerator.writeStartObject();
+            jsonGenerator.writeEndObject();
+        }
+    };
+
+    private static final TemplateResolver NULL_NODE_RESOLVER = new TemplateResolver() {
+        @Override
+        public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
+            jsonGenerator.writeNull();
+        }
+    };
 
     private static Map<String, TemplateResolverFactory<? extends TemplateResolver>> createResolverFactoryByName() {
         Map<String, TemplateResolverFactory<? extends TemplateResolver>> resolverFactoryByName = new LinkedHashMap<>();
@@ -21,58 +45,65 @@ public enum TemplateResolvers {;
         return Collections.unmodifiableMap(resolverFactoryByName);
     }
 
-    private static final TemplateResolver NULL_NODE_RESOLVER = new TemplateResolver() {
-        @Override
-        public JsonNode resolve(LogEvent logEvent) {
-            return NullNode.getInstance();
+    public static TemplateResolver ofTemplate(TemplateResolverContext context, String template) {
+        ObjectNode node;
+        try {
+            node = context.getObjectMapper().readValue(template, ObjectNode.class);
+        } catch (IOException error) {
+            String message = String.format("failed parsing template (template=%s)", template);
+            throw new RuntimeException(message, error);
         }
-    };
+        return ofNode(context, node);
+    }
 
-    public static TemplateResolver ofNode(TemplateResolverContext context, final JsonNode node) {
+    private static TemplateResolver ofNode(TemplateResolverContext context, final JsonNode node) {
+
+        // Check for known types.
         JsonNodeType nodeType = node.getNodeType();
         switch (nodeType) {
             case ARRAY: return ofArrayNode(context, node);
             case OBJECT: return ofObjectNode(context, node);
             case STRING: return ofStringNode(context, node);
         }
+
+        // Create constant resolver for the JSON.
         return new TemplateResolver() {
 
             @Override
-            public JsonNode resolve(LogEvent logEvent) {
-                return node;
+            public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
+                jsonGenerator.writeTree(node);
             }
 
         };
+
     }
 
-    private static TemplateResolver ofArrayNode(final TemplateResolverContext context, final JsonNode srcNode) {
+    private static TemplateResolver ofArrayNode(final TemplateResolverContext context, final JsonNode arrayNode) {
 
         // Create resolver for each children.
-        final List<TemplateResolver> dstChildNodeResolvers = new ArrayList<>();
-        for (int nodeIndex = 0; nodeIndex < srcNode.size(); nodeIndex++) {
-            JsonNode srcChildNode = srcNode.get(nodeIndex);
-            TemplateResolver dstChildNodeResolver = ofNode(context, srcChildNode);
-            dstChildNodeResolvers.add(dstChildNodeResolver);
+        final List<TemplateResolver> itemResolvers = new ArrayList<>();
+        for (int itemIndex = 0; itemIndex < arrayNode.size(); itemIndex++) {
+            JsonNode itemNode = arrayNode.get(itemIndex);
+            TemplateResolver itemResolver = ofNode(context, itemNode);
+            itemResolvers.add(itemResolver);
+        }
+
+        // Short-circuit if the array is empty.
+        if (itemResolvers.isEmpty()) {
+            return EMPTY_ARRAY_RESOLVER;
         }
 
         // Create a parent resolver collecting each child resolver execution.
         return new TemplateResolver() {
             @Override
-            public JsonNode resolve(LogEvent logEvent) {
-                ArrayNode dstNode = null;
+            public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
+                jsonGenerator.writeStartArray();
                 // noinspection ForLoopReplaceableByForEach (avoid iterator instantiation)
-                for (int dstChildNodeResolverIndex = 0; dstChildNodeResolverIndex < dstChildNodeResolvers.size(); dstChildNodeResolverIndex++) {
-                    TemplateResolver dstChildNodeResolver = dstChildNodeResolvers.get(dstChildNodeResolverIndex);
-                    JsonNode dstChildNode = dstChildNodeResolver.resolve(logEvent);
-                    boolean dstChildNodeExcluded = dstChildNode.isNull() && context.isEmptyPropertyExclusionEnabled();
-                    if (!dstChildNodeExcluded) {
-                        if (dstNode == null) {
-                            dstNode = context.getObjectMapper().createArrayNode();
-                        }
-                        dstNode.add(dstChildNode);
-                    }
+                for (int itemResolverIndex = 0; itemResolverIndex < itemResolvers.size(); itemResolverIndex++) {
+                    TemplateResolver itemResolver = itemResolvers.get(itemResolverIndex);
+                    itemResolver.resolve(logEvent, jsonGenerator);
                 }
-                return firstNonNull(dstNode, NullNode.getInstance());
+                jsonGenerator.writeEndArray();
             }
         };
 
@@ -81,37 +112,35 @@ public enum TemplateResolvers {;
     private static TemplateResolver ofObjectNode(final TemplateResolverContext context, final JsonNode srcNode) {
 
         // Create resolver for each object field.
-        final List<String> fieldNames = new ArrayList<>();
-        final Map<String, TemplateResolver> fieldValueResolverByName = new LinkedHashMap<>();
+        final Map<String, TemplateResolver> fieldResolverByName = new LinkedHashMap<>();
         final Iterator<Map.Entry<String, JsonNode>> srcNodeFieldIterator = srcNode.fields();
         while (srcNodeFieldIterator.hasNext()) {
             Map.Entry<String, JsonNode> srcNodeField = srcNodeFieldIterator.next();
             String fieldName = srcNodeField.getKey();
             JsonNode fieldValue = srcNodeField.getValue();
-            TemplateResolver fieldValueResolver = ofNode(context, fieldValue);
-            fieldNames.add(fieldName);
-            fieldValueResolverByName.put(fieldName, fieldValueResolver);
+            TemplateResolver fieldResolver = ofNode(context, fieldValue);
+            fieldResolverByName.put(fieldName, fieldResolver);
+        }
+
+        // Short-circuit if the object is empty.
+        if (fieldResolverByName.isEmpty()) {
+            return EMPTY_OBJECT_RESOLVER;
         }
 
         // Create a parent resolver collecting each object field resolver execution.
+        final List<String> fieldNames = new ArrayList<>(fieldResolverByName.keySet());
         return new TemplateResolver() {
             @Override
-            public JsonNode resolve(LogEvent logEvent) {
-                ObjectNode dstNode = null;
+            public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
+                jsonGenerator.writeStartObject();
                 // noinspection ForLoopReplaceableByForEach (avoid iterator instantiation)
-                for (int fieldNameIndex = 0; fieldNameIndex < fieldNames.size(); fieldNameIndex++) {
+                for (int fieldNameIndex = 0; fieldNameIndex < fieldResolverByName.size(); fieldNameIndex++) {
                     String fieldName = fieldNames.get(fieldNameIndex);
-                    TemplateResolver fieldValueResolver = fieldValueResolverByName.get(fieldName);
-                    JsonNode resolvedFieldValue = fieldValueResolver.resolve(logEvent);
-                    boolean resolvedFieldValueExcluded = resolvedFieldValue.isNull() && context.isEmptyPropertyExclusionEnabled();
-                    if (!resolvedFieldValueExcluded) {
-                        if (dstNode == null) {
-                            dstNode = context.getObjectMapper().createObjectNode();
-                        }
-                        dstNode.set(fieldName, resolvedFieldValue);
-                    }
+                    TemplateResolver fieldResolver = fieldResolverByName.get(fieldName);
+                    jsonGenerator.writeFieldName(fieldName);
+                    fieldResolver.resolve(logEvent, jsonGenerator);
                 }
-                return firstNonNull(dstNode, NullNode.getInstance());
+                jsonGenerator.writeEndObject();
             }
         };
 
@@ -139,11 +168,14 @@ public enum TemplateResolvers {;
         return new TemplateResolver() {
 
             @Override
-            public JsonNode resolve(LogEvent logEvent) {
+            public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
                 String replacedText = context.getSubstitutor().replace(logEvent, fieldValue);
-                return StringUtils.isEmpty(replacedText) && context.isEmptyPropertyExclusionEnabled()
-                        ? NullNode.getInstance()
-                        : new TextNode(replacedText);
+                boolean replacedTextExcluded = StringUtils.isEmpty(replacedText) && context.isEmptyPropertyExclusionEnabled();
+                if (replacedTextExcluded) {
+                    jsonGenerator.writeNull();
+                } else {
+                    jsonGenerator.writeString(replacedText);
+                }
             }
 
         };

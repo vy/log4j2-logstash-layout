@@ -1,15 +1,12 @@
 package com.vlkan.log4j2.logstash.layout.resolver;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.NullNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.core.JsonGenerator;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.util.BiConsumer;
 import org.apache.logging.log4j.util.ReadOnlyStringMap;
 
+import java.io.IOException;
 import java.util.regex.Pattern;
-
-import static org.apache.commons.lang3.ObjectUtils.firstNonNull;
 
 /**
  * Add Mapped Diagnostic Context (MDC).
@@ -30,29 +27,30 @@ class ContextDataResolver implements TemplateResolver {
     }
 
     @Override
-    public JsonNode resolve(LogEvent logEvent) {
+    public void resolve(LogEvent logEvent, final JsonGenerator jsonGenerator) throws IOException {
 
         // Retrieve context data.
         ReadOnlyStringMap contextData = logEvent.getContextData();
         if (contextData == null || contextData.isEmpty()) {
-            return NullNode.getInstance();
+            jsonGenerator.writeNull();
+            return;
         }
 
         // Check if key matches.
         if (key != null) {
             Object value = contextData.getValue(key);
-            if (value == null) {
-                return NullNode.getInstance();
-            }
             boolean valueExcluded = isValueExcluded(context, value);
-            return valueExcluded
-                    ? NullNode.getInstance()
-                    : context.getObjectMapper().convertValue(value, JsonNode.class);
+            if (valueExcluded) {
+                jsonGenerator.writeNull();
+            } else {
+                jsonGenerator.writeObject(value);
+            }
+            return;
         }
 
         // Otherwise return all context data matching the MDC key pattern.
         final Pattern keyPattern = context.getMdcKeyPattern();
-        final ObjectNode[] contextDataNode = new ObjectNode[] { null };
+        final boolean[] objectStarted = new boolean[] { false };
         contextData.forEach(new BiConsumer<String, Object>() {
             @Override
             public void accept(String key, Object value) {
@@ -60,16 +58,25 @@ class ContextDataResolver implements TemplateResolver {
                 if (keyMatches) {
                     boolean valueExcluded = isValueExcluded(context, value);
                     if (!valueExcluded) {
-                        if (contextDataNode[0] == null) {
-                            contextDataNode[0] = context.getObjectMapper().createObjectNode();
+                        try {
+                            if (!objectStarted[0]) {
+                                jsonGenerator.writeStartObject();
+                                objectStarted[0] = true;
+                            }
+                            jsonGenerator.writeObjectField(key ,value);
+                        } catch (IOException error) {
+                            String message = String.format("failed to append MDC field (key=%s, value=%s)", key, value);
+                            throw new RuntimeException(message, error);
                         }
-                        JsonNode valueNode = context.getObjectMapper().convertValue(value, JsonNode.class);
-                        contextDataNode[0].set(key, valueNode);
                     }
                 }
             }
         });
-        return firstNonNull(contextDataNode[0], NullNode.getInstance());
+        if (objectStarted[0]) {
+            jsonGenerator.writeEndObject();
+        } else {
+            jsonGenerator.writeNull();
+        }
 
     }
 

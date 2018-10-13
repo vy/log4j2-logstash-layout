@@ -1,10 +1,10 @@
 package com.vlkan.log4j2.logstash.layout.resolver;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.NullNode;
-import com.fasterxml.jackson.databind.node.TextNode;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.vlkan.log4j2.logstash.layout.util.Throwables;
 import org.apache.logging.log4j.core.LogEvent;
+
+import java.io.IOException;
 
 class ExceptionRootCauseStackTraceResolver implements TemplateResolver {
 
@@ -19,14 +19,15 @@ class ExceptionRootCauseStackTraceResolver implements TemplateResolver {
     }
 
     @Override
-    public JsonNode resolve(LogEvent logEvent) {
+    public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
         Throwable exception = logEvent.getThrown();
         if (!context.isStackTraceEnabled() || exception == null) {
-            return NullNode.getInstance();
+            jsonGenerator.writeNull();
+        } else {
+            Throwable rootCause = Throwables.getRootCause(exception);
+            String exceptionStackTrace = Throwables.serializeStackTrace(rootCause);
+            jsonGenerator.writeString(exceptionStackTrace);
         }
-        Throwable rootCause = Throwables.getRootCause(exception);
-        String exceptionStackTrace = Throwables.serializeStackTrace(rootCause);
-        return new TextNode(exceptionStackTrace);
     }
 
 }

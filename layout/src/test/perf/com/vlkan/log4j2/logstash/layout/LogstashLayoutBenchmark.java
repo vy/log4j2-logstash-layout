@@ -1,6 +1,7 @@
-package com.vlkan.log4j2.logstash.layout.renderer;
+package com.vlkan.log4j2.logstash.layout;
 
 import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.layout.AbstractStringLayout;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.profile.GCProfiler;
 import org.openjdk.jmh.profile.StackProfiler;
@@ -9,13 +10,22 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-public class TemplateRendererBenchmark {
+public class LogstashLayoutBenchmark {
+
+    private static final AbstractStringLayout NO_OP_LAYOUT =
+            new AbstractStringLayout(StandardCharsets.UTF_8) {
+                @Override
+                public String toSerializable(LogEvent logEvent) {
+                    return "{}";
+                }
+            };
 
     public static void main(String[] args) throws Exception {
         Options opt = new OptionsBuilder()
-                .include(TemplateRendererBenchmark.class.getSimpleName())
+                .include(LogstashLayoutBenchmark.class.getSimpleName())
                 .forks(1)
                 .warmupIterations(3)
                 .warmupTime(TimeValue.seconds(20))
@@ -28,14 +38,26 @@ public class TemplateRendererBenchmark {
     }
 
     @Benchmark
-    public static void render(TemplateRendererBenchmarkState state) {
-        TemplateRenderer templateRenderer = state.getTemplateRenderer();
-        List<LogEvent> logEvents = state.getLogEvents();
+    public static void fullSerialization(LogstashLayoutBenchmarkState state) {
+        benchmark(state.getFullLogstashLayout(), state.getFullLogEvents());
+    }
+
+    @Benchmark
+    public static void liteSerialization(LogstashLayoutBenchmarkState state) {
+        benchmark(state.getLiteLogstashLayout(), state.getLiteLogEvents());
+    }
+
+    @Benchmark
+    public static void noSerialization(LogstashLayoutBenchmarkState state) {
+        benchmark(NO_OP_LAYOUT, state.getLiteLogEvents());
+    }
+
+    private static void benchmark(AbstractStringLayout layout, List<LogEvent> logEvents) {
         long someNumber = 0;
         // noinspection ForLoopReplaceableByForEach (for loop avoids iterator allocations)
         for (int logEventIndex = 0; logEventIndex < logEvents.size(); logEventIndex++) {
             LogEvent logEvent = logEvents.get(logEventIndex);
-            String renderedLogEvent = templateRenderer.render(logEvent);
+            String renderedLogEvent = layout.toSerializable(logEvent);
             // Use the output to avoid its elimination by the compiler.
             someNumber += renderedLogEvent.length();
         }

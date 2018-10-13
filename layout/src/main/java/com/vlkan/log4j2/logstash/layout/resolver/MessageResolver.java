@@ -1,9 +1,7 @@
 package com.vlkan.log4j2.logstash.layout.resolver;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.NullNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
+import com.fasterxml.jackson.core.JsonGenerator;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.message.Message;
@@ -31,26 +29,36 @@ class MessageResolver implements TemplateResolver {
     }
 
     @Override
-    public JsonNode resolve(LogEvent logEvent) {
+    public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
         Message message = logEvent.getMessage();
-        return FORMATS[0].equalsIgnoreCase(key)
-                ? resolveJson(message)
-                : resolveText(message);
+        if (FORMATS[0].equalsIgnoreCase(key)) {
+            resolveJson(message, jsonGenerator);
+        } else {
+            resolveText(message, jsonGenerator);
+        }
     }
 
-    private JsonNode resolveText(Message message) {
+    private void resolveText(Message message, JsonGenerator jsonGenerator) throws IOException {
+        String formattedMessage = resolveText(message);
+        if (formattedMessage == null) {
+            jsonGenerator.writeNull();
+        } else {
+            jsonGenerator.writeString(formattedMessage);
+        }
+    }
+
+    private String resolveText(Message message) {
         String formattedMessage = message.getFormattedMessage();
         boolean messageExcluded = StringUtils.isEmpty(formattedMessage) && context.isEmptyPropertyExclusionEnabled();
-        return messageExcluded
-                ? NullNode.getInstance()
-                : new TextNode(formattedMessage);
+        return messageExcluded ? null : formattedMessage;
     }
 
-    private JsonNode resolveJson(Message message) {
+    private void resolveJson(Message message, JsonGenerator jsonGenerator) throws IOException {
 
         // Check message type.
         if (!(message instanceof MultiformatMessage)) {
-            return createMessageObject(message);
+            writeMessageObject(message, jsonGenerator);
+            return;
         }
         MultiformatMessage multiformatMessage = (MultiformatMessage) message;
 
@@ -64,16 +72,19 @@ class MessageResolver implements TemplateResolver {
             }
         }
         if (!jsonSupported) {
-            return createMessageObject(message);
+            writeMessageObject(message, jsonGenerator);
+            return;
         }
 
         // Read JSON.
         String messageJson = multiformatMessage.getFormattedMessage(FORMATS);
         JsonNode jsonNode = readMessageJson(context, messageJson);
         boolean nodeExcluded = isNodeExcluded(jsonNode);
-        return nodeExcluded
-                ? NullNode.getInstance()
-                : jsonNode;
+        if (nodeExcluded) {
+            jsonGenerator.writeNull();
+        } else {
+            jsonGenerator.writeTree(jsonNode);
+        }
 
     }
 
@@ -85,18 +96,19 @@ class MessageResolver implements TemplateResolver {
         }
     }
 
-    private JsonNode createMessageObject(Message message) {
+    private void writeMessageObject(Message message, JsonGenerator jsonGenerator) throws IOException {
 
         // Resolve text node.
-        JsonNode textNode = resolveText(message);
-        if (textNode.isNull()) {
-            return NullNode.getInstance();
+        String formattedMessage = resolveText(message);
+        if (formattedMessage == null) {
+            jsonGenerator.writeNull();
+            return;
         }
 
         // Put textual representation of the message in an object.
-        ObjectNode node = context.getObjectMapper().createObjectNode();
-        node.set(NAME, textNode);
-        return node;
+        jsonGenerator.writeStartObject();
+        jsonGenerator.writeObjectField(NAME, formattedMessage);
+        jsonGenerator.writeEndObject();
 
     }
 

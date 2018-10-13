@@ -1,10 +1,10 @@
 package com.vlkan.log4j2.logstash.layout.resolver;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.NullNode;
-import com.fasterxml.jackson.databind.node.TextNode;
+import com.fasterxml.jackson.core.JsonGenerator;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.core.LogEvent;
+
+import java.io.IOException;
 
 class ThreadNameResolver implements TemplateResolver {
 
@@ -19,12 +19,14 @@ class ThreadNameResolver implements TemplateResolver {
     }
 
     @Override
-    public JsonNode resolve(LogEvent logEvent) {
+    public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
         String threadName = logEvent.getThreadName();
         boolean threadNameExcluded = StringUtils.isEmpty(threadName) && context.isEmptyPropertyExclusionEnabled();
-        return threadNameExcluded
-                ? NullNode.getInstance()
-                : new TextNode(threadName);
+        if (threadNameExcluded) {
+            jsonGenerator.writeNull();
+        } else {
+            jsonGenerator.writeString(threadName);
+        }
     }
 
 }
