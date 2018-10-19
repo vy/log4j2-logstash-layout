@@ -70,12 +70,13 @@
         <!-- library versions -->
         <assertj-core.version>2.9.1</assertj-core.version><!-- Only AssertJ 2.X versions support Java 7! -->
         <commons-lang3.version>3.8</commons-lang3.version>
-        <jackson.version>2.9.6</jackson.version>
+        <jackson.version>2.9.7</jackson.version>
         <jmh.version>1.21</jmh.version>
         <junit.version>4.12</junit.version>
         <log4j2.version>2.11.1</log4j2.version>
 
         <!-- plugin versions -->
+        <build-helper-maven-plugin.version>3.0.0</build-helper-maven-plugin.version>
         <maven-compiler-plugin.version>3.6.1</maven-compiler-plugin.version>
         <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
         <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
@@ -209,6 +210,12 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
                     <version>${maven-shade-plugin.version}</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>${build-helper-maven-plugin.version}</version>
                 </plugin>
 
             </plugins>
