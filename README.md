@@ -125,7 +125,7 @@ in `LogstashJsonEventLayoutV1.json` within the classpath:
   "exception": {
     "exception_class": "${json:exceptionClassName}",
     "exception_message": "${json:exceptionMessage}",
-    "stacktrace": "${json:exceptionStackTrace}"
+    "stacktrace": "${json:exceptionStackTrace:text}"
   },
   "line_number": "${json:sourceLineNumber}",
   "class": "${json:sourceClassName}",
