@@ -22,7 +22,7 @@ enum TemplateResolverFactories {;
                             SourceFileNameResolverFactory.getInstance(),
                             SourceLineNumberResolverFactory.getInstance(),
                             SourceMethodNameResolverFactory.getInstance(),
-                            ThreadNameResolverFactory.getInstance(),
+                            ThreadResolverFactory.getInstance(),
                             TimestampResolverFactory.getInstance()));
 
     static List<TemplateResolverFactory<? extends TemplateResolver>> getResolverFactories() {

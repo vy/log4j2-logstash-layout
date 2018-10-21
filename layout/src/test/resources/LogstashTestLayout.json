@@ -9,7 +9,7 @@
   "@version": 1,
   "source_host": "${hostName}",
   "message": "${json:message}",
-  "thread_name": "${json:threadName}",
+  "thread_name": "${json:thread:name}",
   "@timestamp": "${json:timestamp}",
   "level": "${json:level}",
   "file": "${json:sourceFileName}",

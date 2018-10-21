@@ -121,7 +121,7 @@ in `LogstashJsonEventLayoutV1.json` within the classpath:
   "@version": 1,
   "source_host": "${hostName}",
   "message": "${json:message}",
-  "thread_name": "${json:threadName}",
+  "thread_name": "${json:thread:name}",
   "@timestamp": "${json:timestamp}",
   "level": "${json:level}",
   "file": "${json:sourceFileName}",
@@ -157,7 +157,9 @@ rendering the JSON output.
 | `sourceFileName` | `logEvent.getSource().getFileName()` (inactive when `locationInfoEnabled=false`) |
 | `sourceLineNumber` | `logEvent.getSource().getLineNumber()` (inactive when `locationInfoEnabled=false`) |
 | `sourceMethodName` | `logEvent.getSource().getMethodName()` |
-| `threadName` | `logEvent.getThreadName()` |
+| `thread:id` | `logEvent.getThreadId()` |
+| `thread:name` | `logEvent.getThreadName()` |
+| `thread:priority` | `logEvent.getThreadPriority()` |
 | `timestamp` | `logEvent.getTimeMillis()` formatted using `dateTimeFormatPattern` and `timeZoneId` |
 | `timestamp:millis` | `logEvent.getTimeMillis()` |
 | `timestamp:nanos` | `logEvent.getNanoTime()` |
