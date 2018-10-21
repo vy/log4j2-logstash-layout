@@ -15,5 +15,5 @@
   "level": "${json:level}",
   "file": "${json:sourceFileName}",
   "method": "${json:sourceMethodName}",
-  "logger_name": "${json:loggerName}"
+  "logger_name": "${json:logger:name}"
 }

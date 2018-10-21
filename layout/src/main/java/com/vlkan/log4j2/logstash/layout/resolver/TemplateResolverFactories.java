@@ -16,7 +16,7 @@ enum TemplateResolverFactories {;
                             ExceptionRootCauseStackTraceResolverFactory.getInstance(),
                             ExceptionStackTraceResolverFactory.getInstance(),
                             LevelResolverFactory.getInstance(),
-                            LoggerNameResolverFactory.getInstance(),
+                            LoggerResolverFactory.getInstance(),
                             MessageResolverFactory.getInstance(),
                             SourceClassNameResolverFactory.getInstance(),
                             SourceFileNameResolverFactory.getInstance(),

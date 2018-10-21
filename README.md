@@ -126,7 +126,7 @@ in `LogstashJsonEventLayoutV1.json` within the classpath:
   "level": "${json:level}",
   "file": "${json:sourceFileName}",
   "method": "${json:sourceMethodName}",
-  "logger_name": "${json:loggerName}"
+  "logger_name": "${json:logger:name}"
 }
 ```
 
@@ -147,7 +147,8 @@ rendering the JSON output.
 | `exceptionRootCauseMessage` | the innermost `exceptionMessage` in causal chain |
 | `exceptionRootCauseStackTrace` | the innermost `exceptionStackTrace` in causal chain |
 | `level` | `logEvent.getLevel()` |
-| `loggerName` | `logEvent.getLoggerName()` |
+| `logger:fqcn` | `logEvent.getLoggerFqcn()` |
+| `logger:name` | `logEvent.getLoggerName()` |
 | `mdc` | Mapped Diagnostic Context `Map<String, String>` returned by `logEvent.getContextData()` |
 | `mdc:<key>` | Mapped Diagnostic Context `String` associated with `key` (`mdcKeyPattern` is discarded) |
 | `message` | `logEvent.getFormattedMessage()` |
