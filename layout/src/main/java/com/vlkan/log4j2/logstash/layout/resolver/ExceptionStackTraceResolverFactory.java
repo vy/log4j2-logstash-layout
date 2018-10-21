@@ -17,7 +17,7 @@ class ExceptionStackTraceResolverFactory implements TemplateResolverFactory<Exce
 
     @Override
     public ExceptionStackTraceResolver create(TemplateResolverContext context, String key) {
-        return new ExceptionStackTraceResolver(context);
+        return new ExceptionStackTraceResolver(context, key);
     }
 
 }

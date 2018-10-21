@@ -8,10 +8,42 @@ import java.io.IOException;
 
 class ExceptionRootCauseStackTraceResolver implements TemplateResolver {
 
-    private final TemplateResolverContext context;
+    private final TemplateResolver internalResolver;
 
-    ExceptionRootCauseStackTraceResolver(TemplateResolverContext context) {
-        this.context = context;
+    ExceptionRootCauseStackTraceResolver(TemplateResolverContext context, String key) {
+        this.internalResolver = createInternalResolver(context, key);
+    }
+
+    private static TemplateResolver createInternalResolver(final TemplateResolverContext context, String key) {
+
+        if ("text".equals(key)) {
+            return new TemplateResolver() {
+                @Override
+                public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
+                    Throwable exception = logEvent.getThrown();
+                    if (!context.isStackTraceEnabled() || exception == null) {
+                        jsonGenerator.writeNull();
+                    } else {
+                        Throwable rootCause = Throwables.getRootCause(exception);
+                        ExceptionStackTraceResolvers.resolveText(context, rootCause, jsonGenerator);
+                    }
+                }
+            };
+        }
+
+        return new TemplateResolver() {
+            @Override
+            public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
+                Throwable exception = logEvent.getThrown();
+                if (!context.isStackTraceEnabled() || exception == null) {
+                    jsonGenerator.writeNull();
+                } else {
+                    Throwable rootCause = Throwables.getRootCause(exception);
+                    ExceptionStackTraceResolvers.resolveArray(context, rootCause, jsonGenerator);
+                }
+            }
+        };
+
     }
 
     static String getName() {
@@ -20,14 +52,7 @@ class ExceptionRootCauseStackTraceResolver implements TemplateResolver {
 
     @Override
     public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-        Throwable exception = logEvent.getThrown();
-        if (!context.isStackTraceEnabled() || exception == null) {
-            jsonGenerator.writeNull();
-        } else {
-            Throwable rootCause = Throwables.getRootCause(exception);
-            String exceptionStackTrace = Throwables.serializeStackTrace(rootCause);
-            jsonGenerator.writeString(exceptionStackTrace);
-        }
+        internalResolver.resolve(logEvent, jsonGenerator);
     }
 
 }

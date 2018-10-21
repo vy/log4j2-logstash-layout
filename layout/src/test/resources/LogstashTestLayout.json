@@ -3,7 +3,7 @@
   "ndc": "${json:ndc}",
   "exception_class": "${json:exceptionClassName}",
   "exception_message": "${json:exceptionMessage}",
-  "stacktrace": "${json:exceptionStackTrace}",
+  "stacktrace": "${json:exceptionStackTrace:text}",
   "line_number": "${json:sourceLineNumber}",
   "class": "${json:sourceClassName}",
   "@version": 1,

@@ -143,10 +143,11 @@ rendering the JSON output.
 | `endOfBatch` | `logEvent.isEndOfBatch()` |
 | `exceptionClassName` | `logEvent.getThrown().getClass().getCanonicalName()` |
 | `exceptionMessage` | `logEvent.getThrown().getMessage()` |
-| `exceptionStackTrace` | `logEvent.getThrown().printStackTrace()` (inactive when `stackTraceEnabled=false`) |
+| `exceptionStackTrace` | `logEvent.getThrown().getStackTrace()` (inactive when `stackTraceEnabled=false`) |
+| `exceptionStackTrace:text` | `logEvent.getThrown().printStackTrace()` (inactive when `stackTraceEnabled=false`) |
 | `exceptionRootCauseClassName` | the innermost `exceptionClassName` in causal chain |
 | `exceptionRootCauseMessage` | the innermost `exceptionMessage` in causal chain |
-| `exceptionRootCauseStackTrace` | the innermost `exceptionStackTrace` in causal chain |
+| `exceptionRootCauseStackTrace[:text]` | the innermost `exceptionStackTrace[:text]` in causal chain |
 | `level` | `logEvent.getLevel()` |
 | `logger:fqcn` | `logEvent.getLoggerFqcn()` |
 | `logger:name` | `logEvent.getLoggerName()` |

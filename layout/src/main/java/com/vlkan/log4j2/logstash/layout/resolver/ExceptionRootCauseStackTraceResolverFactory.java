@@ -17,7 +17,7 @@ class ExceptionRootCauseStackTraceResolverFactory implements TemplateResolverFac
 
     @Override
     public ExceptionRootCauseStackTraceResolver create(TemplateResolverContext context, String key) {
-        return new ExceptionRootCauseStackTraceResolver(context);
+        return new ExceptionRootCauseStackTraceResolver(context, key);
     }
 
 }
