@@ -159,6 +159,8 @@ rendering the JSON output.
 | `sourceMethodName` | `logEvent.getSource().getMethodName()` |
 | `threadName` | `logEvent.getThreadName()` |
 | `timestamp` | `logEvent.getTimeMillis()` formatted using `dateTimeFormatPattern` and `timeZoneId` |
+| `timestamp:millis` | `logEvent.getTimeMillis()` |
+| `timestamp:nanos` | `logEvent.getNanoTime()` |
 
 JSON field lookups are performed using the `${json:<variable-name>}` scheme
 where `<variable-name>` is defined as `<resolver-name>[:<resolver-key>]`.

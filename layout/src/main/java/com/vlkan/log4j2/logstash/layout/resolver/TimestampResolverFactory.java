@@ -17,7 +17,7 @@ class TimestampResolverFactory implements TemplateResolverFactory<TimestampResol
 
     @Override
     public TimestampResolver create(TemplateResolverContext context, String key) {
-        return new TimestampResolver(context);
+        return new TimestampResolver(context, key);
     }
 
 }

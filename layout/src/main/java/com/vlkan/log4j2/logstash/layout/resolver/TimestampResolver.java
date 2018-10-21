@@ -8,10 +8,44 @@ import java.io.IOException;
 
 class TimestampResolver implements TemplateResolver {
 
-    private final TemplateResolverContext context;
+    private final TemplateResolver internalResolver;
 
-    TimestampResolver(TemplateResolverContext context) {
-        this.context = context;
+    TimestampResolver(TemplateResolverContext context, String key) {
+        this.internalResolver = createInternalResolver(context, key);
+    }
+
+    private static TemplateResolver createInternalResolver(final TemplateResolverContext context, String key) {
+
+        if ("millis".equals(key)) {
+            return new TemplateResolver() {
+                @Override
+                public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
+                    long timeMillis = logEvent.getTimeMillis();
+                    jsonGenerator.writeNumber(timeMillis);
+                }
+            };
+        }
+
+        if ("nanos".equals(key)) {
+            return new TemplateResolver() {
+                @Override
+                public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
+                    long nanoTime = logEvent.getNanoTime();
+                    jsonGenerator.writeNumber(nanoTime);
+                }
+            };
+        }
+
+        return new TemplateResolver() {
+            @Override
+            public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
+                long timestampMillis = logEvent.getTimeMillis();
+                FastDateFormat timestampFormat = context.getTimestampFormat();
+                String timestamp = timestampFormat.format(timestampMillis);
+                jsonGenerator.writeString(timestamp);
+            }
+        };
+
     }
 
     static String getName() {
@@ -20,10 +54,7 @@ class TimestampResolver implements TemplateResolver {
 
     @Override
     public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-        long timestampMillis = logEvent.getTimeMillis();
-        FastDateFormat timestampFormat = context.getTimestampFormat();
-        String timestamp = timestampFormat.format(timestampMillis);
-        jsonGenerator.writeString(timestamp);
+        internalResolver.resolve(logEvent, jsonGenerator);
     }
 
 }
