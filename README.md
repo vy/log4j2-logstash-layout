@@ -140,6 +140,7 @@ rendering the JSON output.
 
 | Variable Name | Description |
 |---------------|-------------|
+| `endOfBatch` | `logEvent.isEndOfBatch()` |
 | `exceptionClassName` | `logEvent.getThrown().getClass().getCanonicalName()` |
 | `exceptionMessage` | `logEvent.getThrown().getMessage()` |
 | `exceptionStackTrace` | `logEvent.getThrown().printStackTrace()` (inactive when `stackTraceEnabled=false`) |

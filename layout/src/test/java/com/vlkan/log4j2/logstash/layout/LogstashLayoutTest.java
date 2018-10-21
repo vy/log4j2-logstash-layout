@@ -80,8 +80,12 @@ public class LogstashLayoutTest {
     private static void checkBasicFields(LogEvent logEvent, JsonNode rootNode) {
         assertThat(point(rootNode, "message").asText()).isEqualTo(logEvent.getMessage().getFormattedMessage());
         assertThat(point(rootNode, "level").asText()).isEqualTo(logEvent.getLevel().name());
+        assertThat(point(rootNode, "logger_fqcn").asText()).isEqualTo(logEvent.getLoggerFqcn());
         assertThat(point(rootNode, "logger_name").asText()).isEqualTo(logEvent.getLoggerName());
+        assertThat(point(rootNode, "thread_id").asLong()).isEqualTo(logEvent.getThreadId());
         assertThat(point(rootNode, "thread_name").asText()).isEqualTo(logEvent.getThreadName());
+        assertThat(point(rootNode, "thread_priority").asInt()).isEqualTo(logEvent.getThreadPriority());
+        assertThat(point(rootNode, "end_of_batch").asBoolean()).isEqualTo(logEvent.isEndOfBatch());
     }
 
     private static void checkSource(LogEvent logEvent, JsonNode rootNode) {

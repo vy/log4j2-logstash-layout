@@ -38,7 +38,9 @@ public enum LogEventFixture {;
         // Create rest of the event attributes.
         StringMap contextData = createContextData(id);
         ThreadContextStack contextStack = createContextStack(id);
+        int threadId = id.hashCode();
         String threadName = "MyThreadName" + id;
+        int threadPriority = threadId % 10;
         SimpleMessage message = new SimpleMessage("Msg" + id);
         Level level = Level.DEBUG;
         String loggerFqcn = "f.q.c.n" + id;
@@ -54,7 +56,9 @@ public enum LogEventFixture {;
                 .setThrown(ioException)
                 .setContextData(contextData)
                 .setContextStack(contextStack)
+                .setThreadId(threadId)
                 .setThreadName(threadName)
+                .setThreadPriority(threadPriority)
                 .setSource(source)
                 .setTimeMillis(timeMillis)
                 .build();

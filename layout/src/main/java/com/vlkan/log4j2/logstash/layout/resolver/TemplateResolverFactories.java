@@ -9,6 +9,7 @@ enum TemplateResolverFactories {;
                     Arrays.asList(
                             ContextDataResolverFactory.getInstance(),
                             ContextStackResolverFactory.getInstance(),
+                            EndOfBatchResolverFactory.getInstance(),
                             ExceptionClassNameResolverFactory.getInstance(),
                             ExceptionMessageResolverFactory.getInstance(),
                             ExceptionRootCauseClassNameResolverFactory.getInstance(),
