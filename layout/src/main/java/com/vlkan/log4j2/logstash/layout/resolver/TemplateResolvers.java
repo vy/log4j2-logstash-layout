@@ -112,31 +112,32 @@ public enum TemplateResolvers {;
     private static TemplateResolver ofObjectNode(final TemplateResolverContext context, final JsonNode srcNode) {
 
         // Create resolver for each object field.
-        final Map<String, TemplateResolver> fieldResolverByName = new LinkedHashMap<>();
-        final Iterator<Map.Entry<String, JsonNode>> srcNodeFieldIterator = srcNode.fields();
+        final List<String> fieldNames = new ArrayList<>();
+        final List<TemplateResolver> fieldResolvers = new ArrayList<>();
+        Iterator<Map.Entry<String, JsonNode>> srcNodeFieldIterator = srcNode.fields();
         while (srcNodeFieldIterator.hasNext()) {
             Map.Entry<String, JsonNode> srcNodeField = srcNodeFieldIterator.next();
             String fieldName = srcNodeField.getKey();
             JsonNode fieldValue = srcNodeField.getValue();
             TemplateResolver fieldResolver = ofNode(context, fieldValue);
-            fieldResolverByName.put(fieldName, fieldResolver);
+            fieldNames.add(fieldName);
+            fieldResolvers.add(fieldResolver);
         }
 
         // Short-circuit if the object is empty.
-        if (fieldResolverByName.isEmpty()) {
+        final int fieldCount = fieldNames.size();
+        if (fieldCount == 0) {
             return EMPTY_OBJECT_RESOLVER;
         }
 
         // Create a parent resolver collecting each object field resolver execution.
-        final List<String> fieldNames = new ArrayList<>(fieldResolverByName.keySet());
         return new TemplateResolver() {
             @Override
             public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
                 jsonGenerator.writeStartObject();
-                // noinspection ForLoopReplaceableByForEach (avoid iterator instantiation)
-                for (int fieldNameIndex = 0; fieldNameIndex < fieldResolverByName.size(); fieldNameIndex++) {
-                    String fieldName = fieldNames.get(fieldNameIndex);
-                    TemplateResolver fieldResolver = fieldResolverByName.get(fieldName);
+                for (int fieldIndex = 0; fieldIndex < fieldCount; fieldIndex++) {
+                    String fieldName = fieldNames.get(fieldIndex);
+                    TemplateResolver fieldResolver = fieldResolvers.get(fieldIndex);
                     jsonGenerator.writeFieldName(fieldName);
                     fieldResolver.resolve(logEvent, jsonGenerator);
                 }
@@ -164,12 +165,18 @@ public enum TemplateResolvers {;
             }
         }
 
+        // Check if substitution is possible.
+        @SuppressWarnings("StringEquality") final boolean substitutionSupported =
+                fieldValue != context.getSubstitutor().replace(null, fieldValue);
+
         // Fallback to the Log4j substitutor.
         return new TemplateResolver() {
 
             @Override
             public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-                String replacedText = context.getSubstitutor().replace(logEvent, fieldValue);
+                String replacedText = substitutionSupported
+                        ? context.getSubstitutor().replace(logEvent, fieldValue)
+                        : fieldValue;
                 boolean replacedTextExcluded = StringUtils.isEmpty(replacedText) && context.isEmptyPropertyExclusionEnabled();
                 if (replacedTextExcluded) {
                     jsonGenerator.writeNull();
