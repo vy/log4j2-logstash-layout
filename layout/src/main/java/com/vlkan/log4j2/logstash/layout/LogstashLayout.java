@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.filter.FilteringGeneratorDelegate;
 import com.fasterxml.jackson.core.filter.TokenFilter;
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vlkan.log4j2.logstash.layout.resolver.TemplateResolver;
 import com.vlkan.log4j2.logstash.layout.resolver.TemplateResolverContext;
@@ -148,15 +147,18 @@ public class LogstashLayout extends AbstractStringLayout {
     public String toSerializable(LogEvent event) {
         try {
             ByteArrayOutputStream outputStream = outputStreamSupplier.get();
-            JsonGenerator jsonGenerator = jsonFactory.createGenerator(outputStream);
-            if (prettyPrintEnabled) {
-                jsonGenerator.setPrettyPrinter(new DefaultPrettyPrinter());
+            try (JsonGenerator jsonGenerator = jsonFactory.createGenerator(outputStream)) {
+                if (prettyPrintEnabled) {
+                    jsonGenerator.useDefaultPrettyPrinter();
+                }
+                if (tokenFilter == null) {
+                    resolver.resolve(event, jsonGenerator);
+                } else {
+                    try (JsonGenerator jsonGeneratorDelegate = new FilteringGeneratorDelegate(jsonGenerator, tokenFilter, true, true)) {
+                        resolver.resolve(event, jsonGeneratorDelegate);
+                    }
+                }
             }
-            JsonGenerator jsonGeneratorDelegate = tokenFilter != null
-                    ? new FilteringGeneratorDelegate(jsonGenerator, tokenFilter, true, true)
-                    : jsonGenerator;
-            resolver.resolve(event, jsonGeneratorDelegate);
-            jsonGeneratorDelegate.flush();
             if (outputStream.size() == 0) {
                 outputStream.write(EMPTY_OBJECT_JSON_BYTES);
             }
@@ -179,10 +181,12 @@ public class LogstashLayout extends AbstractStringLayout {
     }
 
     @PluginBuilderFactory
+    @SuppressWarnings("WeakerAccess")
     public static Builder newBuilder() {
         return new Builder();
     }
 
+    @SuppressWarnings({"unused", "WeakerAccess"})
     public static class Builder implements org.apache.logging.log4j.core.util.Builder<LogstashLayout> {
 
         @PluginConfiguration
@@ -271,8 +275,8 @@ public class LogstashLayout extends AbstractStringLayout {
             return emptyPropertyExclusionEnabled;
         }
 
-        public Builder setEmptyPropertyExclusionEnabled(boolean blankPropertyExclusionEnabled) {
-            this.emptyPropertyExclusionEnabled = blankPropertyExclusionEnabled;
+        public Builder setEmptyPropertyExclusionEnabled(boolean emptyPropertyExclusionEnabled) {
+            this.emptyPropertyExclusionEnabled = emptyPropertyExclusionEnabled;
             return this;
         }
 
