@@ -10,18 +10,9 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class LogstashLayoutBenchmark {
-
-    private static final AbstractStringLayout NO_OP_LAYOUT =
-            new AbstractStringLayout(StandardCharsets.UTF_8) {
-                @Override
-                public String toSerializable(LogEvent logEvent) {
-                    return "{}";
-                }
-            };
 
     public static void main(String[] args) throws Exception {
         Options opt = new OptionsBuilder()
@@ -38,18 +29,33 @@ public class LogstashLayoutBenchmark {
     }
 
     @Benchmark
-    public static void fullSerialization(LogstashLayoutBenchmarkState state) {
-        benchmark(state.getFullLogstashLayout(), state.getFullLogEvents());
+    public static void fullLogstashLayout(LogstashLayoutBenchmarkState state) {
+        benchmark(state.getLogstashLayout(), state.getFullLogEvents());
     }
 
     @Benchmark
-    public static void liteSerialization(LogstashLayoutBenchmarkState state) {
-        benchmark(state.getLiteLogstashLayout(), state.getLiteLogEvents());
+    public static void liteLogstashLayout(LogstashLayoutBenchmarkState state) {
+        benchmark(state.getLogstashLayout(), state.getLiteLogEvents());
     }
 
     @Benchmark
-    public static void noSerialization(LogstashLayoutBenchmarkState state) {
-        benchmark(NO_OP_LAYOUT, state.getLiteLogEvents());
+    public static void fullDefaultJsonLayout(LogstashLayoutBenchmarkState state) {
+        benchmark(state.getDefaultJsonLayout(), state.getFullLogEvents());
+    }
+
+    @Benchmark
+    public static void liteDefaultJsonLayout(LogstashLayoutBenchmarkState state) {
+        benchmark(state.getDefaultJsonLayout(), state.getLiteLogEvents());
+    }
+
+    @Benchmark
+    public static void fullCustomJsonLayout(LogstashLayoutBenchmarkState state) {
+        benchmark(state.getCustomJsonLayout(), state.getFullLogEvents());
+    }
+
+    @Benchmark
+    public static void liteCustomJsonLayout(LogstashLayoutBenchmarkState state) {
+        benchmark(state.getCustomJsonLayout(), state.getLiteLogEvents());
     }
 
     private static void benchmark(AbstractStringLayout layout, List<LogEvent> logEvents) {

@@ -2,7 +2,7 @@
 [![Maven Central](https://img.shields.io/maven-central/v/com.vlkan.log4j2/log4j2-logstash-layout-parent.svg)](https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.vlkan.log4j2%22)
 [![License](https://img.shields.io/github/license/vy/log4j2-logstash-layout.svg)](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-`LogstashLayout` plugin provides a [Log4j 2.x](https://logging.apache.org/log4j/2.x/)
+`LogstashLayout` plugin provides an efficient [Log4j 2.x](https://logging.apache.org/log4j/2.x/)
 layout with customizable and [Logstash](https://www.elastic.co/products/logstash)-friendly
 JSON formatting.
 
@@ -13,10 +13,21 @@ Log4j 1.x plugin. Compared to
 included in Log4j 2.x and `log4j-jsonevent-layout`, `LogstashLayout` provides
 the following additional features:
 
-- Additional fields can be added. (See `template` and `templateUri` parameters.)
+- Up to 5x higher [performance](#performance).
 - JSON schema structure can be customized. (See `template` and `templateUri` parameters.)
 - Timestamp formatting can be customized. (See `dateTimeFormatPattern`
   and `timeZoneId` parameters.)
+
+# Table of Contents
+
+- [Usage](#usage)
+- [FAT JAR](#fat-jar)
+- [Appender Support](#appender-support)
+- [Performance](#performance)
+- [Contributors](#contributors)
+- [License](#license)
+
+<a name="usage"></a>
 
 # Usage
 
@@ -181,8 +192,9 @@ lookup can be mixed within a regular text: `"myCustomField": "Hello, ${env:USER}
 
 See `layout-demo` directory for a sample application using the `LogstashLayout`.
 
-Fat JAR
-=======
+<a name="fat-jar"></a>
+
+# Fat JAR
 
 Project also contains a `log4j2-logstash-layout-fatjar` artifact which
 includes all its transitive dependencies in a separate shaded package (to
@@ -192,8 +204,9 @@ include separately.
 This might come handy if you want to use this plugin along with already
 compiled applications, e.g., Elasticsearch 5.x, which requires Log4j 2.x.
 
-Appender Support
-================
+<a name="appender-support"></a>
+
+# Appender Support
 
 `log4j2-logstash-layout` is all about providing a highly customizable JSON
 schema for your logs. Though this does not necessarily mean that all of its
@@ -205,47 +218,56 @@ for Logstash's `log4j-json` file input type. (See
 Make sure you configure `log4j2-logstash-layout` properly in a way that
 is aligned with your appender of preference.
 
-Performance
-===========
+<a name="performance"></a>
 
-The source code ships `LogstashLayout`
-[JMH](https://openjdk.java.net/projects/code-tools/jmh/) benchmark to measure
-the rendering performance of the plugin for different `LogEvent` profiles:
+# Performance
 
-- **full**: `LogEvent` contains MDC, NDC, and an exception. In addition to
-  existing defaults, stack traces and location information are enabled in
-  `LogstashLayout`. This profile represents the heavyweight `LogEvent`s.
+The source code ships a `LogstashLayout`-vs-[`JsonLayout`](https://logging.apache.org/log4j/2.0/manual/layouts.html#JSONLayout)
+(the one shipped by default in Log4j 2.X) [JMH](https://openjdk.java.net/projects/code-tools/jmh/)
+benchmark assessing the rendering performance of both plugins. There two
+different `LogEvent` profiles are employed:
 
-- **lite:** `LogEvent` has no MDC, NDC, or exception attachment. This profile
-  represents the lightweight `LogEvent`s.
-
-- **none:** *Lite* `LogEvent`s are passed to a no-op serializer constantly
-  returning '{}'. This profile stands for reference purposes to determine
-  the additional overhead introduced by the plugin.
+- **full**: `LogEvent` contains MDC, NDC, and an exception.
+- **lite:** `LogEvent` has no MDC, NDC, or exception attachment.
 
 To give an idea, we ran the benchmark with the following settings:
 
 - **CPU:** Intel i7 2.70GHz (x86-64)
 - **JVM:** Java HotSpot 1.8.0_161
 - **OS:** Xubuntu 18.04.1 (4.15.0-34-generic, x86-64)
-- **`maxByteCount`:** 1024 * 512
-- **`threadLocalByteBufferEnabled`:** `true`
+- **`LogstashLayout:`** used default settings with the following exceptions:
+  - **`stackTraceEnabled`:** `true`
+  - **`maxByteCount`:** 1024 * 512
+  - **`threadLocalByteBufferEnabled`:** `true`
+- **`JsonLayout`:** used in two different flavors
+  - **`DefaultJsonLayout`:** default settings
+  - **`CustomJsonLayout`:** default settings with an additional `"@version": 1`
+    field (this forces instantiation of a wrapper class to obtain the necessary
+    Jackson view)
 
-The results for the **single-threaded execution of 1,000 `LogEvent`s** are as
-follows:
+The summary (see [BENCHMARK.txt](BENCHMARK.txt) for all) of the results for the
+**single-threaded execution of 1,000 `LogEvent`s** are as follows:
 
-| Profile | Slowdown (×) | Throughput (ops/sec) | GC Alloc. Rate (MB/sec) |
-| ------- | ------------:| --------------------:| -----------------------:|
-| None    |            1 |            1,058,691 |                      ~0 |
-| Lite    |        3,540 |                  299 |                   5,210 |
-| Full    |       27,145 |                   32 |                   3,091 |
+| Profile | Layout              | Throughput (ops/sec) | GC Alloc. Rate (MB/sec) |
+| ------- | -------------------:| --------------------:| -----------------------:|
+| Lite    | `LogstashLayout`    |                  917 |                     143 |
+| Lite    | `DefaultJsonLayout` |                  702 |                      54 |
+| Lite    | `CustomJsonLayout`  |                  582 |                     152 |
+| Full    | `LogstashLayout`    |                   86 |                      59 |
+| Full    | `DefaultJsonLayout` |                   17 |                     482 |
+| Full    | `CustomJsonLayout`  |                   17 |                     163 |
 
-Contributors
-============
+As results point out, `log4j2-logstash-layout` is the fastest JSON layout in the town.
+
+<a name="contributors"></a>
+
+# Contributors
 
 - [Eric Schwartz](https://github.com/emschwar)
 - [Michael K. Edwards](https://github.com/mkedwards)
 - [Yaroslav Skopets](https://github.com/yskopets)
+
+<a name="license"></a>
 
 # License
 
