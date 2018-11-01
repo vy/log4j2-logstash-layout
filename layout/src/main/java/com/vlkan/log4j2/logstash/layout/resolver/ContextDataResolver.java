@@ -1,8 +1,10 @@
 package com.vlkan.log4j2.logstash.layout.resolver;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.vlkan.log4j2.logstash.layout.util.JsonGenerators;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.util.BiConsumer;
+import org.apache.logging.log4j.util.IndexedStringMap;
 import org.apache.logging.log4j.util.ReadOnlyStringMap;
 
 import java.io.IOException;
@@ -50,34 +52,48 @@ class ContextDataResolver implements TemplateResolver {
 
         // Otherwise return all context data matching the MDC key pattern.
         final Pattern keyPattern = context.getMdcKeyPattern();
-        final boolean[] objectStarted = new boolean[] { false };
+        jsonGenerator.writeStartObject();
+        if (contextData instanceof IndexedStringMap) {  // First, try access-by-id, which is GC free.
+            resolveIndexedMap(jsonGenerator, (IndexedStringMap) contextData, keyPattern);
+        } else {                                        // Otherwise, fallback to ReadOnlyStringMap#forEach().
+            resolveGenericMap(jsonGenerator, contextData, keyPattern);
+        }
+        jsonGenerator.writeEndObject();
+
+    }
+
+    private void resolveIndexedMap(JsonGenerator jsonGenerator, IndexedStringMap contextData, Pattern keyPattern) {
+        for (int entryIndex = 0; entryIndex < contextData.size(); entryIndex++) {
+            String key = contextData.getKeyAt(entryIndex);
+            Object value = contextData.getValueAt(entryIndex);
+            boolean keyMatches = keyPattern == null || keyPattern.matcher(key).matches();
+            resolveEntry(jsonGenerator, key, value, keyMatches);
+        }
+    }
+
+    private void resolveGenericMap(final JsonGenerator jsonGenerator, ReadOnlyStringMap contextData, final Pattern keyPattern) {
         contextData.forEach(new BiConsumer<String, Object>() {
             @Override
             public void accept(String key, Object value) {
                 boolean keyMatches = keyPattern == null || keyPattern.matcher(key).matches();
-                if (keyMatches) {
-                    boolean valueExcluded = isValueExcluded(context, value);
-                    if (!valueExcluded) {
-                        try {
-                            if (!objectStarted[0]) {
-                                jsonGenerator.writeStartObject();
-                                objectStarted[0] = true;
-                            }
-                            jsonGenerator.writeObjectField(key ,value);
-                        } catch (IOException error) {
-                            String message = String.format("failed to append MDC field (key=%s, value=%s)", key, value);
-                            throw new RuntimeException(message, error);
-                        }
-                    }
-                }
+                resolveEntry(jsonGenerator, key, value, keyMatches);
             }
         });
-        if (objectStarted[0]) {
-            jsonGenerator.writeEndObject();
-        } else {
-            jsonGenerator.writeNull();
-        }
+    }
 
+    private void resolveEntry(JsonGenerator jsonGenerator, String key, Object value, boolean keyMatches) {
+        if (keyMatches) {
+            boolean valueExcluded = isValueExcluded(context, value);
+            if (!valueExcluded) {
+                try {
+                    jsonGenerator.writeFieldName(key);
+                    JsonGenerators.writeObject(jsonGenerator, value);
+                } catch (IOException error) {
+                    String message = String.format("failed to append MDC field (key=%s, value=%s)", key, value);
+                    throw new RuntimeException(message, error);
+                }
+            }
+        }
     }
 
     private static boolean isValueExcluded(TemplateResolverContext context, Object value) {

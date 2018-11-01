@@ -2,7 +2,7 @@
 [![Maven Central](https://img.shields.io/maven-central/v/com.vlkan.log4j2/log4j2-logstash-layout-parent.svg)](https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.vlkan.log4j2%22)
 [![License](https://img.shields.io/github/license/vy/log4j2-logstash-layout.svg)](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-`LogstashLayout` plugin provides an efficient [Log4j 2.x](https://logging.apache.org/log4j/2.x/)
+`LogstashLayout` is **the fastest** garbage-free [Log4j 2.x](https://logging.apache.org/log4j/2.x/)
 layout with customizable and [Logstash](https://www.elastic.co/products/logstash)-friendly
 JSON formatting.
 
@@ -13,10 +13,9 @@ Log4j 1.x plugin. Compared to
 included in Log4j 2.x and `log4j-jsonevent-layout`, `LogstashLayout` provides
 the following additional features:
 
-- Up to 5x higher [performance](#performance).
-- JSON schema structure can be customized. (See `template` and `templateUri` parameters.)
-- Timestamp formatting can be customized. (See `dateTimeFormatPattern`
-  and `timeZoneId` parameters.)
+- Superior garbage-free [performance](#performance)
+- Customizable JSON schema (see `template` and `templateUri` parameters)
+- Customizable timestamp formatting (see `dateTimeFormatPattern` and `timeZoneId` parameters)
 
 # Table of Contents
 
@@ -110,8 +109,7 @@ This generates an output as follows:
 | `template` | String | inline JSON template for generating the output (has priority over `templateUri`) |
 | `templateUri` | String | JSON template for generating the output (defaults to `classpath:LogstashJsonEventLayoutV1.json`) |
 | `lineSeparator` | String | used to separate log outputs (defaults to `System.lineSeparator()`) |
-| `maxByteCount` | int | used to cap the internal `byte[]` buffer (defaults to 0) |
-| `threadLocalByteBufferEnabled` | boolean | enables thread-local caching of internal `byte[]` buffer and requires `maxByteCount` to be greater than 0 (defaults to `false`) |
+| `maxByteCount` | int | used to cap the internal `byte[]` buffer used for serialization (defaults to 512 KiB) |
 
 `templateUri` denotes the URI pointing to the JSON template that will be used
 while formatting the log events. By default, `LogstashLayout` ships the
@@ -180,9 +178,7 @@ rendering the JSON output.
 
 JSON field lookups are performed using the `${json:<variable-name>}` scheme
 where `<variable-name>` is defined as `<resolver-name>[:<resolver-key>]`.
-Characters following colon (`:`) are treated as the `resolver-key` of
-which as of now only supported in forms `mdc:<key>` and
-`message:json`.
+Characters following colon (`:`) are treated as the `resolver-key`.
 
 [Log4j 2.x Lookups](https://logging.apache.org/log4j/2.0/manual/lookups.html)
 (e.g., `${java:version}`, `${env:USER}`, `${date:MM-dd-yyyy}`) are supported
@@ -237,25 +233,119 @@ To give an idea, we ran the benchmark with the following settings:
 - **OS:** Xubuntu 18.04.1 (4.15.0-34-generic, x86-64)
 - **`LogstashLayout:`** used default settings with the following exceptions:
   - **`stackTraceEnabled`:** `true`
-  - **`maxByteCount`:** 1024 * 512
-  - **`threadLocalByteBufferEnabled`:** `true`
+  - employed custom [`Log4j2JsonLayout.json`](layout/src/test/resources/Log4j2JsonLayout.json)
+    template adopted from the JSON schema used by `JsonLayout`
 - **`JsonLayout`:** used in two different flavors
   - **`DefaultJsonLayout`:** default settings
   - **`CustomJsonLayout`:** default settings with an additional `"@version": 1`
     field (this forces instantiation of a wrapper class to obtain the necessary
     Jackson view)
 
-The summary (see [BENCHMARK.txt](BENCHMARK.txt) for all) of the results for the
-**single-threaded execution of 1,000 `LogEvent`s** are as follows:
+The summary (see [`layout-benchmark`](layout-benchmark) directory) of the
+results for single-threaded run are as follows:
 
-| Profile | Layout              | Throughput (ops/sec) | GC Alloc. Rate (MB/sec) |
-| ------- | -------------------:| --------------------:| -----------------------:|
-| Lite    | `LogstashLayout`    |                  917 |                     143 |
-| Lite    | `DefaultJsonLayout` |                  702 |                      54 |
-| Lite    | `CustomJsonLayout`  |                  582 |                     152 |
-| Full    | `LogstashLayout`    |                   86 |                      59 |
-| Full    | `DefaultJsonLayout` |                   17 |                     482 |
-| Full    | `CustomJsonLayout`  |                   17 |                     163 |
+<div id="results">
+    <table>
+        <thead>
+            <tr>
+                <th>Benchmark</th>
+                <th>TLA?<sup>*</sup></th>
+                <th colspan="2">ops/sec<sup>**</sup></th>
+                <th>MB/sec<sup>**</sup></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr data-benchmark="liteLogstashLayout">
+                <td class="benchmark">liteLogstashLayout</td>
+                <td class="tla">✓</td>
+                <td class="op_rate">1,309,305</td>
+                <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉ (100%)</td>
+                <td class="gc_rate">0.4</td>
+            </tr>
+            <tr data-benchmark="liteLogstashLayout">
+                <td class="benchmark">liteLogstashLayout</td>
+                <td class="tla">✗</td>
+                <td class="op_rate">1,308,970</td>
+                <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉ (100%)</td>
+                <td class="gc_rate">0.4</td>
+            </tr>
+            <tr data-benchmark="liteDefaultJsonLayout">
+                <td class="benchmark">liteDefaultJsonLayout</td>
+                <td class="tla">✓</td>
+                <td class="op_rate">625,116</td>
+                <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉ (48%)</td>
+                <td class="gc_rate">2,915.2</td>
+            </tr>
+            <tr data-benchmark="liteDefaultJsonLayout">
+                <td class="benchmark">liteDefaultJsonLayout</td>
+                <td class="tla">✗</td>
+                <td class="op_rate">615,219</td>
+                <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉ (47%)</td>
+                <td class="gc_rate">2,869.1</td>
+            </tr>
+            <tr data-benchmark="liteCustomJsonLayout">
+                <td class="benchmark">liteCustomJsonLayout</td>
+                <td class="tla">✓</td>
+                <td class="op_rate">551,004</td>
+                <td class="op_rate_bar">▉▉▉▉▉▉▉▉ (42%)</td>
+                <td class="gc_rate">2,781.3</td>
+            </tr>
+            <tr data-benchmark="liteCustomJsonLayout">
+                <td class="benchmark">liteCustomJsonLayout</td>
+                <td class="tla">✗</td>
+                <td class="op_rate">534,704</td>
+                <td class="op_rate_bar">▉▉▉▉▉▉▉▉ (41%)</td>
+                <td class="gc_rate">2,699.0</td>
+            </tr>
+            <tr data-benchmark="fullLogstashLayout">
+                <td class="benchmark">fullLogstashLayout</td>
+                <td class="tla">✗</td>
+                <td class="op_rate">133,726</td>
+                <td class="op_rate_bar">▉▉ (10%)</td>
+                <td class="gc_rate">13.5</td>
+            </tr>
+            <tr data-benchmark="fullLogstashLayout">
+                <td class="benchmark">fullLogstashLayout</td>
+                <td class="tla">✓</td>
+                <td class="op_rate">130,923</td>
+                <td class="op_rate_bar">▉▉ (10%)</td>
+                <td class="gc_rate">13.2</td>
+            </tr>
+            <tr data-benchmark="fullCustomJsonLayout">
+                <td class="benchmark">fullCustomJsonLayout</td>
+                <td class="tla">✗</td>
+                <td class="op_rate">15,509</td>
+                <td class="op_rate_bar">▉ (1%)</td>
+                <td class="gc_rate">3,412.6</td>
+            </tr>
+            <tr data-benchmark="fullDefaultJsonLayout">
+                <td class="benchmark">fullDefaultJsonLayout</td>
+                <td class="tla">✓</td>
+                <td class="op_rate">15,368</td>
+                <td class="op_rate_bar">▉ (1%)</td>
+                <td class="gc_rate">3,378.8</td>
+            </tr>
+            <tr data-benchmark="fullDefaultJsonLayout">
+                <td class="benchmark">fullDefaultJsonLayout</td>
+                <td class="tla">✗</td>
+                <td class="op_rate">15,362</td>
+                <td class="op_rate_bar">▉ (1%)</td>
+                <td class="gc_rate">3,377.3</td>
+            </tr>
+            <tr data-benchmark="fullCustomJsonLayout">
+                <td class="benchmark">fullCustomJsonLayout</td>
+                <td class="tla">✓</td>
+                <td class="op_rate">15,324</td>
+                <td class="op_rate_bar">▉ (1%)</td>
+                <td class="gc_rate">3,371.9</td>
+            </tr>
+        </tbody>
+    </table>
+    <p id="footnotes">
+        <sup>*</sup> Thread local allocations (i.e., <code>log4j2.enable.threadlocals</code> flag) enabled?<br/>
+        <sup>**</sup> 99<sup>th</sup> percentile
+    </p>
+</div>
 
 As results point out, `log4j2-logstash-layout` is the fastest JSON layout in the town.
 

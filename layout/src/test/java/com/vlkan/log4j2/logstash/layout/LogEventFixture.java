@@ -10,28 +10,55 @@ import org.apache.logging.log4j.spi.ThreadContextStack;
 import org.apache.logging.log4j.util.StringMap;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
-public enum LogEventFixture {;
+enum LogEventFixture {;
 
-    public static final LogEvent LOG_EVENT_1 = createLogEvent("#1");
+    static List<LogEvent> createLiteLogEvents(int logEventCount) {
+        List<LogEvent> logEvents = new ArrayList<>(logEventCount);
+        for (int logEventIndex = 0; logEventIndex < logEventCount; logEventIndex++) {
+            LogEvent logEvent = LogEventFixture.createLiteLogEvent(String.valueOf(logEventIndex));
+            logEvents.add(logEvent);
+        }
+        return logEvents;
+    }
 
-    public static final LogEvent LOG_EVENT_2 = createLogEvent("#2");
+    private static LogEvent createLiteLogEvent(String id) {
+        SimpleMessage message = new SimpleMessage("Msg" + id);
+        Level level = Level.DEBUG;
+        String loggerFqcn = "f.q.c.n" + id;
+        String loggerName = "a.B" + id;
+        int timeMillis = 1;
+        return Log4jLogEvent
+                .newBuilder()
+                .setLoggerName(loggerName)
+                .setLoggerFqcn(loggerFqcn)
+                .setLevel(level)
+                .setMessage(message)
+                .setTimeMillis(timeMillis)
+                .build();
+    }
 
-    public static final LogEvent LOG_EVENT_3 = createLogEvent("#3");
+    static List<LogEvent> createFullLogEvents(int logEventCount) {
+        List<LogEvent> logEvents = new ArrayList<>(logEventCount);
+        for (int logEventIndex = 0; logEventIndex < logEventCount; logEventIndex++) {
+            LogEvent logEvent = LogEventFixture.createFullLogEvent(String.valueOf(logEventIndex));
+            logEvents.add(logEvent);
+        }
+        return logEvents;
+    }
 
-    public static final LogEvent LOG_EVENT_4 = createLogEvent("#4");
-
-    public static final LogEvent[] LOG_EVENTS = new LogEvent[] { LOG_EVENT_1, LOG_EVENT_2, LOG_EVENT_3, LOG_EVENT_4 };
-
-    public static LogEvent createLogEvent(String id) {
+    private static LogEvent createFullLogEvent(String id) {
 
         // Create exception.
         Exception sourceHelper = new Exception();
         sourceHelper.fillInStackTrace();
-        Exception cause = new NullPointerException("testNPEx" + id);
+        Exception cause = new NullPointerException("testNPEx-" + id);
         sourceHelper.fillInStackTrace();
         StackTraceElement source = sourceHelper.getStackTrace()[0];
-        IOException ioException = new IOException("testIOEx" + id, cause);
+        IOException ioException = new IOException("testIOEx-" + id, cause);
         ioException.addSuppressed(new IndexOutOfBoundsException("I am suppressed exception 1" + id));
         ioException.addSuppressed(new IndexOutOfBoundsException("I am suppressed exception 2" + id));
 
@@ -45,7 +72,8 @@ public enum LogEventFixture {;
         Level level = Level.DEBUG;
         String loggerFqcn = "f.q.c.n" + id;
         String loggerName = "a.B" + id;
-        int timeMillis = 1;
+        int timeMillis = Math.abs(id.hashCode());
+        int nanoTime = timeMillis * 2;
 
         return Log4jLogEvent
                 .newBuilder()
@@ -61,6 +89,7 @@ public enum LogEventFixture {;
                 .setThreadPriority(threadPriority)
                 .setSource(source)
                 .setTimeMillis(timeMillis)
+                .setNanoTime(nanoTime)
                 .build();
 
     }
@@ -68,7 +97,7 @@ public enum LogEventFixture {;
     private static StringMap createContextData(String id) {
         StringMap contextData = ContextDataFactory.createContextData();
         contextData.putValue("MDC.String." + id, "String");
-        contextData.putValue("MDC.Double." + id, Math.PI);
+        contextData.putValue("MDC.BigDecimal." + id, BigDecimal.valueOf(Math.PI));
         contextData.putValue("MDC.Integer." + id, 10);
         contextData.putValue("MDC.Long." + id, Long.MAX_VALUE);
         return contextData;

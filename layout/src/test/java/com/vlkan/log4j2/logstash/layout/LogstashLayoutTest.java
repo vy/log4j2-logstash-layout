@@ -10,6 +10,7 @@ import com.vlkan.log4j2.logstash.layout.util.Throwables;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.DefaultConfiguration;
 import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilderFactory;
 import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 import org.apache.logging.log4j.core.impl.Log4jLogEvent;
@@ -30,18 +31,26 @@ import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class LogstashLayoutTest {
+abstract class LogstashLayoutTest {
+
+    private static final Configuration CONFIGURATION = new DefaultConfiguration();
+
+    private static final List<LogEvent> LOG_EVENTS = LogEventFixture.createFullLogEvents(5);
 
     private static final JsonNodeFactory JSON_NODE_FACTORY = JsonNodeFactory.instance;
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    LogstashLayoutTest(boolean threadLocalsEnabled) {
+        LogstashLayoutSerializationContexts.THREAD_LOCALS_ENABLED = threadLocalsEnabled;
+    }
 
     @Test
     public void test_serialized_event() throws IOException {
         String lookupTestKey = "lookup_test_key";
         String lookupTestVal = String.format("lookup_test_value_%d", (int) (1000 * Math.random()));
         System.setProperty(lookupTestKey, lookupTestVal);
-        for (LogEvent logEvent : LogEventFixture.LOG_EVENTS) {
+        for (LogEvent logEvent : LOG_EVENTS) {
             checkLogEvent(logEvent, lookupTestKey, lookupTestVal);
         }
     }
@@ -55,7 +64,7 @@ public class LogstashLayoutTest {
         String firstNdcItemExcludingRegex = ndcItems.isEmpty() ? null : String.format("^(?!%s).*$", Pattern.quote(firstNdcItem));
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
-                .setConfiguration(Log4jFixture.CONFIGURATION)
+                .setConfiguration(CONFIGURATION)
                 .setTemplateUri("classpath:LogstashTestLayout.json")
                 .setStackTraceEnabled(true)
                 .setLocationInfoEnabled(true)
@@ -113,7 +122,13 @@ public class LogstashLayoutTest {
                 boolean matches = mdcKeyPattern == null || mdcKeyPattern.matcher(key).matches();
                 if (matches) {
                     JsonNode valueNode = OBJECT_MAPPER.convertValue(value, JsonNode.class);
-                    assertThat(node).isEqualTo(valueNode);
+                    if (valueNode.isNumber()) {
+                        double valueNodeDouble = valueNode.asDouble();
+                        double nodeDouble = node.asDouble();
+                        assertThat(nodeDouble).isEqualTo(valueNodeDouble);
+                    } else {
+                        assertThat(node).isEqualTo(valueNode);
+                    }
                 } else {
                     assertThat(node).isEqualTo(MissingNode.getInstance());
                 }
