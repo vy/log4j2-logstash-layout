@@ -1,9 +1,9 @@
 {
   "mdc": "${json:mdc}",
   "exception": {
-    "exception_class": "${json:exceptionClassName}",
-    "exception_message": "${json:exceptionMessage}",
-    "stacktrace": "${json:exceptionStackTrace:text}"
+    "exception_class": "${json:exception:className}",
+    "exception_message": "${json:exception:message}",
+    "stacktrace": "${json:exception:stackTrace:text}"
   },
   "line_number": "${json:source:lineNumber}",
   "class": "${json:source:className}",

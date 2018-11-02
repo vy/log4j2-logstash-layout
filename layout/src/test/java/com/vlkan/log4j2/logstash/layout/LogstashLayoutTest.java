@@ -272,9 +272,9 @@ abstract class LogstashLayoutTest {
 
         // Create the template.
         ObjectNode templateRootNode = JSON_NODE_FACTORY.objectNode();
-        templateRootNode.put("ex_class", "${json:exceptionClassName}");
-        templateRootNode.put("ex_message", "${json:exceptionMessage}");
-        templateRootNode.put("ex_stacktrace", "${json:exceptionStackTrace:text}");
+        templateRootNode.put("ex_class", "${json:exception:className}");
+        templateRootNode.put("ex_message", "${json:exception:message}");
+        templateRootNode.put("ex_stacktrace", "${json:exception:stackTrace:text}");
         templateRootNode.put("root_ex_class", "${json:exceptionRootCauseClassName}");
         templateRootNode.put("root_ex_message", "${json:exceptionRootCauseMessage}");
         templateRootNode.put("root_ex_stacktrace", "${json:exceptionRootCauseStackTrace:text}");
@@ -318,9 +318,9 @@ abstract class LogstashLayoutTest {
 
         // Create the template.
         ObjectNode templateRootNode = JSON_NODE_FACTORY.objectNode();
-        templateRootNode.put("ex_class", "${json:exceptionClassName}");
-        templateRootNode.put("ex_message", "${json:exceptionMessage}");
-        templateRootNode.put("ex_stacktrace", "${json:exceptionStackTrace:text}");
+        templateRootNode.put("ex_class", "${json:exception:className}");
+        templateRootNode.put("ex_message", "${json:exception:message}");
+        templateRootNode.put("ex_stacktrace", "${json:exception:stackTrace:text}");
         templateRootNode.put("root_ex_class", "${json:exceptionRootCauseClassName}");
         templateRootNode.put("root_ex_message", "${json:exceptionRootCauseMessage}");
         templateRootNode.put("root_ex_stacktrace", "${json:exceptionRootCauseStackTrace:text}");

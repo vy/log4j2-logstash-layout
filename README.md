@@ -121,9 +121,9 @@ in `LogstashJsonEventLayoutV1.json` within the classpath:
   "mdc": "${json:mdc}",
   "ndc": "${json:ndc}",
   "exception": {
-    "exception_class": "${json:exceptionClassName}",
-    "exception_message": "${json:exceptionMessage}",
-    "stacktrace": "${json:exceptionStackTrace:text}"
+    "exception_class": "${json:exception:className}",
+    "exception_message": "${json:exception:message}",
+    "stacktrace": "${json:exception:stackTrace:text}"
   },
   "line_number": "${json:source:lineNumber}",
   "class": "${json:source:className}",
@@ -150,13 +150,13 @@ rendering the JSON output.
 | Variable Name | Description |
 |---------------|-------------|
 | `endOfBatch` | `logEvent.isEndOfBatch()` |
-| `exceptionClassName` | `logEvent.getThrown().getClass().getCanonicalName()` |
-| `exceptionMessage` | `logEvent.getThrown().getMessage()` |
-| `exceptionStackTrace` | `logEvent.getThrown().getStackTrace()` (inactive when `stackTraceEnabled=false`) |
-| `exceptionStackTrace:text` | `logEvent.getThrown().printStackTrace()` (inactive when `stackTraceEnabled=false`) |
-| `exceptionRootCauseClassName` | the innermost `exceptionClassName` in causal chain |
-| `exceptionRootCauseMessage` | the innermost `exceptionMessage` in causal chain |
-| `exceptionRootCauseStackTrace[:text]` | the innermost `exceptionStackTrace[:text]` in causal chain |
+| `exception:className` | `logEvent.getThrown().getClass().getCanonicalName()` |
+| `exception:message` | `logEvent.getThrown().getMessage()` |
+| `exception:stackTrace` | `logEvent.getThrown().getStackTrace()` (inactive when `stackTraceEnabled=false`) |
+| `exception:stackTrace:text` | `logEvent.getThrown().printStackTrace()` (inactive when `stackTraceEnabled=false`) |
+| `exceptionRootCauseClassName` | the innermost `exception:className` in causal chain |
+| `exceptionRootCauseMessage` | the innermost `exception:message` in causal chain |
+| `exceptionRootCauseStackTrace[:text]` | the innermost `exception:stackTrace[:text]` in causal chain |
 | `level` | `logEvent.getLevel()` |
 | `logger:fqcn` | `logEvent.getLoggerFqcn()` |
 | `logger:name` | `logEvent.getLoggerName()` |

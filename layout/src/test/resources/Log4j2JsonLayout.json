@@ -5,9 +5,9 @@
   "loggerName": "${json:logger:name}",
   "message": "${json:message}",
   "thrown": {
-    "message": "${json:exceptionMessage}",
-    "name": "${json:exceptionClassName}",
-    "extendedStackTrace": "${json:exceptionStackTrace}"
+    "message": "${json:exception:message}",
+    "name": "${json:exception:className}",
+    "extendedStackTrace": "${json:exception:stackTrace}"
   },
   "contextStack": "${json:ndc}",
   "endOfBatch": "${json:endOfBatch}",
