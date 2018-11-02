@@ -125,16 +125,16 @@ in `LogstashJsonEventLayoutV1.json` within the classpath:
     "exception_message": "${json:exceptionMessage}",
     "stacktrace": "${json:exceptionStackTrace:text}"
   },
-  "line_number": "${json:sourceLineNumber}",
-  "class": "${json:sourceClassName}",
+  "line_number": "${json:source:lineNumber}",
+  "class": "${json:source:className}",
   "@version": 1,
   "source_host": "${hostName}",
   "message": "${json:message}",
   "thread_name": "${json:thread:name}",
   "@timestamp": "${json:timestamp}",
   "level": "${json:level}",
-  "file": "${json:sourceFileName}",
-  "method": "${json:sourceMethodName}",
+  "file": "${json:source:fileName}",
+  "method": "${json:source:methodName}",
   "logger_name": "${json:logger:name}"
 }
 ```
@@ -165,10 +165,10 @@ rendering the JSON output.
 | `message` | `logEvent.getFormattedMessage()` |
 | `message:json` | if `logEvent.getMessage()` is of type `MultiformatMessage` and supports JSON, its read value, otherwise, `{"message": <formattedMessage>}` object |
 | `ndc` | Nested Diagnostic Context `String[]` returned by `logEvent.getContextStack()` |
-| `sourceClassName` | `logEvent.getSource().getClassName()` |
-| `sourceFileName` | `logEvent.getSource().getFileName()` (inactive when `locationInfoEnabled=false`) |
-| `sourceLineNumber` | `logEvent.getSource().getLineNumber()` (inactive when `locationInfoEnabled=false`) |
-| `sourceMethodName` | `logEvent.getSource().getMethodName()` |
+| `source:className` | `logEvent.getSource().getClassName()` |
+| `source:fileName` | `logEvent.getSource().getFileName()` (inactive when `locationInfoEnabled=false`) |
+| `source:lineNumber` | `logEvent.getSource().getLineNumber()` (inactive when `locationInfoEnabled=false`) |
+| `source:methodName` | `logEvent.getSource().getMethodName()` |
 | `thread:id` | `logEvent.getThreadId()` |
 | `thread:name` | `logEvent.getThreadName()` |
 | `thread:priority` | `logEvent.getThreadPriority()` |

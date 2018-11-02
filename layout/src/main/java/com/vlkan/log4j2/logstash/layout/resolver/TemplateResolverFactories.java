@@ -19,10 +19,7 @@ enum TemplateResolverFactories {;
                             LevelResolverFactory.getInstance(),
                             LoggerResolverFactory.getInstance(),
                             MessageResolverFactory.getInstance(),
-                            SourceClassNameResolverFactory.getInstance(),
-                            SourceFileNameResolverFactory.getInstance(),
-                            SourceLineNumberResolverFactory.getInstance(),
-                            SourceMethodNameResolverFactory.getInstance(),
+                            SourceResolverFactory.getInstance(),
                             ThreadResolverFactory.getInstance(),
                             TimestampResolverFactory.getInstance()));
 

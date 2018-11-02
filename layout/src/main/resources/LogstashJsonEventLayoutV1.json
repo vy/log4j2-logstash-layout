@@ -5,15 +5,15 @@
     "exception_message": "${json:exceptionMessage}",
     "stacktrace": "${json:exceptionStackTrace:text}"
   },
-  "line_number": "${json:sourceLineNumber}",
-  "class": "${json:sourceClassName}",
+  "line_number": "${json:source:lineNumber}",
+  "class": "${json:source:className}",
   "@version": 1,
   "source_host": "${hostName}",
   "message": "${json:message}",
   "thread_name": "${json:thread:name}",
   "@timestamp": "${json:timestamp}",
   "level": "${json:level}",
-  "file": "${json:sourceFileName}",
-  "method": "${json:sourceMethodName}",
+  "file": "${json:source:fileName}",
+  "method": "${json:source:methodName}",
   "logger_name": "${json:logger:name}"
 }

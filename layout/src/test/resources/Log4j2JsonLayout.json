@@ -16,9 +16,9 @@
   "threadId": "${json:thread:id}",
   "threadPriority": "${json:thread:priority}",
   "source": {
-    "class": "${json:sourceClassName}",
-    "method": "${json:sourceMethodName}",
-    "file": "${json:sourceFileName}",
-    "line": "${json:sourceLineNumber}"
+    "class": "${json:source:className}",
+    "method": "${json:source:methodName}",
+    "file": "${json:source:fileName}",
+    "line": "${json:source:lineNumber}"
   }
 }

@@ -11,49 +11,51 @@ class ThreadResolver implements TemplateResolver {
     private final TemplateResolver internalResolver;
 
     ThreadResolver(TemplateResolverContext context, String key) {
-
         this.internalResolver = createInternalResolver(context, key);
     }
 
     private static TemplateResolver createInternalResolver(final TemplateResolverContext context, String key) {
-
-        if ("name".equals(key)) {
-            return new TemplateResolver() {
-                @Override
-                public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-                    String threadName = logEvent.getThreadName();
-                    boolean threadNameExcluded = StringUtils.isEmpty(threadName) && context.isEmptyPropertyExclusionEnabled();
-                    if (threadNameExcluded) {
-                        jsonGenerator.writeNull();
-                    } else {
-                        jsonGenerator.writeString(threadName);
-                    }
-                }
-            };
+        switch (key) {
+            case "name": return createNameResolver(context);
+            case "id": return createIdResolver();
+            case "priority": return createPriorityResolver();
         }
-
-        if ("id".equals(key)) {
-            return new TemplateResolver() {
-                @Override
-                public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-                    long threadId = logEvent.getThreadId();
-                    jsonGenerator.writeNumber(threadId);
-                }
-            };
-        }
-
-        if ("priority".equals(key)) {
-            return new TemplateResolver() {
-                @Override
-                public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-                    int threadPriority = logEvent.getThreadPriority();
-                    jsonGenerator.writeNumber(threadPriority);
-                }
-            };
-        }
-
         throw new IllegalArgumentException("unknown key: " + key);
+    }
 
+    private static TemplateResolver createNameResolver(final TemplateResolverContext context) {
+        return new TemplateResolver() {
+            @Override
+            public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
+                String threadName = logEvent.getThreadName();
+                boolean threadNameExcluded = StringUtils.isEmpty(threadName) && context.isEmptyPropertyExclusionEnabled();
+                if (threadNameExcluded) {
+                    jsonGenerator.writeNull();
+                } else {
+                    jsonGenerator.writeString(threadName);
+                }
+            }
+        };
+    }
+
+    private static TemplateResolver createIdResolver() {
+        return new TemplateResolver() {
+            @Override
+            public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
+                long threadId = logEvent.getThreadId();
+                jsonGenerator.writeNumber(threadId);
+            }
+        };
+    }
+
+    private static TemplateResolver createPriorityResolver() {
+        return new TemplateResolver() {
+            @Override
+            public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
+                int threadPriority = logEvent.getThreadPriority();
+                jsonGenerator.writeNumber(threadPriority);
+            }
+        };
     }
 
     static String getName() {
