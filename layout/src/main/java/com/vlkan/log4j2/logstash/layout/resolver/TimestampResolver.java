@@ -8,6 +8,22 @@ import java.io.IOException;
 
 class TimestampResolver implements TemplateResolver {
 
+    private static final TemplateResolver MILLIS_RESOLVER = new TemplateResolver() {
+        @Override
+        public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
+            long timeMillis = logEvent.getTimeMillis();
+            jsonGenerator.writeNumber(timeMillis);
+        }
+    };
+
+    private static final TemplateResolver NANOS_RESOLVER = new TemplateResolver() {
+        @Override
+        public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
+            long nanoTime = logEvent.getNanoTime();
+            jsonGenerator.writeNumber(nanoTime);
+        }
+    };
+
     private final TemplateResolver internalResolver;
 
     TimestampResolver(TemplateResolverContext context, String key) {
@@ -15,27 +31,17 @@ class TimestampResolver implements TemplateResolver {
     }
 
     private static TemplateResolver createInternalResolver(final TemplateResolverContext context, String key) {
-
-        if ("millis".equals(key)) {
-            return new TemplateResolver() {
-                @Override
-                public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-                    long timeMillis = logEvent.getTimeMillis();
-                    jsonGenerator.writeNumber(timeMillis);
-                }
-            };
+        if (key == null) {
+            return createFormatResolver(context);
         }
-
-        if ("nanos".equals(key)) {
-            return new TemplateResolver() {
-                @Override
-                public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-                    long nanoTime = logEvent.getNanoTime();
-                    jsonGenerator.writeNumber(nanoTime);
-                }
-            };
+        switch (key) {
+            case "millis": return MILLIS_RESOLVER;
+            case "nanos": return NANOS_RESOLVER;
         }
+        throw new IllegalArgumentException("unknown key: " + key);
+    }
 
+    private static TemplateResolver createFormatResolver(final TemplateResolverContext context) {
         return new TemplateResolver() {
             @Override
             public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
@@ -45,7 +51,6 @@ class TimestampResolver implements TemplateResolver {
                 jsonGenerator.writeString(timestamp);
             }
         };
-
     }
 
     static String getName() {
