@@ -1,12 +1,13 @@
 package com.vlkan.log4j2.logstash.layout.resolver;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.vlkan.log4j2.logstash.layout.util.Throwables;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.core.LogEvent;
 
 import java.io.IOException;
 
-class ExceptionResolver implements TemplateResolver {
+class ExceptionRootCauseResolver implements TemplateResolver {
 
     private static final ExceptionInternalResolverFactory INTERNAL_RESOLVER_FACTORY =
             new ExceptionInternalResolverFactory() {
@@ -20,8 +21,9 @@ class ExceptionResolver implements TemplateResolver {
                             if (exception == null) {
                                 jsonGenerator.writeNull();
                             } else {
-                                String exceptionClassName = exception.getClass().getCanonicalName();
-                                jsonGenerator.writeString(exceptionClassName);
+                                Throwable rootCause = Throwables.getRootCause(exception);
+                                String rootCauseClassName = rootCause.getClass().getCanonicalName();
+                                jsonGenerator.writeString(rootCauseClassName);
                             }
                         }
                     };
@@ -34,10 +36,11 @@ class ExceptionResolver implements TemplateResolver {
                         public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
                             Throwable exception = logEvent.getThrown();
                             if (exception != null) {
-                                String exceptionMessage = exception.getMessage();
-                                boolean exceptionMessageExcluded = StringUtils.isEmpty(exceptionMessage) && context.isEmptyPropertyExclusionEnabled();
-                                if (!exceptionMessageExcluded) {
-                                    jsonGenerator.writeString(exceptionMessage);
+                                Throwable rootCause = Throwables.getRootCause(exception);
+                                String rootCauseMessage = rootCause.getMessage();
+                                boolean rootCauseMessageExcluded = StringUtils.isEmpty(rootCauseMessage) && context.isEmptyPropertyExclusionEnabled();
+                                if (!rootCauseMessageExcluded) {
+                                    jsonGenerator.writeString(rootCauseMessage);
                                     return;
                                 }
                             }
@@ -52,7 +55,12 @@ class ExceptionResolver implements TemplateResolver {
                         @Override
                         public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
                             Throwable exception = logEvent.getThrown();
-                            ExceptionStackTraceResolvers.resolveText(context, exception, jsonGenerator);
+                            if (!context.isStackTraceEnabled() || exception == null) {
+                                jsonGenerator.writeNull();
+                            } else {
+                                Throwable rootCause = Throwables.getRootCause(exception);
+                                ExceptionStackTraceResolvers.resolveText(context, rootCause, jsonGenerator);
+                            }
                         }
                     };
                 }
@@ -63,7 +71,12 @@ class ExceptionResolver implements TemplateResolver {
                         @Override
                         public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
                             Throwable exception = logEvent.getThrown();
-                            ExceptionStackTraceResolvers.resolveArray(context, exception, jsonGenerator);
+                            if (!context.isStackTraceEnabled() || exception == null) {
+                                jsonGenerator.writeNull();
+                            } else {
+                                Throwable rootCause = Throwables.getRootCause(exception);
+                                ExceptionStackTraceResolvers.resolveArray(context, rootCause, jsonGenerator);
+                            }
                         }
                     };
                 }
@@ -72,12 +85,12 @@ class ExceptionResolver implements TemplateResolver {
 
     private final TemplateResolver internalResolver;
 
-    ExceptionResolver(TemplateResolverContext context, String key) {
+    ExceptionRootCauseResolver(TemplateResolverContext context, String key) {
         this.internalResolver = INTERNAL_RESOLVER_FACTORY.createInternalResolver(context, key);
     }
 
     static String getName() {
-        return "exception";
+        return "exceptionRootCause";
     }
 
     @Override

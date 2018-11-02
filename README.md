@@ -154,9 +154,9 @@ rendering the JSON output.
 | `exception:message` | `logEvent.getThrown().getMessage()` |
 | `exception:stackTrace` | `logEvent.getThrown().getStackTrace()` (inactive when `stackTraceEnabled=false`) |
 | `exception:stackTrace:text` | `logEvent.getThrown().printStackTrace()` (inactive when `stackTraceEnabled=false`) |
-| `exceptionRootCauseClassName` | the innermost `exception:className` in causal chain |
-| `exceptionRootCauseMessage` | the innermost `exception:message` in causal chain |
-| `exceptionRootCauseStackTrace[:text]` | the innermost `exception:stackTrace[:text]` in causal chain |
+| `exceptionRootCause:className` | the innermost `exception:className` in causal chain |
+| `exceptionRootCause:message` | the innermost `exception:message` in causal chain |
+| `exceptionRootCause:stackTrace[:text]` | the innermost `exception:stackTrace[:text]` in causal chain |
 | `level` | `logEvent.getLevel()` |
 | `logger:fqcn` | `logEvent.getLoggerFqcn()` |
 | `logger:name` | `logEvent.getLoggerName()` |
