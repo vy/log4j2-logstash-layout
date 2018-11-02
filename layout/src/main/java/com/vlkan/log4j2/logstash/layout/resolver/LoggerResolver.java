@@ -15,29 +15,31 @@ class LoggerResolver implements TemplateResolver {
     }
 
     private static TemplateResolver createInternalResolver(final TemplateResolverContext context, String key) {
-
-        if ("name".equals(key)) {
-            return new TemplateResolver() {
-                @Override
-                public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-                    String loggerName = logEvent.getLoggerName();
-                    writeText(jsonGenerator, context, loggerName);
-                }
-            };
+        switch (key) {
+            case "name": return createNameResolver(context);
+            case "fqcn": return createFqcnResolver(context);
         }
-
-        if ("fqcn".equals(key)) {
-            return new TemplateResolver() {
-                @Override
-                public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-                    String loggerFqcn = logEvent.getLoggerFqcn();
-                    writeText(jsonGenerator, context, loggerFqcn);
-                }
-            };
-        }
-
         throw new IllegalArgumentException("unknown key: " + key);
+    }
 
+    private static TemplateResolver createNameResolver(final TemplateResolverContext context) {
+        return new TemplateResolver() {
+            @Override
+            public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
+                String loggerName = logEvent.getLoggerName();
+                writeText(jsonGenerator, context, loggerName);
+            }
+        };
+    }
+
+    private static TemplateResolver createFqcnResolver(final TemplateResolverContext context) {
+        return new TemplateResolver() {
+            @Override
+            public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
+                String loggerFqcn = logEvent.getLoggerFqcn();
+                writeText(jsonGenerator, context, loggerFqcn);
+            }
+        };
     }
 
     private static void writeText(JsonGenerator jsonGenerator, TemplateResolverContext context, String text) throws IOException {
