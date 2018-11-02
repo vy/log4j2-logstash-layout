@@ -151,7 +151,7 @@ public enum TemplateResolvers {;
 
         // Short-circuit if content is blank and not allowed.
         final String fieldValue = textNode.asText();
-        if (StringUtils.isEmpty(fieldValue) && context.isEmptyPropertyExclusionEnabled()) {
+        if (context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(fieldValue)) {
             return NULL_NODE_RESOLVER;
         }
 
@@ -177,7 +177,7 @@ public enum TemplateResolvers {;
                 String replacedText = substitutionSupported
                         ? context.getSubstitutor().replace(logEvent, fieldValue)
                         : fieldValue;
-                boolean replacedTextExcluded = StringUtils.isEmpty(replacedText) && context.isEmptyPropertyExclusionEnabled();
+                boolean replacedTextExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(replacedText);
                 if (replacedTextExcluded) {
                     jsonGenerator.writeNull();
                 } else {

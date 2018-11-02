@@ -38,7 +38,7 @@ class ExceptionRootCauseResolver implements TemplateResolver {
                             if (exception != null) {
                                 Throwable rootCause = Throwables.getRootCause(exception);
                                 String rootCauseMessage = rootCause.getMessage();
-                                boolean rootCauseMessageExcluded = StringUtils.isEmpty(rootCauseMessage) && context.isEmptyPropertyExclusionEnabled();
+                                boolean rootCauseMessageExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(rootCauseMessage);
                                 if (!rootCauseMessageExcluded) {
                                     jsonGenerator.writeString(rootCauseMessage);
                                     return;

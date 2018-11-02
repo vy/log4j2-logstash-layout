@@ -49,7 +49,7 @@ class MessageResolver implements TemplateResolver {
 
     private String resolveText(Message message) {
         String formattedMessage = message.getFormattedMessage();
-        boolean messageExcluded = StringUtils.isEmpty(formattedMessage) && context.isEmptyPropertyExclusionEnabled();
+        boolean messageExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(formattedMessage);
         return messageExcluded ? null : formattedMessage;
     }
 

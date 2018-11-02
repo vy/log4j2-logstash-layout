@@ -28,7 +28,7 @@ class ThreadResolver implements TemplateResolver {
             @Override
             public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
                 String threadName = logEvent.getThreadName();
-                boolean threadNameExcluded = StringUtils.isEmpty(threadName) && context.isEmptyPropertyExclusionEnabled();
+                boolean threadNameExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(threadName);
                 if (threadNameExcluded) {
                     jsonGenerator.writeNull();
                 } else {

@@ -30,7 +30,7 @@ class SourceResolver implements TemplateResolver {
             public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
                 if (context.isLocationInfoEnabled() && logEvent.getSource() != null) {
                     String sourceClassName = logEvent.getSource().getClassName();
-                    boolean sourceClassNameExcluded = StringUtils.isEmpty(sourceClassName) && context.isEmptyPropertyExclusionEnabled();
+                    boolean sourceClassNameExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(sourceClassName);
                     if (!sourceClassNameExcluded) {
                         jsonGenerator.writeString(sourceClassName);
                         return;
@@ -47,7 +47,7 @@ class SourceResolver implements TemplateResolver {
             public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
                 if (context.isLocationInfoEnabled() && logEvent.getSource() != null) {
                     String sourceFileName = logEvent.getSource().getFileName();
-                    boolean sourceFileNameExcluded = StringUtils.isEmpty(sourceFileName) && context.isEmptyPropertyExclusionEnabled();
+                    boolean sourceFileNameExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(sourceFileName);
                     if (!sourceFileNameExcluded) {
                         jsonGenerator.writeString(sourceFileName);
                         return;
@@ -78,7 +78,7 @@ class SourceResolver implements TemplateResolver {
             public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
                 if (context.isLocationInfoEnabled() && logEvent.getSource() != null) {
                     String sourceMethodName = logEvent.getSource().getMethodName();
-                    boolean sourceMethodNameExcluded = StringUtils.isEmpty(sourceMethodName) && context.isEmptyPropertyExclusionEnabled();
+                    boolean sourceMethodNameExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(sourceMethodName);
                     if (!sourceMethodNameExcluded) {
                         jsonGenerator.writeString(sourceMethodName);
                         return;

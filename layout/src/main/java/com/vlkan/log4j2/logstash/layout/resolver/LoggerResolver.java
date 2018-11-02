@@ -41,7 +41,7 @@ class LoggerResolver implements TemplateResolver {
     }
 
     private static void writeText(JsonGenerator jsonGenerator, TemplateResolverContext context, String text) throws IOException {
-        boolean textExcluded = StringUtils.isEmpty(text) && context.isEmptyPropertyExclusionEnabled();
+        boolean textExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(text);
         if (textExcluded) {
             jsonGenerator.writeNull();
         } else {

@@ -97,8 +97,8 @@ class ContextDataResolver implements TemplateResolver {
     }
 
     private static boolean isValueExcluded(TemplateResolverContext context, Object value) {
-        return (value == null || (value instanceof String && ((String) value).isEmpty())) &&
-                context.isEmptyPropertyExclusionEnabled();
+        return context.isEmptyPropertyExclusionEnabled() &&
+                (value == null || (value instanceof String && ((String) value).isEmpty()));
     }
 
 }

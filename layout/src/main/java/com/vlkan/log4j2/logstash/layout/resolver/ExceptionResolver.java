@@ -35,7 +35,7 @@ class ExceptionResolver implements TemplateResolver {
                             Throwable exception = logEvent.getThrown();
                             if (exception != null) {
                                 String exceptionMessage = exception.getMessage();
-                                boolean exceptionMessageExcluded = StringUtils.isEmpty(exceptionMessage) && context.isEmptyPropertyExclusionEnabled();
+                                boolean exceptionMessageExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(exceptionMessage);
                                 if (!exceptionMessageExcluded) {
                                     jsonGenerator.writeString(exceptionMessage);
                                     return;
