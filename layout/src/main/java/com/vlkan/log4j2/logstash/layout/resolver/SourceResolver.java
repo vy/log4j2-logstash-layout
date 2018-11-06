@@ -8,6 +8,13 @@ import java.io.IOException;
 
 class SourceResolver implements EventResolver {
 
+    private static final EventResolver NULL_RESOLVER = new EventResolver() {
+        @Override
+        public void resolve(LogEvent value, JsonGenerator jsonGenerator) throws IOException {
+            jsonGenerator.writeNull();
+        }
+    };
+
     private final EventResolver internalResolver;
 
     SourceResolver(EventResolverContext context, String key) {
@@ -15,10 +22,13 @@ class SourceResolver implements EventResolver {
     }
 
     private EventResolver createInternalResolver(EventResolverContext context, String key) {
+        if (!context.isLocationInfoEnabled()) {
+            return NULL_RESOLVER;
+        }
         switch (key) {
             case "className": return createClassNameResolver(context);
             case "fileName": return createFileNameResolver(context);
-            case "lineNumber": return createLineNumberResolver(context);
+            case "lineNumber": return createLineNumberResolver();
             case "methodName": return createMethodNameResolver(context);
         }
         throw new IllegalArgumentException("unknown key: " + key);
@@ -28,8 +38,9 @@ class SourceResolver implements EventResolver {
         return new EventResolver() {
             @Override
             public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-                if (context.isLocationInfoEnabled() && logEvent.getSource() != null) {
-                    String sourceClassName = logEvent.getSource().getClassName();
+                StackTraceElement logEventSource = logEvent.getSource();
+                if (logEventSource != null) {
+                    String sourceClassName = logEventSource.getClassName();
                     boolean sourceClassNameExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(sourceClassName);
                     if (!sourceClassNameExcluded) {
                         jsonGenerator.writeString(sourceClassName);
@@ -45,8 +56,9 @@ class SourceResolver implements EventResolver {
         return new EventResolver() {
             @Override
             public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-                if (context.isLocationInfoEnabled() && logEvent.getSource() != null) {
-                    String sourceFileName = logEvent.getSource().getFileName();
+                StackTraceElement logEventSource = logEvent.getSource();
+                if (logEventSource != null) {
+                    String sourceFileName = logEventSource.getFileName();
                     boolean sourceFileNameExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(sourceFileName);
                     if (!sourceFileNameExcluded) {
                         jsonGenerator.writeString(sourceFileName);
@@ -58,14 +70,15 @@ class SourceResolver implements EventResolver {
         };
     }
 
-    private static EventResolver createLineNumberResolver(final EventResolverContext context) {
+    private static EventResolver createLineNumberResolver() {
         return new EventResolver() {
             @Override
             public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-                if (!context.isLocationInfoEnabled() || logEvent.getSource() == null) {
+                StackTraceElement logEventSource = logEvent.getSource();
+                if (logEventSource == null) {
                     jsonGenerator.writeNull();
                 } else {
-                    int sourceLineNumber = logEvent.getSource().getLineNumber();
+                    int sourceLineNumber = logEventSource.getLineNumber();
                     jsonGenerator.writeNumber(sourceLineNumber);
                 }
             }
@@ -76,8 +89,9 @@ class SourceResolver implements EventResolver {
         return new EventResolver() {
             @Override
             public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-                if (context.isLocationInfoEnabled() && logEvent.getSource() != null) {
-                    String sourceMethodName = logEvent.getSource().getMethodName();
+                StackTraceElement logEventSource = logEvent.getSource();
+                if (logEventSource != null) {
+                    String sourceMethodName = logEventSource.getMethodName();
                     boolean sourceMethodNameExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(sourceMethodName);
                     if (!sourceMethodNameExcluded) {
                         jsonGenerator.writeString(sourceMethodName);
