@@ -9,17 +9,17 @@ import org.apache.logging.log4j.message.MultiformatMessage;
 
 import java.io.IOException;
 
-class MessageResolver implements TemplateResolver {
+class MessageResolver implements EventResolver {
 
     private static final String NAME = "message";
 
     private static final String[] FORMATS = { "JSON" };
 
-    private final TemplateResolverContext context;
+    private final EventResolverContext context;
 
     private final String key;
 
-    MessageResolver(TemplateResolverContext context, String key) {
+    MessageResolver(EventResolverContext context, String key) {
         this.context = context;
         this.key = key;
     }
@@ -88,7 +88,7 @@ class MessageResolver implements TemplateResolver {
 
     }
 
-    private static JsonNode readMessageJson(TemplateResolverContext context, String messageJson) {
+    private static JsonNode readMessageJson(EventResolverContext context, String messageJson) {
         try {
             return context.getObjectMapper().readTree(messageJson);
         } catch (IOException error) {

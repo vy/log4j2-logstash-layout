@@ -37,8 +37,12 @@ def run_benchmark(tla_enabled):
     json_output_file = get_json_output_file(tla_enabled)
     mvn_output_file = get_mvn_output_file(tla_enabled)
     with open(mvn_output_file, "w") as mvn_output_file_handle:
+        env = os.environ.copy()
+        env["MAVEN_OPTS"] = "-XX:+TieredCompilation -XX:+AggressiveOpts"
         popen = subprocess.Popen(
-            ["time",
+            ["taskset",
+             "-c", "0",
+             "time",
              "mvn",
              "-pl", "layout",
              "exec:java",
@@ -46,6 +50,7 @@ def run_benchmark(tla_enabled):
              "-Dlog4j2.enableDirectEncoders=true",
              "-Dlog4j2.enable.threadlocals={}".format(str(tla_enabled).lower()),
              "-Dlog4j2.logstashLayoutBenchmark.jsonOutputFile={}".format(json_output_file)],
+            env=env,
             bufsize=1,
             universal_newlines=True,
             cwd=PROJECT_DIR,
@@ -54,7 +59,7 @@ def run_benchmark(tla_enabled):
         popen.communicate()
         return_code = popen.returncode
         if return_code != 0:
-            raise Exception("benchmark failure (tla_enabled={}, return_code={})", tla_enabled, return_code)
+            raise Exception("benchmark failure (tla_enabled={}, return_code={})".format(tla_enabled, return_code))
         stop_instant_seconds = time.time()
         total_duration_seconds = stop_instant_seconds - start_instant_seconds
         LOGGER.info("Completed benchmark... (tla_enabled={}, total_duration_seconds={})".format(tla_enabled, total_duration_seconds))

@@ -1,6 +1,6 @@
 package com.vlkan.log4j2.logstash.layout.resolver;
 
-class ThreadResolverFactory implements TemplateResolverFactory<ThreadResolver> {
+class ThreadResolverFactory implements EventResolverFactory<ThreadResolver> {
 
     private static final ThreadResolverFactory INSTANCE = new ThreadResolverFactory();
 
@@ -16,7 +16,7 @@ class ThreadResolverFactory implements TemplateResolverFactory<ThreadResolver> {
     }
 
     @Override
-    public ThreadResolver create(TemplateResolverContext context, String key) {
+    public ThreadResolver create(EventResolverContext context, String key) {
         return new ThreadResolver(context, key);
     }
 

@@ -7,14 +7,14 @@ import org.apache.logging.log4j.core.LogEvent;
 
 import java.io.IOException;
 
-class ExceptionRootCauseResolver implements TemplateResolver {
+class ExceptionRootCauseResolver implements EventResolver {
 
     private static final ExceptionInternalResolverFactory INTERNAL_RESOLVER_FACTORY =
             new ExceptionInternalResolverFactory() {
 
                 @Override
-                TemplateResolver createClassNameResolver() {
-                    return new TemplateResolver() {
+                EventResolver createClassNameResolver() {
+                    return new EventResolver() {
                         @Override
                         public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
                             Throwable exception = logEvent.getThrown();
@@ -30,8 +30,8 @@ class ExceptionRootCauseResolver implements TemplateResolver {
                 }
 
                 @Override
-                TemplateResolver createMessageResolver(final TemplateResolverContext context) {
-                    return new TemplateResolver() {
+                EventResolver createMessageResolver(final EventResolverContext context) {
+                    return new EventResolver() {
                         @Override
                         public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
                             Throwable exception = logEvent.getThrown();
@@ -50,32 +50,32 @@ class ExceptionRootCauseResolver implements TemplateResolver {
                 }
 
                 @Override
-                TemplateResolver createStackTraceTextResolver(final TemplateResolverContext context) {
-                    return new TemplateResolver() {
+                EventResolver createStackTraceTextResolver(final EventResolverContext context) {
+                    return new EventResolver() {
                         @Override
                         public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
                             Throwable exception = logEvent.getThrown();
-                            if (!context.isStackTraceEnabled() || exception == null) {
+                            if (exception == null) {
                                 jsonGenerator.writeNull();
                             } else {
                                 Throwable rootCause = Throwables.getRootCause(exception);
-                                ExceptionStackTraceResolvers.resolveText(context, rootCause, jsonGenerator);
+                                StackTraceTextResolver.getInstance().resolve(rootCause, jsonGenerator);
                             }
                         }
                     };
                 }
 
                 @Override
-                TemplateResolver createStackTraceObjectResolver(final TemplateResolverContext context) {
-                    return new TemplateResolver() {
+                EventResolver createStackTraceObjectResolver(final EventResolverContext context) {
+                    return new EventResolver() {
                         @Override
                         public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
                             Throwable exception = logEvent.getThrown();
-                            if (!context.isStackTraceEnabled() || exception == null) {
+                            if (exception == null) {
                                 jsonGenerator.writeNull();
                             } else {
                                 Throwable rootCause = Throwables.getRootCause(exception);
-                                ExceptionStackTraceResolvers.resolveArray(context, rootCause, jsonGenerator);
+                                context.getStackTraceObjectResolver().resolve(rootCause, jsonGenerator);
                             }
                         }
                     };
@@ -83,9 +83,9 @@ class ExceptionRootCauseResolver implements TemplateResolver {
 
             };
 
-    private final TemplateResolver internalResolver;
+    private final EventResolver internalResolver;
 
-    ExceptionRootCauseResolver(TemplateResolverContext context, String key) {
+    ExceptionRootCauseResolver(EventResolverContext context, String key) {
         this.internalResolver = INTERNAL_RESOLVER_FACTORY.createInternalResolver(context, key);
     }
 

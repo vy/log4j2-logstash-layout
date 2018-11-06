@@ -1,6 +1,6 @@
 package com.vlkan.log4j2.logstash.layout.resolver;
 
-class EndOfBatchResolverFactory implements TemplateResolverFactory<EndOfBatchResolver> {
+class EndOfBatchResolverFactory implements EventResolverFactory<EndOfBatchResolver> {
 
     private static final EndOfBatchResolverFactory INSTANCE = new EndOfBatchResolverFactory();
 
@@ -16,7 +16,7 @@ class EndOfBatchResolverFactory implements TemplateResolverFactory<EndOfBatchRes
     }
 
     @Override
-    public EndOfBatchResolver create(TemplateResolverContext context, String key) {
+    public EndOfBatchResolver create(EventResolverContext context, String key) {
         return EndOfBatchResolver.getInstance();
     }
 

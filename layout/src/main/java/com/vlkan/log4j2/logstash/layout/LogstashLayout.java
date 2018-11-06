@@ -3,9 +3,7 @@ package com.vlkan.log4j2.logstash.layout;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vlkan.log4j2.logstash.layout.resolver.TemplateResolver;
-import com.vlkan.log4j2.logstash.layout.resolver.TemplateResolverContext;
-import com.vlkan.log4j2.logstash.layout.resolver.TemplateResolvers;
+import com.vlkan.log4j2.logstash.layout.resolver.*;
 import com.vlkan.log4j2.logstash.layout.util.ByteBufferOutputStream;
 import com.vlkan.log4j2.logstash.layout.util.JsonGenerators;
 import com.vlkan.log4j2.logstash.layout.util.Uris;
@@ -45,41 +43,69 @@ public class LogstashLayout implements Layout<String> {
 
     private static final byte[] EMPTY_OBJECT_JSON_BYTES = "{}".getBytes(CHARSET);
 
-    private final TemplateResolver resolver;
+    private final TemplateResolver<LogEvent> eventResolver;
 
     private final byte[] lineSeparatorBytes;
 
     private final Supplier<LogstashLayoutSerializationContext> serializationContextSupplier;
 
     private LogstashLayout(Builder builder) {
-        String template = readTemplate(builder);
-        FastDateFormat timestampFormat = readDateFormat(builder);
+
+        // Create StackTraceElement resolver.
         ObjectMapper objectMapper = new ObjectMapper();
         StrSubstitutor substitutor = builder.config.getStrSubstitutor();
-        TemplateResolverContext resolverContext = TemplateResolverContext
+        TemplateResolver<StackTraceElement> stackTraceElementObjectResolver = null;
+        if (builder.stackTraceEnabled) {
+            StackTraceElementObjectResolverContext stackTraceElementObjectResolverContext =
+                    StackTraceElementObjectResolverContext
+                    .newBuilder()
+                    .setObjectMapper(objectMapper)
+                    .setSubstitutor(substitutor)
+                    .setEmptyPropertyExclusionEnabled(builder.emptyPropertyExclusionEnabled)
+                    .build();
+            String stackTraceElementTemplate = readStackTraceElementTemplate(builder);
+            stackTraceElementObjectResolver = TemplateResolvers.ofTemplate(stackTraceElementObjectResolverContext, stackTraceElementTemplate);
+        }
+
+        // Create LogEvent resolver.
+        String eventTemplate = readEventTemplate(builder);
+        FastDateFormat timestampFormat = readDateFormat(builder);
+        EventResolverContext resolverContext = EventResolverContext
                 .newBuilder()
                 .setObjectMapper(objectMapper)
                 .setSubstitutor(substitutor)
                 .setTimestampFormat(timestampFormat)
                 .setLocationInfoEnabled(builder.locationInfoEnabled)
                 .setStackTraceEnabled(builder.stackTraceEnabled)
+                .setStackTraceElementObjectResolver(stackTraceElementObjectResolver)
                 .setEmptyPropertyExclusionEnabled(builder.emptyPropertyExclusionEnabled)
                 .setMdcKeyPattern(builder.mdcKeyPattern)
                 .setNdcPattern(builder.ndcPattern)
                 .build();
-        this.resolver = TemplateResolvers.ofTemplate(resolverContext, template);
+        this.eventResolver = TemplateResolvers.ofTemplate(resolverContext, eventTemplate);
+
+        // Create the serialization context supplier.
         this.lineSeparatorBytes = builder.lineSeparator.getBytes(CHARSET);
         this.serializationContextSupplier = LogstashLayoutSerializationContexts.createSupplier(
                 objectMapper,
                 builder.maxByteCount,
                 builder.prettyPrintEnabled,
                 builder.emptyPropertyExclusionEnabled);
+
     }
 
-    private static String readTemplate(Builder builder) {
-        return StringUtils.isBlank(builder.template)
-                ? Uris.readUri(builder.templateUri)
-                : builder.template;
+    private static String readEventTemplate(Builder builder) {
+        return readTemplate(builder.eventTemplate, builder.eventTemplateUri);
+    }
+
+    private static String readStackTraceElementTemplate(Builder builder) {
+        return readTemplate(builder.stackTraceElementTemplate, builder.stackTraceElementTemplateUri);
+    }
+
+    private static String readTemplate(String template, String templateUri) {
+        return StringUtils.isBlank(template)
+                ? Uris.readUri(templateUri)
+                : template;
     }
 
     private static FastDateFormat readDateFormat(Builder builder) {
@@ -119,7 +145,7 @@ public class LogstashLayout implements Layout<String> {
 
     private void unsafeEncode(LogEvent event, LogstashLayoutSerializationContext context) throws IOException {
         JsonGenerator jsonGenerator = context.getJsonGenerator();
-        resolver.resolve(event, jsonGenerator);
+        eventResolver.resolve(event, jsonGenerator);
         jsonGenerator.flush();
         ByteBufferOutputStream outputStream = context.getOutputStream();
         if (outputStream.getByteBuffer().position() == 0) {
@@ -184,10 +210,16 @@ public class LogstashLayout implements Layout<String> {
         private String timeZoneId = TimeZone.getDefault().getID();
 
         @PluginBuilderAttribute
-        private String template = null;
+        private String eventTemplate = null;
 
         @PluginBuilderAttribute
-        private String templateUri = "classpath:LogstashJsonEventLayoutV1.json";
+        private String eventTemplateUri = "classpath:LogstashJsonEventLayoutV1.json";
+
+        @PluginBuilderAttribute
+        private String stackTraceElementTemplate = null;
+
+        @PluginBuilderAttribute
+        private String stackTraceElementTemplateUri = "classpath:Log4j2StackTraceElementLayout.json";
 
         @PluginBuilderAttribute
         private String mdcKeyPattern;
@@ -268,21 +300,39 @@ public class LogstashLayout implements Layout<String> {
             return this;
         }
 
-        public String getTemplate() {
-            return template;
+        public String getEventTemplate() {
+            return eventTemplate;
         }
 
-        public Builder setTemplate(String template) {
-            this.template = template;
+        public Builder setEventTemplate(String eventTemplate) {
+            this.eventTemplate = eventTemplate;
             return this;
         }
 
-        public String getTemplateUri() {
-            return templateUri;
+        public String getEventTemplateUri() {
+            return eventTemplateUri;
         }
 
-        public Builder setTemplateUri(String templateUri) {
-            this.templateUri = templateUri;
+        public Builder setEventTemplateUri(String eventTemplateUri) {
+            this.eventTemplateUri = eventTemplateUri;
+            return this;
+        }
+
+        public String getStackTraceElementTemplate() {
+            return stackTraceElementTemplate;
+        }
+
+        public Builder setStackTraceElementTemplate(String stackTraceElementTemplate) {
+            this.stackTraceElementTemplate = stackTraceElementTemplate;
+            return this;
+        }
+
+        public String getStackTraceElementTemplateUri() {
+            return stackTraceElementTemplateUri;
+        }
+
+        public Builder setStackTraceElementTemplateUri(String stackTraceElementTemplateUri) {
+            this.stackTraceElementTemplateUri = stackTraceElementTemplateUri;
             return this;
         }
 
@@ -333,8 +383,13 @@ public class LogstashLayout implements Layout<String> {
             Validate.notBlank(dateTimeFormatPattern, "dateTimeFormatPattern");
             Validate.notBlank(timeZoneId, "timeZoneId");
             Validate.isTrue(
-                    !StringUtils.isBlank(template) || !StringUtils.isBlank(templateUri),
-                    "both template and templateUri are blank");
+                    !StringUtils.isBlank(eventTemplate) || !StringUtils.isBlank(eventTemplateUri),
+                    "both eventTemplate and eventTemplateUri are blank");
+            if (stackTraceEnabled) {
+                Validate.isTrue(
+                        !StringUtils.isBlank(stackTraceElementTemplate) || !StringUtils.isBlank(stackTraceElementTemplateUri),
+                        "both stackTraceElementTemplate and stackTraceElementTemplateUri are blank");
+            }
             Validate.isTrue(maxByteCount > 0, "maxByteCount requires a non-zero positive integer");
         }
 
@@ -347,8 +402,8 @@ public class LogstashLayout implements Layout<String> {
                     ", emptyPropertyExclusionEnabled=" + emptyPropertyExclusionEnabled +
                     ", dateTimeFormatPattern='" + dateTimeFormatPattern + '\'' +
                     ", timeZoneId='" + timeZoneId + '\'' +
-                    ", template='" + template + '\'' +
-                    ", templateUri='" + templateUri + '\'' +
+                    ", eventTemplate='" + eventTemplate + '\'' +
+                    ", eventTemplateUri='" + eventTemplateUri + '\'' +
                     ", mdcKeyPattern='" + mdcKeyPattern + '\'' +
                     ", lineSeparator='" + escapedLineSeparator + '\'' +
                     ", maxByteCount='" + maxByteCount + '\'' +

@@ -13,13 +13,13 @@ import java.util.regex.Pattern;
 /**
  * Add Mapped Diagnostic Context (MDC).
  */
-class ContextDataResolver implements TemplateResolver {
+class ContextDataResolver implements EventResolver {
 
-    private final TemplateResolverContext context;
+    private final EventResolverContext context;
 
     private final String key;
 
-    ContextDataResolver(TemplateResolverContext context, String key) {
+    ContextDataResolver(EventResolverContext context, String key) {
         this.context = context;
         this.key = key;
     }
@@ -45,7 +45,7 @@ class ContextDataResolver implements TemplateResolver {
             if (valueExcluded) {
                 jsonGenerator.writeNull();
             } else {
-                jsonGenerator.writeObject(value);
+                JsonGenerators.writeObject(jsonGenerator, value);
             }
             return;
         }
@@ -96,7 +96,7 @@ class ContextDataResolver implements TemplateResolver {
         }
     }
 
-    private static boolean isValueExcluded(TemplateResolverContext context, Object value) {
+    private static boolean isValueExcluded(EventResolverContext context, Object value) {
         return context.isEmptyPropertyExclusionEnabled() &&
                 (value == null || (value instanceof String && ((String) value).isEmpty()));
     }

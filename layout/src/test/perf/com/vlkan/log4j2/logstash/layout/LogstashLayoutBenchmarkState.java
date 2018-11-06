@@ -43,7 +43,7 @@ public class LogstashLayoutBenchmarkState {
         return LogstashLayout
                 .newBuilder()
                 .setConfiguration(CONFIGURATION)
-                .setTemplateUri("classpath:Log4j2JsonLayout.json")
+                .setEventTemplateUri("classpath:Log4j2JsonLayout.json")
                 .setStackTraceEnabled(true)
                 .build();
     }

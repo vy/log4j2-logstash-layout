@@ -6,15 +6,15 @@ import org.apache.logging.log4j.core.LogEvent;
 
 import java.io.IOException;
 
-class ThreadResolver implements TemplateResolver {
+class ThreadResolver implements EventResolver {
 
-    private final TemplateResolver internalResolver;
+    private final EventResolver internalResolver;
 
-    ThreadResolver(TemplateResolverContext context, String key) {
+    ThreadResolver(EventResolverContext context, String key) {
         this.internalResolver = createInternalResolver(context, key);
     }
 
-    private static TemplateResolver createInternalResolver(final TemplateResolverContext context, String key) {
+    private static EventResolver createInternalResolver(final EventResolverContext context, String key) {
         switch (key) {
             case "name": return createNameResolver(context);
             case "id": return createIdResolver();
@@ -23,8 +23,8 @@ class ThreadResolver implements TemplateResolver {
         throw new IllegalArgumentException("unknown key: " + key);
     }
 
-    private static TemplateResolver createNameResolver(final TemplateResolverContext context) {
-        return new TemplateResolver() {
+    private static EventResolver createNameResolver(final EventResolverContext context) {
+        return new EventResolver() {
             @Override
             public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
                 String threadName = logEvent.getThreadName();
@@ -38,8 +38,8 @@ class ThreadResolver implements TemplateResolver {
         };
     }
 
-    private static TemplateResolver createIdResolver() {
-        return new TemplateResolver() {
+    private static EventResolver createIdResolver() {
+        return new EventResolver() {
             @Override
             public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
                 long threadId = logEvent.getThreadId();
@@ -48,8 +48,8 @@ class ThreadResolver implements TemplateResolver {
         };
     }
 
-    private static TemplateResolver createPriorityResolver() {
-        return new TemplateResolver() {
+    private static EventResolver createPriorityResolver() {
+        return new EventResolver() {
             @Override
             public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
                 int threadPriority = logEvent.getThreadPriority();

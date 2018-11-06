@@ -1,6 +1,6 @@
 package com.vlkan.log4j2.logstash.layout.resolver;
 
-class ExceptionRootCauseResolverFactory implements TemplateResolverFactory<ExceptionRootCauseResolver> {
+class ExceptionRootCauseResolverFactory implements EventResolverFactory<ExceptionRootCauseResolver> {
 
     private static final ExceptionRootCauseResolverFactory INSTANCE = new ExceptionRootCauseResolverFactory();
 
@@ -16,7 +16,7 @@ class ExceptionRootCauseResolverFactory implements TemplateResolverFactory<Excep
     }
 
     @Override
-    public ExceptionRootCauseResolver create(TemplateResolverContext context, String key) {
+    public ExceptionRootCauseResolver create(EventResolverContext context, String key) {
         return new ExceptionRootCauseResolver(context, key);
     }
 

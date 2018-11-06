@@ -5,7 +5,7 @@ import org.apache.logging.log4j.core.LogEvent;
 
 import java.io.IOException;
 
-class EndOfBatchResolver implements TemplateResolver {
+class EndOfBatchResolver implements EventResolver {
 
     private static final EndOfBatchResolver INSTANCE = new EndOfBatchResolver();
 

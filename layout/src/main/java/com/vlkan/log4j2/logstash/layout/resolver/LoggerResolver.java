@@ -6,15 +6,15 @@ import org.apache.logging.log4j.core.LogEvent;
 
 import java.io.IOException;
 
-class LoggerResolver implements TemplateResolver {
+class LoggerResolver implements EventResolver {
 
-    private final TemplateResolver internalResolver;
+    private final EventResolver internalResolver;
 
-    LoggerResolver(TemplateResolverContext context, String key) {
+    LoggerResolver(EventResolverContext context, String key) {
         this.internalResolver = createInternalResolver(context, key);
     }
 
-    private static TemplateResolver createInternalResolver(final TemplateResolverContext context, String key) {
+    private static EventResolver createInternalResolver(final EventResolverContext context, String key) {
         switch (key) {
             case "name": return createNameResolver(context);
             case "fqcn": return createFqcnResolver(context);
@@ -22,8 +22,8 @@ class LoggerResolver implements TemplateResolver {
         throw new IllegalArgumentException("unknown key: " + key);
     }
 
-    private static TemplateResolver createNameResolver(final TemplateResolverContext context) {
-        return new TemplateResolver() {
+    private static EventResolver createNameResolver(final EventResolverContext context) {
+        return new EventResolver() {
             @Override
             public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
                 String loggerName = logEvent.getLoggerName();
@@ -32,8 +32,8 @@ class LoggerResolver implements TemplateResolver {
         };
     }
 
-    private static TemplateResolver createFqcnResolver(final TemplateResolverContext context) {
-        return new TemplateResolver() {
+    private static EventResolver createFqcnResolver(final EventResolverContext context) {
+        return new EventResolver() {
             @Override
             public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
                 String loggerFqcn = logEvent.getLoggerFqcn();
@@ -42,7 +42,7 @@ class LoggerResolver implements TemplateResolver {
         };
     }
 
-    private static void writeText(JsonGenerator jsonGenerator, TemplateResolverContext context, String text) throws IOException {
+    private static void writeText(JsonGenerator jsonGenerator, EventResolverContext context, String text) throws IOException {
         boolean textExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(text);
         if (textExcluded) {
             jsonGenerator.writeNull();

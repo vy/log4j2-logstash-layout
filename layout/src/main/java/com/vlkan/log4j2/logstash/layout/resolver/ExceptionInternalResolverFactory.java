@@ -1,8 +1,20 @@
 package com.vlkan.log4j2.logstash.layout.resolver;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import org.apache.logging.log4j.core.LogEvent;
+
+import java.io.IOException;
+
 abstract class ExceptionInternalResolverFactory {
 
-    TemplateResolver createInternalResolver(TemplateResolverContext context, String key) {
+    private static final EventResolver NULL_RESOLVER = new EventResolver() {
+        @Override
+        public void resolve(LogEvent ignored, JsonGenerator jsonGenerator) throws IOException {
+            jsonGenerator.writeNull();
+        }
+    };
+
+    EventResolver createInternalResolver(EventResolverContext context, String key) {
 
         // Split the key into its major and minor components.
         String majorKey;
@@ -26,11 +38,14 @@ abstract class ExceptionInternalResolverFactory {
 
     }
 
-    abstract TemplateResolver createClassNameResolver();
+    abstract EventResolver createClassNameResolver();
 
-    abstract TemplateResolver createMessageResolver(TemplateResolverContext context);
+    abstract EventResolver createMessageResolver(EventResolverContext context);
 
-    private TemplateResolver createStackTraceResolver(TemplateResolverContext context, String minorKey) {
+    private EventResolver createStackTraceResolver(EventResolverContext context, String minorKey) {
+        if (!context.isStackTraceEnabled()) {
+            return NULL_RESOLVER;
+        }
         switch (minorKey) {
             case "text": return createStackTraceTextResolver(context);
             case "": return createStackTraceObjectResolver(context);
@@ -38,8 +53,8 @@ abstract class ExceptionInternalResolverFactory {
         throw new IllegalArgumentException("unknown minor key: " + minorKey);
     }
 
-    abstract TemplateResolver createStackTraceTextResolver(TemplateResolverContext context);
+    abstract EventResolver createStackTraceTextResolver(EventResolverContext context);
 
-    abstract TemplateResolver createStackTraceObjectResolver(TemplateResolverContext context);
+    abstract EventResolver createStackTraceObjectResolver(EventResolverContext context);
 
 }

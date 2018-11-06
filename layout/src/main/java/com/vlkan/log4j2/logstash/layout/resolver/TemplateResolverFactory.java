@@ -1,9 +1,9 @@
 package com.vlkan.log4j2.logstash.layout.resolver;
 
-public interface TemplateResolverFactory<R extends TemplateResolver> {
+interface TemplateResolverFactory<V, C extends TemplateResolverContext<V, C>, R extends TemplateResolver<V>> {
 
     String getName();
 
-    R create(TemplateResolverContext context, String key);
+    R create(C context, String key);
 
 }

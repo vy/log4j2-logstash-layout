@@ -1,6 +1,6 @@
 package com.vlkan.log4j2.logstash.layout.resolver;
 
-class LevelResolverFactory implements TemplateResolverFactory<LevelResolver> {
+class LevelResolverFactory implements EventResolverFactory<LevelResolver> {
 
     private static final LevelResolverFactory INSTANCE = new LevelResolverFactory();
 
@@ -16,7 +16,7 @@ class LevelResolverFactory implements TemplateResolverFactory<LevelResolver> {
     }
 
     @Override
-    public LevelResolver create(TemplateResolverContext context, String key) {
+    public LevelResolver create(EventResolverContext context, String key) {
         return LevelResolver.getInstance();
     }
 

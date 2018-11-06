@@ -6,9 +6,9 @@ import org.apache.logging.log4j.core.util.datetime.FastDateFormat;
 
 import java.io.IOException;
 
-class TimestampResolver implements TemplateResolver {
+class TimestampResolver implements EventResolver {
 
-    private static final TemplateResolver MILLIS_RESOLVER = new TemplateResolver() {
+    private static final EventResolver MILLIS_RESOLVER = new EventResolver() {
         @Override
         public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
             long timeMillis = logEvent.getTimeMillis();
@@ -16,7 +16,7 @@ class TimestampResolver implements TemplateResolver {
         }
     };
 
-    private static final TemplateResolver NANOS_RESOLVER = new TemplateResolver() {
+    private static final EventResolver NANOS_RESOLVER = new EventResolver() {
         @Override
         public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
             long nanoTime = logEvent.getNanoTime();
@@ -24,13 +24,13 @@ class TimestampResolver implements TemplateResolver {
         }
     };
 
-    private final TemplateResolver internalResolver;
+    private final EventResolver internalResolver;
 
-    TimestampResolver(TemplateResolverContext context, String key) {
+    TimestampResolver(EventResolverContext context, String key) {
         this.internalResolver = createInternalResolver(context, key);
     }
 
-    private static TemplateResolver createInternalResolver(final TemplateResolverContext context, String key) {
+    private static EventResolver createInternalResolver(final EventResolverContext context, String key) {
         if (key == null) {
             return createFormatResolver(context);
         }
@@ -41,8 +41,8 @@ class TimestampResolver implements TemplateResolver {
         throw new IllegalArgumentException("unknown key: " + key);
     }
 
-    private static TemplateResolver createFormatResolver(final TemplateResolverContext context) {
-        return new TemplateResolver() {
+    private static EventResolver createFormatResolver(final EventResolverContext context) {
+        return new EventResolver() {
             @Override
             public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
                 long timestampMillis = logEvent.getTimeMillis();

@@ -1,6 +1,6 @@
 package com.vlkan.log4j2.logstash.layout.resolver;
 
-class TimestampResolverFactory implements TemplateResolverFactory<TimestampResolver> {
+class TimestampResolverFactory implements EventResolverFactory<TimestampResolver> {
 
     private static final TimestampResolverFactory INSTANCE = new TimestampResolverFactory();
 
@@ -16,7 +16,7 @@ class TimestampResolverFactory implements TemplateResolverFactory<TimestampResol
     }
 
     @Override
-    public TimestampResolver create(TemplateResolverContext context, String key) {
+    public TimestampResolver create(EventResolverContext context, String key) {
         return new TimestampResolver(context, key);
     }
 

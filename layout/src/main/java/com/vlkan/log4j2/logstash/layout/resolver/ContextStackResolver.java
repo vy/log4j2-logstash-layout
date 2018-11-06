@@ -10,11 +10,11 @@ import java.util.regex.Pattern;
 /**
  * Add Nested Diagnostic Context (NDC).
  */
-class ContextStackResolver implements TemplateResolver {
+class ContextStackResolver implements EventResolver {
 
-    private final TemplateResolverContext context;
+    private final EventResolverContext context;
 
-    ContextStackResolver(TemplateResolverContext context) {
+    ContextStackResolver(EventResolverContext context) {
         this.context = context;
     }
 

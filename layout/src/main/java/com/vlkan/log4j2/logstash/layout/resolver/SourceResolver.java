@@ -6,15 +6,15 @@ import org.apache.logging.log4j.core.LogEvent;
 
 import java.io.IOException;
 
-class SourceResolver implements TemplateResolver {
+class SourceResolver implements EventResolver {
 
-    private final TemplateResolver internalResolver;
+    private final EventResolver internalResolver;
 
-    SourceResolver(TemplateResolverContext context, String key) {
+    SourceResolver(EventResolverContext context, String key) {
         this.internalResolver = createInternalResolver(context, key);
     }
 
-    private TemplateResolver createInternalResolver(TemplateResolverContext context, String key) {
+    private EventResolver createInternalResolver(EventResolverContext context, String key) {
         switch (key) {
             case "className": return createClassNameResolver(context);
             case "fileName": return createFileNameResolver(context);
@@ -24,8 +24,8 @@ class SourceResolver implements TemplateResolver {
         throw new IllegalArgumentException("unknown key: " + key);
     }
 
-    private static TemplateResolver createClassNameResolver(final TemplateResolverContext context) {
-        return new TemplateResolver() {
+    private static EventResolver createClassNameResolver(final EventResolverContext context) {
+        return new EventResolver() {
             @Override
             public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
                 if (context.isLocationInfoEnabled() && logEvent.getSource() != null) {
@@ -41,8 +41,8 @@ class SourceResolver implements TemplateResolver {
         };
     }
 
-    private static TemplateResolver createFileNameResolver(final TemplateResolverContext context) {
-        return new TemplateResolver() {
+    private static EventResolver createFileNameResolver(final EventResolverContext context) {
+        return new EventResolver() {
             @Override
             public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
                 if (context.isLocationInfoEnabled() && logEvent.getSource() != null) {
@@ -58,8 +58,8 @@ class SourceResolver implements TemplateResolver {
         };
     }
 
-    private static TemplateResolver createLineNumberResolver(final TemplateResolverContext context) {
-        return new TemplateResolver() {
+    private static EventResolver createLineNumberResolver(final EventResolverContext context) {
+        return new EventResolver() {
             @Override
             public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
                 if (!context.isLocationInfoEnabled() || logEvent.getSource() == null) {
@@ -72,8 +72,8 @@ class SourceResolver implements TemplateResolver {
         };
     }
 
-    private static TemplateResolver createMethodNameResolver(final TemplateResolverContext context) {
-        return new TemplateResolver() {
+    private static EventResolver createMethodNameResolver(final EventResolverContext context) {
+        return new EventResolver() {
             @Override
             public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
                 if (context.isLocationInfoEnabled() && logEvent.getSource() != null) {

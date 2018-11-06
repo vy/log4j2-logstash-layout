@@ -5,7 +5,7 @@ import org.apache.logging.log4j.core.LogEvent;
 
 import java.io.IOException;
 
-class LevelResolver implements TemplateResolver {
+class LevelResolver implements EventResolver {
 
     private static final LevelResolver INSTANCE = new LevelResolver();
 

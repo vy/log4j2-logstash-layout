@@ -6,14 +6,14 @@ import org.apache.logging.log4j.core.LogEvent;
 
 import java.io.IOException;
 
-class ExceptionResolver implements TemplateResolver {
+class ExceptionResolver implements EventResolver {
 
     private static final ExceptionInternalResolverFactory INTERNAL_RESOLVER_FACTORY =
             new ExceptionInternalResolverFactory() {
 
                 @Override
-                TemplateResolver createClassNameResolver() {
-                    return new TemplateResolver() {
+                EventResolver createClassNameResolver() {
+                    return new EventResolver() {
                         @Override
                         public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
                             Throwable exception = logEvent.getThrown();
@@ -28,8 +28,8 @@ class ExceptionResolver implements TemplateResolver {
                 }
 
                 @Override
-                TemplateResolver createMessageResolver(final TemplateResolverContext context) {
-                    return new TemplateResolver() {
+                EventResolver createMessageResolver(final EventResolverContext context) {
+                    return new EventResolver() {
                         @Override
                         public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
                             Throwable exception = logEvent.getThrown();
@@ -47,32 +47,36 @@ class ExceptionResolver implements TemplateResolver {
                 }
 
                 @Override
-                TemplateResolver createStackTraceTextResolver(final TemplateResolverContext context) {
-                    return new TemplateResolver() {
+                EventResolver createStackTraceTextResolver(final EventResolverContext context) {
+                    return new EventResolver() {
                         @Override
                         public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
                             Throwable exception = logEvent.getThrown();
-                            ExceptionStackTraceResolvers.resolveText(context, exception, jsonGenerator);
+                            if (exception != null) {
+                                StackTraceTextResolver.getInstance().resolve(exception, jsonGenerator);
+                            }
                         }
                     };
                 }
 
                 @Override
-                TemplateResolver createStackTraceObjectResolver(final TemplateResolverContext context) {
-                    return new TemplateResolver() {
+                EventResolver createStackTraceObjectResolver(final EventResolverContext context) {
+                    return new EventResolver() {
                         @Override
                         public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
                             Throwable exception = logEvent.getThrown();
-                            ExceptionStackTraceResolvers.resolveArray(context, exception, jsonGenerator);
+                            if (exception != null) {
+                                context.getStackTraceObjectResolver().resolve(exception, jsonGenerator);
+                            }
                         }
                     };
                 }
 
             };
 
-    private final TemplateResolver internalResolver;
+    private final EventResolver internalResolver;
 
-    ExceptionResolver(TemplateResolverContext context, String key) {
+    ExceptionResolver(EventResolverContext context, String key) {
         this.internalResolver = INTERNAL_RESOLVER_FACTORY.createInternalResolver(context, key);
     }
 
