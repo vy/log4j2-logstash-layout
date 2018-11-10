@@ -33,6 +33,13 @@ public class ByteBufferOutputStream extends OutputStream {
         byteBuffer.put(buf, off, len);
     }
 
+    public byte[] toByteArray() {
+        int size = byteBuffer.position();
+        byte[] buffer = new byte[size];
+        System.arraycopy(byteBuffer.array(), 0, buffer, 0, size);
+        return buffer;
+    }
+
     public String toString(Charset charset) {
         return new String(byteBuffer.array(), 0, byteBuffer.position(), charset);
     }

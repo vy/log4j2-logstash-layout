@@ -14,6 +14,7 @@ import org.apache.logging.log4j.core.config.DefaultConfiguration;
 import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilderFactory;
 import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 import org.apache.logging.log4j.core.impl.Log4jLogEvent;
+import org.apache.logging.log4j.core.layout.ByteBufferDestination;
 import org.apache.logging.log4j.message.SimpleMessage;
 import org.apache.logging.log4j.message.StringMapMessage;
 import org.apache.logging.log4j.util.BiConsumer;
@@ -22,6 +23,8 @@ import org.apache.logging.log4j.util.StringMap;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -653,6 +656,61 @@ abstract class LogstashLayoutTest {
             assertThat(point(stackTraceElementNode, fileNameFieldName).asText()).isEqualTo(stackTraceElement.getFileName());
             assertThat(point(stackTraceElementNode, lineNumberFieldName).asInt()).isEqualTo(stackTraceElement.getLineNumber());
         }
+
+    }
+
+    @Test
+    public void test_toSerializable_toByteArray_encode_outputs() {
+
+        // Create the layout.
+        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        LogstashLayout layout = LogstashLayout
+                .newBuilder()
+                .setConfiguration(configuration)
+                .setStackTraceEnabled(true)
+                .build();
+
+        // Create the log event.
+        LogEvent logEvent = LogEventFixture.createFullLogEvents(1).get(0);
+
+        // Get toSerializable() output.
+        String toSerializableOutput = layout.toSerializable(logEvent);
+
+        // Get toByteArrayOutput().
+        byte[] toByteArrayOutputBytes = layout.toByteArray(logEvent);
+        String toByteArrayOutput = new String(toByteArrayOutputBytes, 0, toByteArrayOutputBytes.length, StandardCharsets.UTF_8);
+
+        // Get encode() output.
+        final ByteBuffer byteBuffer = ByteBuffer.allocate(512 * 1024);
+        ByteBufferDestination byteBufferDestination = new ByteBufferDestination() {
+
+            @Override
+            public ByteBuffer getByteBuffer() {
+                return byteBuffer;
+            }
+
+            @Override
+            public ByteBuffer drain(ByteBuffer buf) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public void writeBytes(ByteBuffer data) {
+                byteBuffer.put(data);
+            }
+
+            @Override
+            public void writeBytes(byte[] data, int offset, int length) {
+                byteBuffer.put(data, offset, length);
+            }
+
+        };
+        layout.encode(logEvent, byteBufferDestination);
+        String encodeOutput = new String(byteBuffer.array(), 0, byteBuffer.position(), StandardCharsets.UTF_8);
+
+        // Compare outputs.
+        assertThat(toSerializableOutput).isEqualTo(toByteArrayOutput);
+        assertThat(toByteArrayOutput).isEqualTo(encodeOutput);
 
     }
 

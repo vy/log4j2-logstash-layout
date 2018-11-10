@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.core.filter.FilteringGeneratorDelegate;
 import com.fasterxml.jackson.core.filter.TokenFilter;
+import com.fasterxml.jackson.core.io.SerializedString;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vlkan.log4j2.logstash.layout.util.ByteBufferOutputStream;
@@ -19,6 +20,8 @@ enum LogstashLayoutSerializationContexts {;
 
     // On purpose using a dynamic variable to enable state change during tests.
     static boolean THREAD_LOCALS_ENABLED = Constants.ENABLE_THREADLOCALS;
+
+    private static final SerializedString EMPTY_SERIALIZED_STRING = new SerializedString("");
 
     private static final PrettyPrinter PRETTY_PRINTER = new DefaultPrettyPrinter("");
 
@@ -170,6 +173,7 @@ enum LogstashLayoutSerializationContexts {;
             boolean prettyPrintEnabled) {
         try {
             JsonGenerator jsonGenerator = jsonFactory.createGenerator(outputStream);
+            jsonGenerator.setRootValueSeparator(EMPTY_SERIALIZED_STRING);
             if (prettyPrintEnabled) {
                 jsonGenerator.setPrettyPrinter(PRETTY_PRINTER);
             }

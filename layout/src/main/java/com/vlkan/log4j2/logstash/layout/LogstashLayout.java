@@ -123,6 +123,16 @@ public class LogstashLayout implements Layout<String> {
     }
 
     @Override
+    public byte[] toByteArray(LogEvent event) {
+        try (LogstashLayoutSerializationContext context = serializationContextSupplier.get()) {
+            encode(event, context);
+            return context.getOutputStream().toByteArray();
+        } catch (Exception error) {
+            throw new RuntimeException("failed serializing JSON", error);
+        }
+    }
+
+    @Override
     public void encode(LogEvent event, ByteBufferDestination destination) {
         try (LogstashLayoutSerializationContext context = serializationContextSupplier.get()) {
             encode(event, context);
@@ -161,11 +171,6 @@ public class LogstashLayout implements Layout<String> {
 
     @Override
     public byte[] getHeader() {
-        return null;
-    }
-
-    @Override
-    public byte[] toByteArray(LogEvent event) {
         return null;
     }
 
