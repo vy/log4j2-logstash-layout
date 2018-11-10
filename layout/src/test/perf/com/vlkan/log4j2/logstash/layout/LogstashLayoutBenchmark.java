@@ -16,6 +16,7 @@ import org.openjdk.jmh.runner.options.TimeValue;
 import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.ByteBuffer;
 import java.util.List;
 
 public class LogstashLayoutBenchmark {
@@ -62,42 +63,45 @@ public class LogstashLayoutBenchmark {
     }
 
     @Benchmark
-    public static void fullLogstashLayout(LogstashLayoutBenchmarkState state) {
-        benchmark(state.getLogstashLayout(), state.getFullLogEvents(), state.getByteBufferDestination());
+    public static int fullLogstashLayout(LogstashLayoutBenchmarkState state) {
+        return benchmark(state.getLogstashLayout(), state.getFullLogEvents(), state.getByteBufferDestination());
     }
 
     @Benchmark
-    public static void liteLogstashLayout(LogstashLayoutBenchmarkState state) {
-        benchmark(state.getLogstashLayout(), state.getLiteLogEvents(), state.getByteBufferDestination());
+    public static int liteLogstashLayout(LogstashLayoutBenchmarkState state) {
+        return benchmark(state.getLogstashLayout(), state.getLiteLogEvents(), state.getByteBufferDestination());
     }
 
     @Benchmark
-    public static void fullDefaultJsonLayout(LogstashLayoutBenchmarkState state) {
-        benchmark(state.getDefaultJsonLayout(), state.getFullLogEvents(), state.getByteBufferDestination());
+    public static int fullDefaultJsonLayout(LogstashLayoutBenchmarkState state) {
+        return benchmark(state.getDefaultJsonLayout(), state.getFullLogEvents(), state.getByteBufferDestination());
     }
 
     @Benchmark
-    public static void liteDefaultJsonLayout(LogstashLayoutBenchmarkState state) {
-        benchmark(state.getDefaultJsonLayout(), state.getLiteLogEvents(), state.getByteBufferDestination());
+    public static int liteDefaultJsonLayout(LogstashLayoutBenchmarkState state) {
+        return benchmark(state.getDefaultJsonLayout(), state.getLiteLogEvents(), state.getByteBufferDestination());
     }
 
     @Benchmark
-    public static void fullCustomJsonLayout(LogstashLayoutBenchmarkState state) {
-        benchmark(state.getCustomJsonLayout(), state.getFullLogEvents(), state.getByteBufferDestination());
+    public static int fullCustomJsonLayout(LogstashLayoutBenchmarkState state) {
+        return benchmark(state.getCustomJsonLayout(), state.getFullLogEvents(), state.getByteBufferDestination());
     }
 
     @Benchmark
-    public static void liteCustomJsonLayout(LogstashLayoutBenchmarkState state) {
-        benchmark(state.getCustomJsonLayout(), state.getLiteLogEvents(), state.getByteBufferDestination());
+    public static int liteCustomJsonLayout(LogstashLayoutBenchmarkState state) {
+        return benchmark(state.getCustomJsonLayout(), state.getLiteLogEvents(), state.getByteBufferDestination());
     }
 
-    private static void benchmark(Layout<String> layout, List<LogEvent> logEvents, ByteBufferDestination destination) {
+    private static int benchmark(Layout<String> layout, List<LogEvent> logEvents, ByteBufferDestination destination) {
         // noinspection ForLoopReplaceableByForEach (for loop avoids iterator allocations)
         for (int logEventIndex = 0; logEventIndex < logEvents.size(); logEventIndex++) {
             LogEvent logEvent = logEvents.get(logEventIndex);
             layout.encode(logEvent, destination);
         }
-        destination.getByteBuffer().clear();
+        ByteBuffer byteBuffer = destination.getByteBuffer();
+        int position = byteBuffer.position();
+        byteBuffer.clear();
+        return position;
     }
 
 }
