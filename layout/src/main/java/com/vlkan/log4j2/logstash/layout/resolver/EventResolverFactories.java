@@ -20,6 +20,7 @@ enum EventResolverFactories {;
                 ExceptionRootCauseResolverFactory.getInstance(),
                 LevelResolverFactory.getInstance(),
                 LoggerResolverFactory.getInstance(),
+                MainMapResolverFactory.getInstance(),
                 MessageResolverFactory.getInstance(),
                 SourceResolverFactory.getInstance(),
                 ThreadResolverFactory.getInstance(),
