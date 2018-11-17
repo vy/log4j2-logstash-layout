@@ -15,6 +15,7 @@ import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilderFact
 import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 import org.apache.logging.log4j.core.impl.Log4jLogEvent;
 import org.apache.logging.log4j.core.layout.ByteBufferDestination;
+import org.apache.logging.log4j.core.lookup.MainMapLookup;
 import org.apache.logging.log4j.message.SimpleMessage;
 import org.apache.logging.log4j.message.StringMapMessage;
 import org.apache.logging.log4j.util.BiConsumer;
@@ -387,8 +388,54 @@ abstract class LogstashLayoutTest {
     }
 
     @Test
-    public void test_mdc_key_access() throws IOException {
+    public void test_main_key_access() throws IOException {
+        // Create the log event.
+        SimpleMessage message = new SimpleMessage("Hello, World!");
 
+        String kwKey = "--name";
+        String kwVal = "aNameValue";
+        String positionArg = "position2Value";
+        String missingKwKey = "--missing";
+
+        String[] mainArgs = {
+            kwKey, kwVal, positionArg
+        };
+        MainMapLookup.setMainArguments(mainArgs);
+
+        LogEvent logEvent = Log4jLogEvent
+            .newBuilder()
+            .setLoggerName(LogstashLayoutTest.class.getSimpleName())
+            .setLevel(Level.INFO)
+            .setMessage(message)
+            .build();
+
+        // Create the template.
+        ObjectNode templateRootNode = JSON_NODE_FACTORY.objectNode();
+        String mdcFieldName = "mdc";
+
+        templateRootNode.put("name", String.format("${json:main:%s}", kwKey));
+        templateRootNode.put("positionArg", "${json:main:2}");
+        templateRootNode.put("notFoundArg", String.format("${json:main:%s}", missingKwKey));
+        String template = templateRootNode.toString();
+
+        // Create the layout.
+        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        LogstashLayout layout = LogstashLayout
+            .newBuilder()
+            .setConfiguration(configuration)
+            .setEventTemplate(template)
+            .build();
+
+        // Check the serialized event.
+        String serializedLogEvent = layout.toSerializable(logEvent);
+        JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
+        assertThat(point(rootNode, "name").asText()).isEqualTo(kwVal);
+        assertThat(point(rootNode, "positionArg").asText()).isEqualTo(positionArg);
+        assertThat(point(rootNode, "notFoundArg")).isInstanceOf(MissingNode.class);
+    }
+
+    @Test
+    public void test_mdc_key_access() throws IOException {
         // Create the log event.
         SimpleMessage message = new SimpleMessage("Hello, World!");
         StringMap contextData = new SortedArrayStringMap();
@@ -437,7 +484,6 @@ abstract class LogstashLayoutTest {
         assertThat(point(rootNode, mdcFieldName, mdcPatternMatchedKey).asText()).isEqualTo(mdcPatternMatchedValue);
         assertThat(point(rootNode, mdcFieldName, mdcPatternMismatchedKey)).isInstanceOf(MissingNode.class);
         assertThat(point(rootNode, mdcDirectlyAccessedNullPropertyKey)).isInstanceOf(MissingNode.class);
-
     }
 
     @Test
