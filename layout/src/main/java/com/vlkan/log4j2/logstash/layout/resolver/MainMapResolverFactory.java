@@ -1,7 +1,5 @@
 package com.vlkan.log4j2.logstash.layout.resolver;
 
-import org.apache.logging.log4j.core.lookup.MainMapLookup;
-
 public class MainMapResolverFactory implements EventResolverFactory<MainMapResolver> {
 
   private static final MainMapResolverFactory INSTANCE = new MainMapResolverFactory();
@@ -21,4 +19,5 @@ public class MainMapResolverFactory implements EventResolverFactory<MainMapResol
   public MainMapResolver create(EventResolverContext context, String key) {
     return new MainMapResolver(context, key);
   }
+
 }
