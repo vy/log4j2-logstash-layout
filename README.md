@@ -176,6 +176,7 @@ while rendering the JSON output.
 | `level` | `logEvent.getLevel()` |
 | `logger:fqcn` | `logEvent.getLoggerFqcn()` |
 | `logger:name` | `logEvent.getLoggerName()` |
+| `main:<key>` | performs [Main Argument Lookup](https://logging.apache.org/log4j/2.0/manual/lookups.html#AppMainArgsLookup) for the given `key` |
 | `mdc` | Mapped Diagnostic Context `Map<String, String>` returned by `logEvent.getContextData()` |
 | `mdc:<key>` | Mapped Diagnostic Context `String` associated with `key` (`mdcKeyPattern` is discarded) |
 | `message` | `logEvent.getFormattedMessage()` |
