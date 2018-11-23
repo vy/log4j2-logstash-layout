@@ -8,22 +8,24 @@ import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vlkan.log4j2.logstash.layout.util.Throwables;
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LogEvent;
-import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.DefaultConfiguration;
 import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilderFactory;
 import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 import org.apache.logging.log4j.core.impl.Log4jLogEvent;
+import org.apache.logging.log4j.core.layout.ByteBufferDestination;
+import org.apache.logging.log4j.core.lookup.MainMapLookup;
 import org.apache.logging.log4j.message.SimpleMessage;
 import org.apache.logging.log4j.message.StringMapMessage;
 import org.apache.logging.log4j.util.BiConsumer;
 import org.apache.logging.log4j.util.SortedArrayStringMap;
 import org.apache.logging.log4j.util.StringMap;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,25 +35,31 @@ import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class LogstashLayoutTest {
+public abstract class LogstashLayoutTest {
+
+    private static final Configuration CONFIGURATION = new DefaultConfiguration();
+
+    private static final List<LogEvent> LOG_EVENTS = LogEventFixture.createFullLogEvents(5);
 
     private static final JsonNodeFactory JSON_NODE_FACTORY = JsonNodeFactory.instance;
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    LogstashLayoutTest(boolean threadLocalsEnabled) {
+        LogstashLayoutSerializationContexts.THREAD_LOCALS_ENABLED = threadLocalsEnabled;
+    }
 
     @Test
     public void test_serialized_event() throws IOException {
         String lookupTestKey = "lookup_test_key";
         String lookupTestVal = String.format("lookup_test_value_%d", (int) (1000 * Math.random()));
         System.setProperty(lookupTestKey, lookupTestVal);
-        LoggerContext loggerContext = (LoggerContext) LogManager.getContext(false);
-        Configuration loggerConfig = loggerContext.getConfiguration();
-        for (LogEvent logEvent : LogEventFixture.LOG_EVENTS) {
-            checkLogEvent(loggerConfig, logEvent, lookupTestKey, lookupTestVal);
+        for (LogEvent logEvent : LOG_EVENTS) {
+            checkLogEvent(logEvent, lookupTestKey, lookupTestVal);
         }
     }
 
-    private void checkLogEvent(Configuration config, LogEvent logEvent, String lookupTestKey, String lookupTestVal) throws IOException {
+    private void checkLogEvent(LogEvent logEvent, String lookupTestKey, String lookupTestVal) throws IOException {
         Set<String> mdcKeys = logEvent.getContextData().toMap().keySet();
         String firstMdcKey = mdcKeys.iterator().next();
         String firstMdcKeyExcludingRegex = mdcKeys.isEmpty() ? null : String.format("^(?!%s).*$", Pattern.quote(firstMdcKey));
@@ -60,8 +68,8 @@ public class LogstashLayoutTest {
         String firstNdcItemExcludingRegex = ndcItems.isEmpty() ? null : String.format("^(?!%s).*$", Pattern.quote(firstNdcItem));
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
-                .setConfiguration(config)
-                .setTemplateUri("classpath:LogstashTestLayout.json")
+                .setConfiguration(CONFIGURATION)
+                .setEventTemplateUri("classpath:LogstashTestLayout.json")
                 .setStackTraceEnabled(true)
                 .setLocationInfoEnabled(true)
                 .setMdcKeyPattern(firstMdcKeyExcludingRegex)
@@ -85,8 +93,12 @@ public class LogstashLayoutTest {
     private static void checkBasicFields(LogEvent logEvent, JsonNode rootNode) {
         assertThat(point(rootNode, "message").asText()).isEqualTo(logEvent.getMessage().getFormattedMessage());
         assertThat(point(rootNode, "level").asText()).isEqualTo(logEvent.getLevel().name());
+        assertThat(point(rootNode, "logger_fqcn").asText()).isEqualTo(logEvent.getLoggerFqcn());
         assertThat(point(rootNode, "logger_name").asText()).isEqualTo(logEvent.getLoggerName());
+        assertThat(point(rootNode, "thread_id").asLong()).isEqualTo(logEvent.getThreadId());
         assertThat(point(rootNode, "thread_name").asText()).isEqualTo(logEvent.getThreadName());
+        assertThat(point(rootNode, "thread_priority").asInt()).isEqualTo(logEvent.getThreadPriority());
+        assertThat(point(rootNode, "end_of_batch").asBoolean()).isEqualTo(logEvent.isEndOfBatch());
     }
 
     private static void checkSource(LogEvent logEvent, JsonNode rootNode) {
@@ -114,7 +126,13 @@ public class LogstashLayoutTest {
                 boolean matches = mdcKeyPattern == null || mdcKeyPattern.matcher(key).matches();
                 if (matches) {
                     JsonNode valueNode = OBJECT_MAPPER.convertValue(value, JsonNode.class);
-                    assertThat(node).isEqualTo(valueNode);
+                    if (valueNode.isNumber()) {
+                        double valueNodeDouble = valueNode.asDouble();
+                        double nodeDouble = node.asDouble();
+                        assertThat(nodeDouble).isEqualTo(valueNodeDouble);
+                    } else {
+                        assertThat(node).isEqualTo(valueNode);
+                    }
                 } else {
                     assertThat(node).isEqualTo(MissingNode.getInstance());
                 }
@@ -179,13 +197,13 @@ public class LogstashLayoutTest {
                 .setTimeMillis(timeMillis)
                 .build();
 
-        // Create the template.
-        ObjectNode templateRootNode = JSON_NODE_FACTORY.objectNode();
-        templateRootNode.put("@timestamp", "${json:timestamp}");
+        // Create the event template.
+        ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
+        eventTemplateRootNode.put("@timestamp", "${json:timestamp}");
         String staticFieldName = "staticFieldName";
         String staticFieldValue = "staticFieldValue";
-        templateRootNode.put(staticFieldName, staticFieldValue);
-        String template = templateRootNode.toString();
+        eventTemplateRootNode.put(staticFieldName, staticFieldValue);
+        String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
         BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
@@ -193,7 +211,7 @@ public class LogstashLayoutTest {
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
                 .setConfiguration(configuration)
-                .setTemplate(template)
+                .setEventTemplate(eventTemplate)
                 .setTimeZoneId(timeZoneId)
                 .build();
 
@@ -217,11 +235,11 @@ public class LogstashLayoutTest {
                 .setMessage(message)
                 .build();
 
-        // Create the template with property.
-        ObjectNode templateRootNode = JSON_NODE_FACTORY.objectNode();
+        // Create the event template with property.
+        ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
         String propertyName = "propertyName";
-        templateRootNode.put(propertyName, "${" + propertyName + "}");
-        String template = templateRootNode.toString();
+        eventTemplateRootNode.put(propertyName, "${" + propertyName + "}");
+        String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout with property.
         String propertyValue = "propertyValue";
@@ -232,7 +250,7 @@ public class LogstashLayoutTest {
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
                 .setConfiguration(config)
-                .setTemplate(template)
+                .setEventTemplate(eventTemplate)
                 .build();
 
         // Check the serialized event.
@@ -256,15 +274,15 @@ public class LogstashLayoutTest {
                 .setThrown(exception)
                 .build();
 
-        // Create the template.
-        ObjectNode templateRootNode = JSON_NODE_FACTORY.objectNode();
-        templateRootNode.put("ex_class", "${json:exceptionClassName}");
-        templateRootNode.put("ex_message", "${json:exceptionMessage}");
-        templateRootNode.put("ex_stacktrace", "${json:exceptionStackTrace}");
-        templateRootNode.put("root_ex_class", "${json:exceptionRootCauseClassName}");
-        templateRootNode.put("root_ex_message", "${json:exceptionRootCauseMessage}");
-        templateRootNode.put("root_ex_stacktrace", "${json:exceptionRootCauseStackTrace}");
-        String template = templateRootNode.toString();
+        // Create the event template.
+        ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
+        eventTemplateRootNode.put("ex_class", "${json:exception:className}");
+        eventTemplateRootNode.put("ex_message", "${json:exception:message}");
+        eventTemplateRootNode.put("ex_stacktrace", "${json:exception:stackTrace:text}");
+        eventTemplateRootNode.put("root_ex_class", "${json:exceptionRootCause:className}");
+        eventTemplateRootNode.put("root_ex_message", "${json:exceptionRootCause:message}");
+        eventTemplateRootNode.put("root_ex_stacktrace", "${json:exceptionRootCause:stackTrace:text}");
+        String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
         BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
@@ -272,7 +290,7 @@ public class LogstashLayoutTest {
                 .newBuilder()
                 .setConfiguration(configuration)
                 .setStackTraceEnabled(true)
-                .setTemplate(template)
+                .setEventTemplate(eventTemplate)
                 .build();
 
         // Check the serialized event.
@@ -302,15 +320,15 @@ public class LogstashLayoutTest {
                 .setThrown(exception)
                 .build();
 
-        // Create the template.
-        ObjectNode templateRootNode = JSON_NODE_FACTORY.objectNode();
-        templateRootNode.put("ex_class", "${json:exceptionClassName}");
-        templateRootNode.put("ex_message", "${json:exceptionMessage}");
-        templateRootNode.put("ex_stacktrace", "${json:exceptionStackTrace}");
-        templateRootNode.put("root_ex_class", "${json:exceptionRootCauseClassName}");
-        templateRootNode.put("root_ex_message", "${json:exceptionRootCauseMessage}");
-        templateRootNode.put("root_ex_stacktrace", "${json:exceptionRootCauseStackTrace}");
-        String template = templateRootNode.toString();
+        // Create the event template.
+        ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
+        eventTemplateRootNode.put("ex_class", "${json:exception:className}");
+        eventTemplateRootNode.put("ex_message", "${json:exception:message}");
+        eventTemplateRootNode.put("ex_stacktrace", "${json:exception:stackTrace:text}");
+        eventTemplateRootNode.put("root_ex_class", "${json:exceptionRootCause:className}");
+        eventTemplateRootNode.put("root_ex_message", "${json:exceptionRootCause:message}");
+        eventTemplateRootNode.put("root_ex_stacktrace", "${json:exceptionRootCause:stackTrace:text}");
+        String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
         BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
@@ -318,7 +336,7 @@ public class LogstashLayoutTest {
                 .newBuilder()
                 .setConfiguration(configuration)
                 .setStackTraceEnabled(true)
-                .setTemplate(template)
+                .setEventTemplate(eventTemplate)
                 .build();
 
         // Check the serialized event.
@@ -346,34 +364,78 @@ public class LogstashLayoutTest {
                 .build();
 
         // Check line separators.
-        SoftAssertions assertions = new SoftAssertions();
-        test_lineSeparator_suffix(logEvent, true, assertions);
-        test_lineSeparator_suffix(logEvent, false, assertions);
-        assertions.assertAll();
+        test_lineSeparator_suffix(logEvent, true);
+        test_lineSeparator_suffix(logEvent, false);
 
     }
 
-    private void test_lineSeparator_suffix(LogEvent logEvent, boolean prettyPrintEnabled, SoftAssertions assertions) {
+    private void test_lineSeparator_suffix(LogEvent logEvent, boolean prettyPrintEnabled) {
 
         // Create the layout.
         BuiltConfiguration config = ConfigurationBuilderFactory.newConfigurationBuilder().build();
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
                 .setConfiguration(config)
-                .setTemplateUri("classpath:LogstashJsonEventLayoutV1.json")
+                .setEventTemplateUri("classpath:LogstashJsonEventLayoutV1.json")
                 .setPrettyPrintEnabled(prettyPrintEnabled)
                 .build();
 
         // Check the serialized event.
         String serializedLogEvent = layout.toSerializable(logEvent);
         String assertionCaption = String.format("testing lineSeperator (prettyPrintEnabled=%s)", prettyPrintEnabled);
-        assertions.assertThat(serializedLogEvent).as(assertionCaption).endsWith("}" + System.lineSeparator());
+        assertThat(serializedLogEvent).as(assertionCaption).endsWith("}" + System.lineSeparator());
 
     }
 
     @Test
-    public void test_mdc_key_access() throws IOException {
+    public void test_main_key_access() throws IOException {
+        // Create the log event.
+        SimpleMessage message = new SimpleMessage("Hello, World!");
 
+        String kwKey = "--name";
+        String kwVal = "aNameValue";
+        String positionArg = "position2Value";
+        String missingKwKey = "--missing";
+
+        String[] mainArgs = {
+            kwKey, kwVal, positionArg
+        };
+        MainMapLookup.setMainArguments(mainArgs);
+
+        LogEvent logEvent = Log4jLogEvent
+            .newBuilder()
+            .setLoggerName(LogstashLayoutTest.class.getSimpleName())
+            .setLevel(Level.INFO)
+            .setMessage(message)
+            .build();
+
+        // Create the template.
+        ObjectNode templateRootNode = JSON_NODE_FACTORY.objectNode();
+        String mdcFieldName = "mdc";
+
+        templateRootNode.put("name", String.format("${json:main:%s}", kwKey));
+        templateRootNode.put("positionArg", "${json:main:2}");
+        templateRootNode.put("notFoundArg", String.format("${json:main:%s}", missingKwKey));
+        String template = templateRootNode.toString();
+
+        // Create the layout.
+        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        LogstashLayout layout = LogstashLayout
+            .newBuilder()
+            .setConfiguration(configuration)
+            .setEventTemplate(template)
+            .build();
+
+        // Check the serialized event.
+        String serializedLogEvent = layout.toSerializable(logEvent);
+        JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
+        assertThat(point(rootNode, "name").asText()).isEqualTo(kwVal);
+        assertThat(point(rootNode, "positionArg").asText()).isEqualTo(positionArg);
+        assertThat(point(rootNode, "notFoundArg")).isInstanceOf(MissingNode.class);
+    }
+
+    @Test
+    public void test_mdc_key_access() throws IOException {
         // Create the log event.
         SimpleMessage message = new SimpleMessage("Hello, World!");
         StringMap contextData = new SortedArrayStringMap();
@@ -397,13 +459,13 @@ public class LogstashLayoutTest {
                 .setContextData(contextData)
                 .build();
 
-        // Create the template.
-        ObjectNode templateRootNode = JSON_NODE_FACTORY.objectNode();
+        // Create the event template.
+        ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
         String mdcFieldName = "mdc";
-        templateRootNode.put(mdcFieldName, "${json:mdc}");
-        templateRootNode.put(mdcDirectlyAccessedKey, String.format("${json:mdc:%s}", mdcDirectlyAccessedKey));
-        templateRootNode.put(mdcDirectlyAccessedNullPropertyKey, String.format("${json:mdc:%s}", mdcDirectlyAccessedNullPropertyKey));
-        String template = templateRootNode.toString();
+        eventTemplateRootNode.put(mdcFieldName, "${json:mdc}");
+        eventTemplateRootNode.put(mdcDirectlyAccessedKey, String.format("${json:mdc:%s}", mdcDirectlyAccessedKey));
+        eventTemplateRootNode.put(mdcDirectlyAccessedNullPropertyKey, String.format("${json:mdc:%s}", mdcDirectlyAccessedNullPropertyKey));
+        String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
         BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
@@ -411,7 +473,7 @@ public class LogstashLayoutTest {
                 .newBuilder()
                 .setConfiguration(configuration)
                 .setStackTraceEnabled(true)
-                .setTemplate(template)
+                .setEventTemplate(eventTemplate)
                 .setMdcKeyPattern(mdcPatternMatchedKey)
                 .build();
 
@@ -422,7 +484,6 @@ public class LogstashLayoutTest {
         assertThat(point(rootNode, mdcFieldName, mdcPatternMatchedKey).asText()).isEqualTo(mdcPatternMatchedValue);
         assertThat(point(rootNode, mdcFieldName, mdcPatternMismatchedKey)).isInstanceOf(MissingNode.class);
         assertThat(point(rootNode, mdcDirectlyAccessedNullPropertyKey)).isInstanceOf(MissingNode.class);
-
     }
 
     @Test
@@ -443,15 +504,30 @@ public class LogstashLayoutTest {
                 .setContextData(contextData)
                 .build();
 
-        // Create the template with property.
-        ObjectNode templateRootNode = JSON_NODE_FACTORY.objectNode();
+        // Create event template node with empty property and MDC fields.
+        ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
         String mdcFieldName = "mdc";
         String emptyProperty1Name = "property1Name";
-        templateRootNode.put(emptyProperty1Name, "${" + emptyProperty1Name + "}");
-        templateRootNode.put(mdcFieldName, "${json:mdc}");
-        templateRootNode.put(mdcEmptyKey1, String.format("${json:mdc:%s}", mdcEmptyKey1));
-        templateRootNode.put(mdcEmptyKey2, String.format("${json:mdc:%s}", mdcEmptyKey2));
-        String template = templateRootNode.toString();
+        eventTemplateRootNode.put(emptyProperty1Name, "${" + emptyProperty1Name + "}");
+        eventTemplateRootNode.put(mdcFieldName, "${json:mdc}");
+        eventTemplateRootNode.put(mdcEmptyKey1, String.format("${json:mdc:%s}", mdcEmptyKey1));
+        eventTemplateRootNode.put(mdcEmptyKey2, String.format("${json:mdc:%s}", mdcEmptyKey2));
+
+        // Put a "blankObject": {"emptyArray": []} field into event template.
+        String blankObjectFieldName = "blankObject";
+        ObjectNode blankObjectNode = JSON_NODE_FACTORY.objectNode();
+        String emptyArrayFieldName = "emptyArray";
+        ArrayNode emptyArrayNode = JSON_NODE_FACTORY.arrayNode();
+        blankObjectNode.set(emptyArrayFieldName, emptyArrayNode);
+        eventTemplateRootNode.set(blankObjectFieldName, blankObjectNode);
+
+        // Put an "emptyObject": {} field into the event template.
+        String emptyObjectFieldName = "emptyObject";
+        ObjectNode emptyObjectNode = JSON_NODE_FACTORY.objectNode();
+        eventTemplateRootNode.set(emptyObjectFieldName, emptyObjectNode);
+
+        // Render the event template.
+        String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout configuration.
         Configuration config = ConfigurationBuilderFactory
@@ -465,15 +541,17 @@ public class LogstashLayoutTest {
             LogstashLayout layout = LogstashLayout
                     .newBuilder()
                     .setConfiguration(config)
-                    .setTemplate(template)
+                    .setEventTemplate(eventTemplate)
                     .setEmptyPropertyExclusionEnabled(emptyPropertyExclusionEnabled)
                     .build();
 
             // Check serialized event.
             String serializedLogEvent = layout.toSerializable(logEvent);
             if (emptyPropertyExclusionEnabled) {
-                assertThat(serializedLogEvent).isEqualTo("{}");
+                assertThat(serializedLogEvent).isEqualTo("{}" + System.lineSeparator());
             } else {
+
+                // Check property and MDC fields.
                 JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
                 assertThat(point(rootNode, mdcEmptyKey1).asText()).isEmpty();
                 assertThat(point(rootNode, mdcEmptyKey2).isNull()).isTrue();
@@ -481,6 +559,15 @@ public class LogstashLayoutTest {
                 assertThat(point(rootNode, mdcFieldName, mdcEmptyKey1).asText()).isEmpty();
                 assertThat(point(rootNode, mdcFieldName, mdcEmptyKey2).isNull()).isTrue();
                 assertThat(point(rootNode, emptyProperty1Name).asText()).isEmpty();
+
+                // Check "blankObject": {"emptyArray": []} field.
+                assertThat(point(rootNode, blankObjectFieldName, emptyArrayFieldName).isArray()).isTrue();
+                assertThat(point(rootNode, blankObjectFieldName, emptyArrayFieldName).size()).isZero();
+
+                // Check "emptyObject": {} field.
+                assertThat(point(rootNode, emptyObjectFieldName).isObject()).isTrue();
+                assertThat(point(rootNode, emptyObjectFieldName).size()).isZero();
+
             }
 
         }
@@ -501,10 +588,10 @@ public class LogstashLayoutTest {
                 .setMessage(message)
                 .build();
 
-        // Create the template.
-        ObjectNode templateRootNode = JSON_NODE_FACTORY.objectNode();
-        templateRootNode.put("message", "${json:message:json}");
-        String template = templateRootNode.toString();
+        // Create the event template.
+        ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
+        eventTemplateRootNode.put("message", "${json:message:json}");
+        String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
         BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
@@ -512,7 +599,7 @@ public class LogstashLayoutTest {
                 .newBuilder()
                 .setConfiguration(configuration)
                 .setStackTraceEnabled(true)
-                .setTemplate(template)
+                .setEventTemplate(eventTemplate)
                 .build();
 
         // Check the serialized event.
@@ -535,10 +622,10 @@ public class LogstashLayoutTest {
                 .setMessage(message)
                 .build();
 
-        // Create the template.
-        ObjectNode templateRootNode = JSON_NODE_FACTORY.objectNode();
-        templateRootNode.put("message", "${json:message:json}");
-        String template = templateRootNode.toString();
+        // Create the event template.
+        ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
+        eventTemplateRootNode.put("message", "${json:message:json}");
+        String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
         BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
@@ -546,13 +633,130 @@ public class LogstashLayoutTest {
                 .newBuilder()
                 .setConfiguration(configuration)
                 .setStackTraceEnabled(true)
-                .setTemplate(template)
+                .setEventTemplate(eventTemplate)
                 .build();
 
         // Check the serialized event.
         String serializedLogEvent = layout.toSerializable(logEvent);
         JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
         assertThat(point(rootNode, "message", "message").asText()).isEqualTo("Hello, World!");
+
+    }
+
+    @Test
+    public void test_StackTraceElement_template() throws IOException {
+
+        // Create the stack trace element template.
+        ObjectNode stackTraceElementTemplateRootNode = JSON_NODE_FACTORY.objectNode();
+        String classNameFieldName = "className";
+        stackTraceElementTemplateRootNode.put(classNameFieldName, "${json:stackTraceElement:className}");
+        String methodNameFieldName = "methodName";
+        stackTraceElementTemplateRootNode.put(methodNameFieldName, "${json:stackTraceElement:methodName}");
+        String fileNameFieldName = "fileName";
+        stackTraceElementTemplateRootNode.put(fileNameFieldName, "${json:stackTraceElement:fileName}");
+        String lineNumberFieldName = "lineNumber";
+        stackTraceElementTemplateRootNode.put(lineNumberFieldName, "${json:stackTraceElement:lineNumber}");
+        String stackTraceElementTemplate = stackTraceElementTemplateRootNode.toString();
+
+        // Create the event template.
+        ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
+        String stackTraceFieldName = "stackTrace";
+        eventTemplateRootNode.put(stackTraceFieldName, "${json:exception:stackTrace}");
+        String eventTemplate = eventTemplateRootNode.toString();
+
+        // Create the layout.
+        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        LogstashLayout layout = LogstashLayout
+                .newBuilder()
+                .setConfiguration(configuration)
+                .setStackTraceEnabled(true)
+                .setStackTraceElementTemplate(stackTraceElementTemplate)
+                .setEventTemplate(eventTemplate)
+                .build();
+
+        // Create the log event.
+        SimpleMessage message = new SimpleMessage("Hello, World!");
+        RuntimeException exceptionCause = new RuntimeException("failure cause for test purposes");
+        RuntimeException exception = new RuntimeException("failure for test purposes", exceptionCause);
+        LogEvent logEvent = Log4jLogEvent
+                .newBuilder()
+                .setLoggerName(LogstashLayoutTest.class.getSimpleName())
+                .setLevel(Level.ERROR)
+                .setMessage(message)
+                .setThrown(exception)
+                .build();
+
+        // Check the serialized event.
+        String serializedLogEvent = layout.toSerializable(logEvent);
+        JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
+        JsonNode stackTraceNode = point(rootNode, stackTraceFieldName);
+        assertThat(stackTraceNode.isArray()).isTrue();
+        StackTraceElement[] stackTraceElements = exception.getStackTrace();
+        assertThat(stackTraceNode.size()).isEqualTo(stackTraceElements.length);
+        for (int stackTraceElementIndex = 0; stackTraceElementIndex < stackTraceElements.length; stackTraceElementIndex++) {
+            StackTraceElement stackTraceElement = stackTraceElements[stackTraceElementIndex];
+            JsonNode stackTraceElementNode = stackTraceNode.get(stackTraceElementIndex);
+            assertThat(stackTraceElementNode.size()).isEqualTo(4);
+            assertThat(point(stackTraceElementNode, classNameFieldName).asText()).isEqualTo(stackTraceElement.getClassName());
+            assertThat(point(stackTraceElementNode, methodNameFieldName).asText()).isEqualTo(stackTraceElement.getMethodName());
+            assertThat(point(stackTraceElementNode, fileNameFieldName).asText()).isEqualTo(stackTraceElement.getFileName());
+            assertThat(point(stackTraceElementNode, lineNumberFieldName).asInt()).isEqualTo(stackTraceElement.getLineNumber());
+        }
+
+    }
+
+    @Test
+    public void test_toSerializable_toByteArray_encode_outputs() {
+
+        // Create the layout.
+        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        LogstashLayout layout = LogstashLayout
+                .newBuilder()
+                .setConfiguration(configuration)
+                .setStackTraceEnabled(true)
+                .build();
+
+        // Create the log event.
+        LogEvent logEvent = LogEventFixture.createFullLogEvents(1).get(0);
+
+        // Get toSerializable() output.
+        String toSerializableOutput = layout.toSerializable(logEvent);
+
+        // Get toByteArrayOutput().
+        byte[] toByteArrayOutputBytes = layout.toByteArray(logEvent);
+        String toByteArrayOutput = new String(toByteArrayOutputBytes, 0, toByteArrayOutputBytes.length, StandardCharsets.UTF_8);
+
+        // Get encode() output.
+        final ByteBuffer byteBuffer = ByteBuffer.allocate(512 * 1024);
+        ByteBufferDestination byteBufferDestination = new ByteBufferDestination() {
+
+            @Override
+            public ByteBuffer getByteBuffer() {
+                return byteBuffer;
+            }
+
+            @Override
+            public ByteBuffer drain(ByteBuffer buf) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public void writeBytes(ByteBuffer data) {
+                byteBuffer.put(data);
+            }
+
+            @Override
+            public void writeBytes(byte[] data, int offset, int length) {
+                byteBuffer.put(data, offset, length);
+            }
+
+        };
+        layout.encode(logEvent, byteBufferDestination);
+        String encodeOutput = new String(byteBuffer.array(), 0, byteBuffer.position(), StandardCharsets.UTF_8);
+
+        // Compare outputs.
+        assertThat(toSerializableOutput).isEqualTo(toByteArrayOutput);
+        assertThat(toByteArrayOutput).isEqualTo(encodeOutput);
 
     }
 

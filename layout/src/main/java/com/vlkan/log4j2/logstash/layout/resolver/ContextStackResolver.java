@@ -1,21 +1,20 @@
 package com.vlkan.log4j2.logstash.layout.resolver;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.NullNode;
+import com.fasterxml.jackson.core.JsonGenerator;
 import org.apache.logging.log4j.ThreadContext;
 import org.apache.logging.log4j.core.LogEvent;
 
+import java.io.IOException;
 import java.util.regex.Pattern;
 
 /**
  * Add Nested Diagnostic Context (NDC).
  */
-class ContextStackResolver implements TemplateResolver {
+class ContextStackResolver implements EventResolver {
 
-    private final TemplateResolverContext context;
+    private final EventResolverContext context;
 
-    ContextStackResolver(TemplateResolverContext context) {
+    ContextStackResolver(EventResolverContext context) {
         this.context = context;
     }
 
@@ -24,20 +23,29 @@ class ContextStackResolver implements TemplateResolver {
     }
 
     @Override
-    public JsonNode resolve(LogEvent logEvent) {
+    public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
         ThreadContext.ContextStack contextStack = logEvent.getContextStack();
         if (contextStack.getDepth() == 0) {
-            return NullNode.getInstance();
+            jsonGenerator.writeNull();
+            return;
         }
         Pattern itemPattern = context.getNdcPattern();
-        ArrayNode contextStackNode = context.getObjectMapper().createArrayNode();
+        boolean arrayStarted = false;
         for (String contextStackItem : contextStack.asList()) {
             boolean matches = itemPattern == null || itemPattern.matcher(contextStackItem).matches();
             if (matches) {
-                contextStackNode.add(contextStackItem);
+                if (!arrayStarted) {
+                    jsonGenerator.writeStartArray();
+                    arrayStarted = true;
+                }
+                jsonGenerator.writeString(contextStackItem);
             }
         }
-        return contextStackNode;
+        if (arrayStarted) {
+            jsonGenerator.writeEndArray();
+        } else {
+            jsonGenerator.writeNull();
+        }
     }
 
 }

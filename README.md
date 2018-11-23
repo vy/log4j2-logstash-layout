@@ -2,7 +2,7 @@
 [![Maven Central](https://img.shields.io/maven-central/v/com.vlkan.log4j2/log4j2-logstash-layout-parent.svg)](https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.vlkan.log4j2%22)
 [![License](https://img.shields.io/github/license/vy/log4j2-logstash-layout.svg)](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-`LogstashLayout` plugin provides a [Log4j 2.x](https://logging.apache.org/log4j/2.x/)
+`LogstashLayout` is **the fastest** garbage-free [Log4j 2](https://logging.apache.org/log4j/2.x/)
 layout with customizable and [Logstash](https://www.elastic.co/products/logstash)-friendly
 JSON formatting.
 
@@ -10,13 +10,23 @@ By default, `LogstashLayout` ships the official `JSONEventLayoutV1` stated by
 [log4j-jsonevent-layout](https://github.com/logstash/log4j-jsonevent-layout)
 Log4j 1.x plugin. Compared to
 [JSONLayout](https://logging.apache.org/log4j/2.x/manual/layouts.html#JSONLayout)
-included in Log4j 2.x and `log4j-jsonevent-layout`, `LogstashLayout` provides
+included in Log4j 2 and `log4j-jsonevent-layout`, `LogstashLayout` provides
 the following additional features:
 
-- Additional fields can be added. (See `template` and `templateUri` parameters.)
-- JSON schema structure can be customized. (See `template` and `templateUri` parameters.)
-- Timestamp formatting can be customized. (See `dateTimeFormatPattern`
-  and `timeZoneId` parameters.)
+- Superior [performance](#performance)
+- Customizable JSON schema (see `eventTemplate[Uri]` and `stackTraceElementTemplate[Uri]` parameters)
+- Customizable timestamp formatting (see `dateTimeFormatPattern` and `timeZoneId` parameters)
+
+# Table of Contents
+
+- [Usage](#usage)
+- [FAT JAR](#fat-jar)
+- [Appender Support](#appender-support)
+- [Performance](#performance)
+- [Contributors](#contributors)
+- [License](#license)
+
+<a name="usage"></a>
 
 # Usage
 
@@ -48,7 +58,7 @@ Below you can find a sample `log4j2.xml` snippet employing `LogstashLayout`.
     <Appenders>
         <Console name="CONSOLE" target="SYSTEM_OUT">
             <LogstashLayout dateTimeFormatPattern="yyyy-MM-dd'T'HH:mm:ss.SSSZZZ"
-                            templateUri="classpath:LogstashJsonEventLayoutV1.json"
+                            eventTemplateUri="classpath:LogstashJsonEventLayoutV1.json"
                             prettyPrintEnabled="true"
                             stackTraceEnabled="true"/>
         </Console>
@@ -96,83 +106,121 @@ This generates an output as follows:
 | `timeZoneId` | String | time zone id (defaults to `TimeZone.getDefault().getID()`) |
 | `mdcKeyPattern` | String | regex to filter MDC keys (does not apply to direct `mdc:key` access) |
 | `ndcPattern` | String | regex to filter NDC items |
-| `template` | String | inline JSON template for generating the output (has priority over `templateUri`) |
-| `templateUri` | String | JSON template for generating the output (defaults to `classpath:LogstashJsonEventLayoutV1.json`) |
+| `eventTemplate` | String | inline JSON template for rendering `LogEvent`s (has priority over `eventTemplateUri`) |
+| `eventTemplateUri` | String | JSON template for rendering `LogEvent`s (defaults to [`classpath:LogstashJsonEventLayoutV1.json`](layout/src/main/resources/LogstashJsonEventLayoutV1.json)) |
+| `stackTraceElementTemplate` | String | inline JSON template for rendering `StackTraceElement`s (has priority over `stackTraceElementTemplateUri`) |
+| `stackTraceElementTemplateUri` | String | JSON template for rendering `StackTraceElement`s (defaults to [`classpath:Log4j2StackTraceElementLayout.json`](layout/src/main/resources/Log4j2StackTraceElementLayout.json)) |
+| `lineSeparator` | String | used to separate log outputs (defaults to `System.lineSeparator()`) |
+| `maxByteCount` | int | used to cap the internal `byte[]` buffer used for serialization (defaults to 512 KiB) |
 
-`templateUri` denotes the URI pointing to the JSON template that will be used
-while formatting the log events. By default, `LogstashLayout` ships the
-[JSONEventLayoutV1](https://github.com/logstash/log4j-jsonevent-layout)
-in `LogstashJsonEventLayoutV1.json` within the classpath:
+`eventTemplateUri` denotes the URI pointing to the JSON template that will be used
+while formatting the `LogEvent`s. By default, `LogstashLayout` ships
+[`LogstashJsonEventLayoutV1.json`](layout/src/main/resources/LogstashJsonEventLayoutV1.json)
+providing [the official Logstash `JSONEventLayoutV1`](https://github.com/logstash/log4j-jsonevent-layout).
 
 ```json
 {
   "mdc": "${json:mdc}",
   "ndc": "${json:ndc}",
   "exception": {
-    "exception_class": "${json:exceptionClassName}",
-    "exception_message": "${json:exceptionMessage}",
-    "stacktrace": "${json:exceptionStackTrace}"
+    "exception_class": "${json:exception:className}",
+    "exception_message": "${json:exception:message}",
+    "stacktrace": "${json:exception:stackTrace:text}"
   },
-  "line_number": "${json:sourceLineNumber}",
-  "class": "${json:sourceClassName}",
+  "line_number": "${json:source:lineNumber}",
+  "class": "${json:source:className}",
   "@version": 1,
   "source_host": "${hostName}",
   "message": "${json:message}",
-  "thread_name": "${json:threadName}",
+  "thread_name": "${json:thread:name}",
   "@timestamp": "${json:timestamp}",
   "level": "${json:level}",
-  "file": "${json:sourceFileName}",
-  "method": "${json:sourceMethodName}",
-  "logger_name": "${json:loggerName}"
+  "file": "${json:source:fileName}",
+  "method": "${json:source:methodName}",
+  "logger_name": "${json:logger:name}"
+}
+```
+
+Similarly, `stackTraceElementUri` denotes the URI pointing to the JSON template
+that will be used while formatting the `StackTraceElement`s. By default,
+`LogstashLayout` ships [`classpath:Log4j2StackTraceElementLayout.json`](layout/src/main/resources/Log4j2StackTraceElementLayout.json)
+providing an identical stack trace structure produced by Log4j 2 `JSONLayout`.
+
+```json
+{
+  "class": "${json:stackTraceElement:className}",
+  "method": "${json:stackTraceElement:methodName}",
+  "file": "${json:stackTraceElement:fileName}",
+  "line": "${json:stackTraceElement:lineNumber}"
 }
 ```
 
 In case of need, you can create your own templates with a structure tailored
 to your needs. That is, you can add new fields, remove or rename existing
-ones, change the structure, etc. Please note that `templateUri` parameter only
-supports `file` and `classpath` URI schemes. 
+ones, change the structure, etc. Please note that `eventTemplateUri` parameter
+only supports `file` and `classpath` URI schemes. 
 
-Below is the list of known template variables that will be replaced while
-rendering the JSON output.
+Below is the list of allowed `LogEvent` template variables that will be replaced
+while rendering the JSON output.
 
 | Variable Name | Description |
 |---------------|-------------|
-| `exceptionClassName` | `logEvent.getThrown().getClass().getCanonicalName()` |
-| `exceptionMessage` | `logEvent.getThrown().getMessage()` |
-| `exceptionStackTrace` | `logEvent.getThrown().printStackTrace()` (inactive when `stackTraceEnabled=false`) |
-| `exceptionRootCauseClassName` | the innermost `exceptionClassName` in causal chain |
-| `exceptionRootCauseMessage` | the innermost `exceptionMessage` in causal chain |
-| `exceptionRootCauseStackTrace` | the innermost `exceptionStackTrace` in causal chain |
+| `endOfBatch` | `logEvent.isEndOfBatch()` |
+| `exception:className` | `logEvent.getThrown().getClass().getCanonicalName()` |
+| `exception:message` | `logEvent.getThrown().getMessage()` |
+| `exception:stackTrace` | `logEvent.getThrown().getStackTrace()` (inactive when `stackTraceEnabled=false`) |
+| `exception:stackTrace:text` | `logEvent.getThrown().printStackTrace()` (inactive when `stackTraceEnabled=false`) |
+| `exceptionRootCause:className` | the innermost `exception:className` in causal chain |
+| `exceptionRootCause:message` | the innermost `exception:message` in causal chain |
+| `exceptionRootCause:stackTrace[:text]` | the innermost `exception:stackTrace[:text]` in causal chain |
 | `level` | `logEvent.getLevel()` |
-| `loggerName` | `logEvent.getLoggerName()` |
+| `logger:fqcn` | `logEvent.getLoggerFqcn()` |
+| `logger:name` | `logEvent.getLoggerName()` |
+| `main:<key>` | performs [Main Argument Lookup](https://logging.apache.org/log4j/2.0/manual/lookups.html#AppMainArgsLookup) for the given `key` |
 | `mdc` | Mapped Diagnostic Context `Map<String, String>` returned by `logEvent.getContextData()` |
 | `mdc:<key>` | Mapped Diagnostic Context `String` associated with `key` (`mdcKeyPattern` is discarded) |
 | `message` | `logEvent.getFormattedMessage()` |
 | `message:json` | if `logEvent.getMessage()` is of type `MultiformatMessage` and supports JSON, its read value, otherwise, `{"message": <formattedMessage>}` object |
 | `ndc` | Nested Diagnostic Context `String[]` returned by `logEvent.getContextStack()` |
-| `sourceClassName` | `logEvent.getSource().getClassName()` |
-| `sourceFileName` | `logEvent.getSource().getFileName()` (inactive when `locationInfoEnabled=false`) |
-| `sourceLineNumber` | `logEvent.getSource().getLineNumber()` (inactive when `locationInfoEnabled=false`) |
-| `sourceMethodName` | `logEvent.getSource().getMethodName()` |
-| `threadName` | `logEvent.getThreadName()` |
+| `source:className` | `logEvent.getSource().getClassName()` |
+| `source:fileName` | `logEvent.getSource().getFileName()` (inactive when `locationInfoEnabled=false`) |
+| `source:lineNumber` | `logEvent.getSource().getLineNumber()` (inactive when `locationInfoEnabled=false`) |
+| `source:methodName` | `logEvent.getSource().getMethodName()` |
+| `thread:id` | `logEvent.getThreadId()` |
+| `thread:name` | `logEvent.getThreadName()` |
+| `thread:priority` | `logEvent.getThreadPriority()` |
 | `timestamp` | `logEvent.getTimeMillis()` formatted using `dateTimeFormatPattern` and `timeZoneId` |
+| `timestamp:millis` | `logEvent.getTimeMillis()` |
+| `timestamp:nanos` | `logEvent.getNanoTime()` |
 
 JSON field lookups are performed using the `${json:<variable-name>}` scheme
 where `<variable-name>` is defined as `<resolver-name>[:<resolver-key>]`.
-Characters following colon (`:`) are treated as the `resolver-key` of
-which as of now only supported in forms `mdc:<key>` and
-`message:json`.
+Characters following colon (`:`) are treated as the `resolver-key`.
 
-[Log4j 2.x Lookups](https://logging.apache.org/log4j/2.0/manual/lookups.html)
+[Log4j 2 Lookups](https://logging.apache.org/log4j/2.0/manual/lookups.html)
 (e.g., `${java:version}`, `${env:USER}`, `${date:MM-dd-yyyy}`) are supported
-in templates too. Though note that while `${json:...}` template variables is
+in templates too. Though note that while `${json:...}` template variables are
 expected to occupy an entire field, that is, `"level": "${json:level}"`, a
 lookup can be mixed within a regular text: `"myCustomField": "Hello, ${env:USER}!"`.
 
-See `layout-demo` directory for a sample application using the `LogstashLayout`.
+Similarly, below is the list of allowed `StackTraceElement` template variables:
 
-Fat JAR
-=======
+| Variable Name | Description |
+|---------------|-------------|
+| `stackTraceElement:className` | `stackTraceElement.getClassName()` |
+| `stackTraceElement:methodName` | `stackTraceElement.getMethodName()` |
+| `stackTraceElement:fileName` | `stackTraceElement.getFileName()` |
+| `stackTraceElement:lineNumber` | `stackTraceElement.getLineNumber()` |
+
+As in `LogEvent` templates, `StackTraceElement` templates support Log4j 2
+lookups too.
+
+See [`layout-demo`](layout-demo) directory for a sample application
+demonstrating the usage of `LogstashLayout`.
+
+<a name="fat-jar"></a>
+
+# Fat JAR
 
 Project also contains a `log4j2-logstash-layout-fatjar` artifact which
 includes all its transitive dependencies in a separate shaded package (to
@@ -180,10 +228,12 @@ avoid the JAR Hell) with the exception of `log4j-core`, that you need to
 include separately.
 
 This might come handy if you want to use this plugin along with already
-compiled applications, e.g., Elasticsearch 5.x, which requires Log4j 2.x.
+compiled applications, e.g., Elasticsearch 5.x and 6.x versions, which
+requires Log4j 2.
 
-Appender Support
-================
+<a name="appender-support"></a>
+
+# Appender Support
 
 `log4j2-logstash-layout` is all about providing a highly customizable JSON
 schema for your logs. Though this does not necessarily mean that all of its
@@ -195,21 +245,179 @@ for Logstash's `log4j-json` file input type. (See
 Make sure you configure `log4j2-logstash-layout` properly in a way that
 is aligned with your appender of preference.
 
-Performance
-===========
+<a name="performance"></a>
 
-The source code ships a [JMH](https://openjdk.java.net/projects/code-tools/jmh/)
-benchmark, where you can measure the rendering performance of your preferred
-platform. As of this writing, using a *single thread* on an Intel i7 2.70GHz
-processor powering Java HotSpot 1.8.0_161, the `log4j2-logstash-layout` can
-render ~29k `LogEvent`/sec with a GC allocation rate of ~3 GB/sec.
+# Performance
 
-Contributors
-============
+The source code ships a `LogstashLayout`-vs-[`JSONLayout`](https://logging.apache.org/log4j/2.0/manual/layouts.html#JSONLayout)
+(the one shipped by default in Log4j 2) [JMH](https://openjdk.java.net/projects/code-tools/jmh/)
+benchmark assessing the rendering performance of both plugins. There two
+different `LogEvent` profiles are employed:
+
+- **full**: `LogEvent` contains MDC, NDC, and an exception.
+- **lite:** `LogEvent` has no MDC, NDC, or exception attachment.
+
+To give an idea, we ran the benchmark with the following settings:
+
+- **CPU:** Intel i7 2.70GHz (x86-64, confined `java` process to a single core
+  using [`taskset -c 0`](http://www.man7.org/linux/man-pages/man1/taskset.1.html))
+- **JVM:** Java HotSpot 1.8.0_161 (`-XX:+TieredCompilation`, `-XX:+AggressiveOpts`)
+- **OS:** Xubuntu 18.04.1 (4.15.0-34-generic, x86-64)
+- **`LogstashLayout:`** used default settings with the following exceptions:
+  - **`stackTraceEnabled`:** `true`
+- **`JSONLayout`:** used in two different flavors
+  - **`DefaultJsonLayout`:** default settings
+  - **`CustomJsonLayout`:** default settings with an additional `"@version": 1`
+    field (this forces instantiation of a wrapper class to obtain the necessary
+    Jackson view)
+
+The results are as follows. (See [`layout-benchmark`](layout-benchmark)
+directory for the full report.)
+
+<div id="results">
+    <table>
+        <thead>
+            <tr>
+                <th>Benchmark</th>
+                <th>TLA?<sup>*</sup></th>
+                <th colspan="2">ops/sec<sup>**</sup></th>
+                <th>MB/sec<sup>**</sup></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr data-benchmark="liteLogstashLayout">
+                <td class="benchmark">liteLogstashLayout</td>
+                <td class="tla">✓</td>
+                <td class="op_rate">700,297</td>
+                <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉ (100%)</td>
+                <td class="gc_rate">0.3</td>
+            </tr>
+            <tr data-benchmark="liteLogstashLayout">
+                <td class="benchmark">liteLogstashLayout</td>
+                <td class="tla">✗</td>
+                <td class="op_rate">700,144</td>
+                <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉ (100%)</td>
+                <td class="gc_rate">0.3</td>
+            </tr>
+            <tr data-benchmark="liteDefaultJsonLayout">
+                <td class="benchmark">liteDefaultJsonLayout</td>
+                <td class="tla">✓</td>
+                <td class="op_rate">342,474</td>
+                <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉ (49%)</td>
+                <td class="gc_rate">1,597.2</td>
+            </tr>
+            <tr data-benchmark="liteDefaultJsonLayout">
+                <td class="benchmark">liteDefaultJsonLayout</td>
+                <td class="tla">✗</td>
+                <td class="op_rate">337,688</td>
+                <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉ (48%)</td>
+                <td class="gc_rate">1,574.8</td>
+            </tr>
+            <tr data-benchmark="liteCustomJsonLayout">
+                <td class="benchmark">liteCustomJsonLayout</td>
+                <td class="tla">✗</td>
+                <td class="op_rate">290,527</td>
+                <td class="op_rate_bar">▉▉▉▉▉▉▉▉ (41%)</td>
+                <td class="gc_rate">1,440.4</td>
+            </tr>
+            <tr data-benchmark="liteCustomJsonLayout">
+                <td class="benchmark">liteCustomJsonLayout</td>
+                <td class="tla">✓</td>
+                <td class="op_rate">283,389</td>
+                <td class="op_rate_bar">▉▉▉▉▉▉▉▉ (40%)</td>
+                <td class="gc_rate">1,430.5</td>
+            </tr>
+            <tr data-benchmark="fullLogstashLayout">
+                <td class="benchmark">fullLogstashLayout</td>
+                <td class="tla">✗</td>
+                <td class="op_rate">62,988</td>
+                <td class="op_rate_bar">▉▉ (9%)</td>
+                <td class="gc_rate">6.4</td>
+            </tr>
+            <tr data-benchmark="fullLogstashLayout">
+                <td class="benchmark">fullLogstashLayout</td>
+                <td class="tla">✓</td>
+                <td class="op_rate">62,612</td>
+                <td class="op_rate_bar">▉▉ (9%)</td>
+                <td class="gc_rate">6.4</td>
+            </tr>
+            <tr data-benchmark="fullDefaultJsonLayout">
+                <td class="benchmark">fullDefaultJsonLayout</td>
+                <td class="tla">✓</td>
+                <td class="op_rate">8,964</td>
+                <td class="op_rate_bar">▉ (1%)</td>
+                <td class="gc_rate">1,927.1</td>
+            </tr>
+            <tr data-benchmark="fullCustomJsonLayout">
+                <td class="benchmark">fullCustomJsonLayout</td>
+                <td class="tla">✓</td>
+                <td class="op_rate">8,751</td>
+                <td class="op_rate_bar">▉ (1%)</td>
+                <td class="gc_rate">1,925.5</td>
+            </tr>
+            <tr data-benchmark="fullDefaultJsonLayout">
+                <td class="benchmark">fullDefaultJsonLayout</td>
+                <td class="tla">✗</td>
+                <td class="op_rate">8,491</td>
+                <td class="op_rate_bar">▉ (1%)</td>
+                <td class="gc_rate">1,866.7</td>
+            </tr>
+            <tr data-benchmark="fullCustomJsonLayout">
+                <td class="benchmark">fullCustomJsonLayout</td>
+                <td class="tla">✗</td>
+                <td class="op_rate">8,369</td>
+                <td class="op_rate_bar">▉ (1%)</td>
+                <td class="gc_rate">1,827.5</td>
+            </tr>
+        </tbody>
+    </table>
+    <p id="footnotes">
+        <sup>*</sup> Thread local allocations (i.e., <code>log4j2.enable.threadlocals</code> flag) enabled?<br/>
+        <sup>**</sup> 99<sup>th</sup> percentile
+    </p>
+</div>
+
+Let us try to answer some common questions:
+
+- **How come `log4j2-logstash-layout` can yield superior performance compared
+  to Log4j 2 `JSONLayout`?** Log4j 2 `JSONLayout` employs a single Jackson view
+  to generate JSON, XML, and YAML outputs. For this purpose, it uses Jackson
+  `ObjectMapper`, which needs to walk over the class fields via reflection and
+  perform heavy branching and intermediate object instantiation. On the contrary,
+  `log4j2-logstash-layout` parses the given template once and compiles a
+  garbage-free and (to a certain extent) branching-free JSON generator using
+  Jackson `JsonGenerator`.
+
+- **Given `log4j2-logstash-layout` is garbage-free, how come MB/sec column is
+  never zero?** In the case of `liteLogstashLayout` benchmarks, the appearing
+  *0.3 MB/sec* is due to JVM internal allocations, `LogstashLayout` in
+  TLA-enabled mode indeed has zero allocations. Though, there are some caveats:
+
+  - Since `Throwable#getStackTrace()` clones the original
+    `StackTraceElement[]`, accesses to (and hence rendering) stack traces can
+    never be garbage-free.
+
+  - Rendering stack traces to text (that is, `exception[rootCause]StackTrace:text`)
+    allocates a new `ByteArrayOutputStream`-backed `PrintStream` (used by
+    `Throwable#printStackTrace()`) each time.
+
+  - Rendering of context data (that is, MDC) field values is garbage-free if
+    the value is either `null`, or of type `String`, `Short`, `Integer`,
+    `Long`, or `byte[]`.
+
+- **How can one run the benchmark on his/her machine?** After a fresh
+  `mvn clean package` within the source directory, run
+  `layout-benchmark/benchmark.py`.
+
+<a name="contributors"></a>
+
+# Contributors
 
 - [Eric Schwartz](https://github.com/emschwar)
 - [Michael K. Edwards](https://github.com/mkedwards)
 - [Yaroslav Skopets](https://github.com/yskopets)
+
+<a name="license"></a>
 
 # License
 

@@ -1,16 +1,15 @@
 package com.vlkan.log4j2.logstash.layout.resolver;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.TextNode;
+import com.fasterxml.jackson.core.JsonGenerator;
 import org.apache.logging.log4j.core.LogEvent;
 
-class LevelResolver implements TemplateResolver {
+import java.io.IOException;
+
+class LevelResolver implements EventResolver {
 
     private static final LevelResolver INSTANCE = new LevelResolver();
 
-    private LevelResolver() {
-        // Do nothing.
-    }
+    private LevelResolver() {}
 
     static LevelResolver getInstance() {
         return INSTANCE;
@@ -21,9 +20,9 @@ class LevelResolver implements TemplateResolver {
     }
 
     @Override
-    public JsonNode resolve(LogEvent logEvent) {
+    public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
         String level = logEvent.getLevel().name();
-        return new TextNode(level);
+        jsonGenerator.writeString(level);
     }
 
 }

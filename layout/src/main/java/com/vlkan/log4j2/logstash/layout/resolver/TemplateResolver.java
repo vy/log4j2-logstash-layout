@@ -1,10 +1,11 @@
 package com.vlkan.log4j2.logstash.layout.resolver;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import org.apache.logging.log4j.core.LogEvent;
+import com.fasterxml.jackson.core.JsonGenerator;
 
-public interface TemplateResolver {
+import java.io.IOException;
 
-    JsonNode resolve(LogEvent logEvent);
+public interface TemplateResolver<V> {
+
+    void resolve(V value, JsonGenerator jsonGenerator) throws IOException;
 
 }
