@@ -35,7 +35,7 @@ import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-abstract class LogstashLayoutTest {
+public abstract class LogstashLayoutTest {
 
     private static final Configuration CONFIGURATION = new DefaultConfiguration();
 
