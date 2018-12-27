@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vlkan.log4j2.logstash.layout.util.Throwables;
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.DefaultConfiguration;
@@ -348,6 +350,45 @@ public abstract class LogstashLayoutTest {
         assertThat(point(rootNode, "root_ex_class").asText()).isEqualTo(exceptionCause.getClass().getCanonicalName());
         assertThat(point(rootNode, "root_ex_message").asText()).isEqualTo(exceptionCause.getMessage());
         assertThat(point(rootNode, "root_ex_stacktrace").asText()).startsWith(exceptionCause.getClass().getCanonicalName() + ": " + exceptionCause.getMessage());
+
+    }
+
+    @Test
+    public void test_marker_name() throws IOException {
+
+        // Create the log event.
+        SimpleMessage message = new SimpleMessage("Hello, World!");
+        String markerName = "test";
+        Marker marker = MarkerManager.getMarker(markerName);
+        LogEvent logEvent = Log4jLogEvent
+                .newBuilder()
+                .setLoggerName(LogstashLayoutTest.class.getSimpleName())
+                .setLevel(Level.ERROR)
+                .setMessage(message)
+                .setMarker(marker)
+                .build();
+
+        // Create the event template.
+        ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
+        String messageKey = "message";
+        eventTemplateRootNode.put(messageKey, "${json:message}");
+        String markerNameKey = "marker";
+        eventTemplateRootNode.put(markerNameKey, "${json:marker:name}");
+        String eventTemplate = eventTemplateRootNode.toString();
+
+        // Create the layout.
+        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        LogstashLayout layout = LogstashLayout
+                .newBuilder()
+                .setConfiguration(configuration)
+                .setEventTemplate(eventTemplate)
+                .build();
+
+        // Check the serialized event.
+        String serializedLogEvent = layout.toSerializable(logEvent);
+        JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
+        assertThat(point(rootNode, messageKey).asText()).isEqualTo(message.getFormattedMessage());
+        assertThat(point(rootNode, markerNameKey).asText()).isEqualTo(markerName);
 
     }
 

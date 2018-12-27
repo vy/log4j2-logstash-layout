@@ -21,6 +21,7 @@ enum EventResolverFactories {;
                 LevelResolverFactory.getInstance(),
                 LoggerResolverFactory.getInstance(),
                 MainMapResolverFactory.getInstance(),
+                MarkerResolverFactory.getInstance(),
                 MessageResolverFactory.getInstance(),
                 SourceResolverFactory.getInstance(),
                 ThreadResolverFactory.getInstance(),
