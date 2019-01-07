@@ -71,6 +71,25 @@ Below you can find a sample `log4j2.xml` snippet employing `LogstashLayout`.
 </Configuration>
 ```
 
+Or using the `log4j2.properties` file instead:
+
+```ini
+status = warn
+
+appender.console.name = CONSOLE
+appender.console.type = CONSOLE
+appender.console.target = SYSTEM_OUT
+
+appender.console.logshtash.type = LogstashLayout
+appender.console.logshtash.dateTimeFormatPattern = yyyy-MM-dd'T'HH:mm:ss.SSSZZZ
+appender.console.logshtash.eventTemplateUri = classpath:LogstashJsonEventLayoutV1.json
+appender.console.logshtash.prettyPrintEnabled = true
+appender.console.logshtash.stackTraceEnabled = true
+
+rootLogger.level = info
+rootLogger.appenderRef.stdout.ref = CONSOLE
+```
+
 This generates an output as follows:
 
 ```json
