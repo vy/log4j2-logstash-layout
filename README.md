@@ -435,13 +435,14 @@ Let us try to answer some common questions:
 
 - [Eric Schwartz](https://github.com/emschwar)
 - [Michael K. Edwards](https://github.com/mkedwards)
+- [Rafa Gómez](https://github.com/rgomezcasas)
 - [Yaroslav Skopets](https://github.com/yskopets)
 
 <a name="license"></a>
 
 # License
 
-Copyright &copy; 2017-2018 [Volkan Yazıcı](http://vlkan.com/)
+Copyright &copy; 2017-2019 [Volkan Yazıcı](http://vlkan.com/)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
