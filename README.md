@@ -80,11 +80,11 @@ appender.console.name = CONSOLE
 appender.console.type = CONSOLE
 appender.console.target = SYSTEM_OUT
 
-appender.console.logshtash.type = LogstashLayout
-appender.console.logshtash.dateTimeFormatPattern = yyyy-MM-dd'T'HH:mm:ss.SSSZZZ
-appender.console.logshtash.eventTemplateUri = classpath:LogstashJsonEventLayoutV1.json
-appender.console.logshtash.prettyPrintEnabled = true
-appender.console.logshtash.stackTraceEnabled = true
+appender.console.logstash.type = LogstashLayout
+appender.console.logstash.dateTimeFormatPattern = yyyy-MM-dd'T'HH:mm:ss.SSSZZZ
+appender.console.logstash.eventTemplateUri = classpath:LogstashJsonEventLayoutV1.json
+appender.console.logstash.prettyPrintEnabled = true
+appender.console.logstash.stackTraceEnabled = true
 
 rootLogger.level = info
 rootLogger.appenderRef.stdout.ref = CONSOLE
