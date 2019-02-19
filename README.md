@@ -435,6 +435,7 @@ Let us try to answer some common questions:
 
 - [Eric Schwartz](https://github.com/emschwar)
 - [Michael K. Edwards](https://github.com/mkedwards)
+- [Mikael Strand](https://github.com/MikaelStrand)
 - [Rafa Gómez](https://github.com/rgomezcasas)
 - [Yaroslav Skopets](https://github.com/yskopets)
 
