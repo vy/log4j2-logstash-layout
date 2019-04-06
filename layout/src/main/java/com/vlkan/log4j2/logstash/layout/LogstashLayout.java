@@ -3,7 +3,11 @@ package com.vlkan.log4j2.logstash.layout;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vlkan.log4j2.logstash.layout.resolver.*;
+import com.vlkan.log4j2.logstash.layout.resolver.EventResolverContext;
+import com.vlkan.log4j2.logstash.layout.resolver.StackTraceElementObjectResolverContext;
+import com.vlkan.log4j2.logstash.layout.resolver.TemplateResolver;
+import com.vlkan.log4j2.logstash.layout.resolver.TemplateResolvers;
+import com.vlkan.log4j2.logstash.layout.util.ByteBufferDestinations;
 import com.vlkan.log4j2.logstash.layout.util.ByteBufferOutputStream;
 import com.vlkan.log4j2.logstash.layout.util.JsonGenerators;
 import com.vlkan.log4j2.logstash.layout.util.Uris;
@@ -18,7 +22,6 @@ import org.apache.logging.log4j.core.config.plugins.PluginBuilderAttribute;
 import org.apache.logging.log4j.core.config.plugins.PluginBuilderFactory;
 import org.apache.logging.log4j.core.config.plugins.PluginConfiguration;
 import org.apache.logging.log4j.core.layout.ByteBufferDestination;
-import org.apache.logging.log4j.core.layout.ByteBufferDestinationHelper;
 import org.apache.logging.log4j.core.lookup.StrSubstitutor;
 import org.apache.logging.log4j.core.util.datetime.FastDateFormat;
 import org.apache.logging.log4j.util.Supplier;
@@ -138,7 +141,7 @@ public class LogstashLayout implements Layout<String> {
             encode(event, context);
             ByteBuffer byteBuffer = context.getOutputStream().getByteBuffer();
             byteBuffer.flip();
-            ByteBufferDestinationHelper.writeToUnsynchronized(byteBuffer, destination);
+            ByteBufferDestinations.writeToUnsynchronized(byteBuffer, destination);
         } catch (Exception error) {
             throw new RuntimeException("failed serializing JSON", error);
         }
