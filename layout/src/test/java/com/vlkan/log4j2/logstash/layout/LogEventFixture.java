@@ -1,5 +1,6 @@
 package com.vlkan.log4j2.logstash.layout;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.impl.ContextDataFactory;
@@ -24,6 +25,10 @@ enum LogEventFixture {;
         }
         return logEvents;
     }
+    static LogEvent createHugeMessagLogEvent(int messageSize) {
+
+        return createFullLogEvent("hugeId",new String(RandomUtils.nextBytes(messageSize)));
+    }
 
     private static LogEvent createLiteLogEvent(String id) {
         SimpleMessage message = new SimpleMessage("Msg" + id);
@@ -44,13 +49,13 @@ enum LogEventFixture {;
     static List<LogEvent> createFullLogEvents(int logEventCount) {
         List<LogEvent> logEvents = new ArrayList<>(logEventCount);
         for (int logEventIndex = 0; logEventIndex < logEventCount; logEventIndex++) {
-            LogEvent logEvent = LogEventFixture.createFullLogEvent(String.valueOf(logEventIndex));
+            LogEvent logEvent = LogEventFixture.createFullLogEvent(String.valueOf(logEventIndex),"Msg" + logEventIndex);
             logEvents.add(logEvent);
         }
         return logEvents;
     }
 
-    private static LogEvent createFullLogEvent(String id) {
+    private static LogEvent createFullLogEvent(String id,String message) {
 
         // Create exception.
         Exception sourceHelper = new Exception();
@@ -68,7 +73,6 @@ enum LogEventFixture {;
         int threadId = id.hashCode();
         String threadName = "MyThreadName" + id;
         int threadPriority = threadId % 10;
-        SimpleMessage message = new SimpleMessage("Msg" + id);
         Level level = Level.DEBUG;
         String loggerFqcn = "f.q.c.n" + id;
         String loggerName = "a.B" + id;
@@ -80,7 +84,7 @@ enum LogEventFixture {;
                 .setLoggerName(loggerName)
                 .setLoggerFqcn(loggerFqcn)
                 .setLevel(level)
-                .setMessage(message)
+                .setMessage(new SimpleMessage(message))
                 .setThrown(ioException)
                 .setContextData(contextData)
                 .setContextStack(contextStack)
