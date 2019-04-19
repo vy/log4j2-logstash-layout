@@ -2,6 +2,7 @@ package com.vlkan.log4j2.logstash.layout.util;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonStreamContext;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -114,4 +115,18 @@ public enum JsonGenerators {;
 
     }
 
+    public static void resetGeneratorState(JsonGenerator generator, ByteBuffer buffer) throws IOException {
+        while (true) {
+            JsonStreamContext ctx = generator.getOutputContext();
+            if (ctx.inArray()) {
+                generator.writeEndArray();
+            } else if (ctx.inObject()) {
+                generator.writeEndObject();
+            } else {
+                break;
+            }
+        }
+        generator.flush();
+        buffer.clear();
+    }
 }
