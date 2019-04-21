@@ -14,7 +14,6 @@ import org.apache.logging.log4j.util.Supplier;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
 
 enum LogstashLayoutSerializationContexts {;
 
@@ -50,31 +49,38 @@ enum LogstashLayoutSerializationContexts {;
         // Wrap new context instance supplier such that ByteBuffer is cleared rather than Jackson resources are released.
         final Supplier<LogstashLayoutSerializationContext> byteBufferClearingContextSupplier =
                 new Supplier<LogstashLayoutSerializationContext>() {
+
+                    // "volatile" modifier is not needed due to TL.
+                    private LogstashLayoutSerializationContext delegateContext =
+                            jacksonResourceReleasingContextSupplier.get();
+
                     @Override
                     public LogstashLayoutSerializationContext get() {
-                        final LogstashLayoutSerializationContext internalContext = jacksonResourceReleasingContextSupplier.get();
-                        final ByteBufferOutputStream outputStream = internalContext.getOutputStream();
-                        final ByteBuffer internalByteBuffer = outputStream.getByteBuffer();
-                        final JsonGenerator jsonGenerator = internalContext.getJsonGenerator();
                         return new LogstashLayoutSerializationContext() {
 
                             @Override
                             public void close() {
-                                internalByteBuffer.clear();
+                                delegateContext.getOutputStream().getByteBuffer().clear();
                             }
 
                             @Override
                             public ByteBufferOutputStream getOutputStream() {
-                                return outputStream;
+                                return delegateContext.getOutputStream();
                             }
 
                             @Override
                             public JsonGenerator getJsonGenerator() {
-                                return jsonGenerator;
+                                return delegateContext.getJsonGenerator();
+                            }
+
+                            @Override
+                            public void resetJsonGenerator() {
+                                delegateContext = jacksonResourceReleasingContextSupplier.get();
                             }
 
                         };
                     }
+
                 };
 
         // Create thread-local context.
@@ -126,6 +132,11 @@ enum LogstashLayoutSerializationContexts {;
                         }
 
                         @Override
+                        public void resetJsonGenerator() {
+                            // Each usage is expected create a new instance, hence no need to reset.
+                        }
+
+                        @Override
                         public void close() throws Exception {
                             jsonGeneratorDelegate.close();
                             jsonGenerator.close();
@@ -153,6 +164,11 @@ enum LogstashLayoutSerializationContexts {;
                         @Override
                         public JsonGenerator getJsonGenerator() {
                             return jsonGenerator;
+                        }
+
+                        @Override
+                        public void resetJsonGenerator() {
+                            // Each usage is expected create a new instance, hence no need to reset.
                         }
 
                         @Override

@@ -1,7 +1,6 @@
 package com.vlkan.log4j2.logstash.layout;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.MissingNode;
@@ -35,6 +34,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
+import static com.vlkan.log4j2.logstash.layout.ObjectMapperFixture.OBJECT_MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public abstract class LogstashLayoutTest {
@@ -44,8 +44,6 @@ public abstract class LogstashLayoutTest {
     private static final List<LogEvent> LOG_EVENTS = LogEventFixture.createFullLogEvents(5);
 
     private static final JsonNodeFactory JSON_NODE_FACTORY = JsonNodeFactory.instance;
-
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     LogstashLayoutTest(boolean threadLocalsEnabled) {
         LogstashLayoutSerializationContexts.THREAD_LOCALS_ENABLED = threadLocalsEnabled;

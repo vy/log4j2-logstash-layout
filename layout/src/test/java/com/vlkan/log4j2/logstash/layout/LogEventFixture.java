@@ -1,6 +1,5 @@
 package com.vlkan.log4j2.logstash.layout;
 
-import org.apache.commons.lang3.RandomUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.impl.ContextDataFactory;
@@ -25,10 +24,6 @@ enum LogEventFixture {;
         }
         return logEvents;
     }
-    static LogEvent createHugeMessagLogEvent(int messageSize) {
-
-        return createFullLogEvent("hugeId",new String(RandomUtils.nextBytes(messageSize)));
-    }
 
     private static LogEvent createLiteLogEvent(String id) {
         SimpleMessage message = new SimpleMessage("Msg" + id);
@@ -49,13 +44,13 @@ enum LogEventFixture {;
     static List<LogEvent> createFullLogEvents(int logEventCount) {
         List<LogEvent> logEvents = new ArrayList<>(logEventCount);
         for (int logEventIndex = 0; logEventIndex < logEventCount; logEventIndex++) {
-            LogEvent logEvent = LogEventFixture.createFullLogEvent(String.valueOf(logEventIndex),"Msg" + logEventIndex);
+            LogEvent logEvent = LogEventFixture.createFullLogEvent(String.valueOf(logEventIndex), "Msg" + logEventIndex);
             logEvents.add(logEvent);
         }
         return logEvents;
     }
 
-    private static LogEvent createFullLogEvent(String id,String message) {
+    private static LogEvent createFullLogEvent(String id, String message) {
 
         // Create exception.
         Exception sourceHelper = new Exception();

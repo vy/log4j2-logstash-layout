@@ -413,6 +413,10 @@ Let us try to answer some common questions:
   *0.3 MB/sec* is due to JVM internal allocations, `LogstashLayout` in
   TLA-enabled mode indeed has zero allocations. Though, there are some caveats:
 
+  - Failures to encode the passed `LogEvent` into the destination `ByteBuffer`,
+    trigger instantiation of a new `JsonGenerator` to reset the corrupted Jackson
+    state.
+
   - Since `Throwable#getStackTrace()` clones the original
     `StackTraceElement[]`, accesses to (and hence rendering) stack traces can
     never be garbage-free.
@@ -433,6 +437,7 @@ Let us try to answer some common questions:
 
 # Contributors
 
+- [bakomchik](https://github.com/bakomchik)
 - [Eric Schwartz](https://github.com/emschwar)
 - [Michael K. Edwards](https://github.com/mkedwards)
 - [Mikael Strand](https://github.com/MikaelStrand)
