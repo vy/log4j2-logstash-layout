@@ -11,7 +11,6 @@ import org.apache.logging.log4j.core.config.DefaultConfiguration;
 import org.apache.logging.log4j.core.impl.Log4jLogEvent;
 import org.apache.logging.log4j.message.SimpleMessage;
 import org.assertj.core.api.Assertions;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.nio.Buffer;
@@ -21,7 +20,7 @@ import java.nio.charset.StandardCharsets;
 
 import static com.vlkan.log4j2.logstash.layout.ObjectMapperFixture.OBJECT_MAPPER;
 
-public class ThreadLocalEnabledLogstashLayoutJsonGeneratorStateTest {
+public class LogstashLayoutJsonGeneratorStateResetTest {
 
     private static final Configuration CONFIGURATION = new DefaultConfiguration();
 
@@ -49,11 +48,6 @@ public class ThreadLocalEnabledLogstashLayoutJsonGeneratorStateTest {
                 .newBuilder()
                 .setMessage(message)
                 .build();
-    }
-
-    @Before
-    public void enableThreadLocals() {
-        LogstashLayoutSerializationContexts.THREAD_LOCALS_ENABLED = true;
     }
 
     @Test

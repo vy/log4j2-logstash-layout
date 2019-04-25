@@ -19,7 +19,6 @@ import org.apache.logging.log4j.core.layout.ByteBufferDestination;
 import org.apache.logging.log4j.core.lookup.MainMapLookup;
 import org.apache.logging.log4j.message.SimpleMessage;
 import org.apache.logging.log4j.message.StringMapMessage;
-import org.apache.logging.log4j.util.BiConsumer;
 import org.apache.logging.log4j.util.SortedArrayStringMap;
 import org.apache.logging.log4j.util.StringMap;
 import org.junit.Test;
@@ -37,17 +36,13 @@ import java.util.regex.Pattern;
 import static com.vlkan.log4j2.logstash.layout.ObjectMapperFixture.OBJECT_MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public abstract class LogstashLayoutTest {
+public class LogstashLayoutTest {
 
     private static final Configuration CONFIGURATION = new DefaultConfiguration();
 
     private static final List<LogEvent> LOG_EVENTS = LogEventFixture.createFullLogEvents(5);
 
     private static final JsonNodeFactory JSON_NODE_FACTORY = JsonNodeFactory.instance;
-
-    LogstashLayoutTest(boolean threadLocalsEnabled) {
-        LogstashLayoutSerializationContexts.THREAD_LOCALS_ENABLED = threadLocalsEnabled;
-    }
 
     @Test
     public void test_serialized_event() throws IOException {
@@ -117,25 +112,22 @@ public abstract class LogstashLayoutTest {
         }
     }
 
-    private static void checkContextData(LogEvent logEvent, String mdcKeyRegex, final JsonNode rootNode) {
+    private static void checkContextData(LogEvent logEvent, String mdcKeyRegex, JsonNode rootNode) {
         final Pattern mdcKeyPattern = mdcKeyRegex == null ? null : Pattern.compile(mdcKeyRegex);
-        logEvent.getContextData().forEach(new BiConsumer<String, Object>() {
-            @Override
-            public void accept(String key, Object value) {
-                JsonNode node = point(rootNode, "mdc", key);
-                boolean matches = mdcKeyPattern == null || mdcKeyPattern.matcher(key).matches();
-                if (matches) {
-                    JsonNode valueNode = OBJECT_MAPPER.convertValue(value, JsonNode.class);
-                    if (valueNode.isNumber()) {
-                        double valueNodeDouble = valueNode.asDouble();
-                        double nodeDouble = node.asDouble();
-                        assertThat(nodeDouble).isEqualTo(valueNodeDouble);
-                    } else {
-                        assertThat(node).isEqualTo(valueNode);
-                    }
+        logEvent.getContextData().forEach((key, value) -> {
+            JsonNode node = point(rootNode, "mdc", key);
+            boolean matches = mdcKeyPattern == null || mdcKeyPattern.matcher(key).matches();
+            if (matches) {
+                JsonNode valueNode = OBJECT_MAPPER.convertValue(value, JsonNode.class);
+                if (valueNode.isNumber()) {
+                    double valueNodeDouble = valueNode.asDouble();
+                    double nodeDouble = node.asDouble();
+                    assertThat(nodeDouble).isEqualTo(valueNodeDouble);
                 } else {
-                    assertThat(node).isEqualTo(MissingNode.getInstance());
+                    assertThat(node).isEqualTo(valueNode);
                 }
+            } else {
+                assertThat(node).isEqualTo(MissingNode.getInstance());
             }
         });
     }
@@ -428,6 +420,7 @@ public abstract class LogstashLayoutTest {
 
     @Test
     public void test_main_key_access() throws IOException {
+
         // Create the log event.
         SimpleMessage message = new SimpleMessage("Hello, World!");
 
@@ -450,8 +443,6 @@ public abstract class LogstashLayoutTest {
 
         // Create the template.
         ObjectNode templateRootNode = JSON_NODE_FACTORY.objectNode();
-        String mdcFieldName = "mdc";
-
         templateRootNode.put("name", String.format("${json:main:%s}", kwKey));
         templateRootNode.put("positionArg", "${json:main:2}");
         templateRootNode.put("notFoundArg", String.format("${json:main:%s}", missingKwKey));
@@ -471,10 +462,12 @@ public abstract class LogstashLayoutTest {
         assertThat(point(rootNode, "name").asText()).isEqualTo(kwVal);
         assertThat(point(rootNode, "positionArg").asText()).isEqualTo(positionArg);
         assertThat(point(rootNode, "notFoundArg")).isInstanceOf(MissingNode.class);
+
     }
 
     @Test
     public void test_mdc_key_access() throws IOException {
+
         // Create the log event.
         SimpleMessage message = new SimpleMessage("Hello, World!");
         StringMap contextData = new SortedArrayStringMap();
@@ -523,6 +516,7 @@ public abstract class LogstashLayoutTest {
         assertThat(point(rootNode, mdcFieldName, mdcPatternMatchedKey).asText()).isEqualTo(mdcPatternMatchedValue);
         assertThat(point(rootNode, mdcFieldName, mdcPatternMismatchedKey)).isInstanceOf(MissingNode.class);
         assertThat(point(rootNode, mdcDirectlyAccessedNullPropertyKey)).isInstanceOf(MissingNode.class);
+
     }
 
     @Test
@@ -766,7 +760,7 @@ public abstract class LogstashLayoutTest {
         String toByteArrayOutput = new String(toByteArrayOutputBytes, 0, toByteArrayOutputBytes.length, StandardCharsets.UTF_8);
 
         // Get encode() output.
-        final ByteBuffer byteBuffer = ByteBuffer.allocate(512 * 1024);
+        ByteBuffer byteBuffer = ByteBuffer.allocate(512 * 1024);
         ByteBufferDestination byteBufferDestination = new ByteBufferDestination() {
 
             @Override

@@ -154,16 +154,7 @@ public class LogstashLayout implements Layout<String> {
         }
     }
 
-    private void encode(LogEvent event, LogstashLayoutSerializationContext context) throws Exception {
-        try {
-            unsafeEncode(event, context);
-        } catch (Exception error) {
-            context.resetJsonGenerator();
-            throw error;
-        }
-    }
-
-    private void unsafeEncode(LogEvent event, LogstashLayoutSerializationContext context) throws IOException {
+    private void encode(LogEvent event, LogstashLayoutSerializationContext context) throws IOException {
         JsonGenerator jsonGenerator = context.getJsonGenerator();
         eventResolver.resolve(event, jsonGenerator);
         jsonGenerator.flush();
