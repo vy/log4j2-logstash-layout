@@ -2,9 +2,9 @@
 [![Maven Central](https://img.shields.io/maven-central/v/com.vlkan.log4j2/log4j2-logstash-layout-parent.svg)](https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.vlkan.log4j2%22)
 [![License](https://img.shields.io/github/license/vy/log4j2-logstash-layout.svg)](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-`LogstashLayout` is **the fastest** garbage-free [Log4j 2](https://logging.apache.org/log4j/2.x/)
-layout with customizable and [Logstash](https://www.elastic.co/products/logstash)-friendly
-JSON formatting.
+`LogstashLayout` is **the fastest** [Log4j 2](https://logging.apache.org/log4j/2.x/)
+JSON layout allowing schema customization and [Logstash](https://www.elastic.co/products/logstash)-friendly
+output.
 
 By default, `LogstashLayout` ships the official `JSONEventLayoutV1` stated by
 [log4j-jsonevent-layout](https://github.com/logstash/log4j-jsonevent-layout)
@@ -299,101 +299,51 @@ directory for the full report.)
         <thead>
             <tr>
                 <th>Benchmark</th>
-                <th>TLA?<sup>*</sup></th>
-                <th colspan="2">ops/sec<sup>**</sup></th>
-                <th>MB/sec<sup>**</sup></th>
+                <th colspan="2">ops/sec<sup>*</sup></th>
+                <th>MB/sec<sup>*</sup></th>
             </tr>
         </thead>
         <tbody>
             <tr data-benchmark="liteLogstashLayout">
                 <td class="benchmark">liteLogstashLayout</td>
-                <td class="tla">✓</td>
-                <td class="op_rate">700,297</td>
+                <td class="op_rate">793,597</td>
                 <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉ (100%)</td>
-                <td class="gc_rate">0.3</td>
-            </tr>
-            <tr data-benchmark="liteLogstashLayout">
-                <td class="benchmark">liteLogstashLayout</td>
-                <td class="tla">✗</td>
-                <td class="op_rate">700,144</td>
-                <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉ (100%)</td>
-                <td class="gc_rate">0.3</td>
+                <td class="gc_rate">1.5</td>
             </tr>
             <tr data-benchmark="liteDefaultJsonLayout">
                 <td class="benchmark">liteDefaultJsonLayout</td>
-                <td class="tla">✓</td>
-                <td class="op_rate">342,474</td>
-                <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉ (49%)</td>
-                <td class="gc_rate">1,597.2</td>
-            </tr>
-            <tr data-benchmark="liteDefaultJsonLayout">
-                <td class="benchmark">liteDefaultJsonLayout</td>
-                <td class="tla">✗</td>
-                <td class="op_rate">337,688</td>
-                <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉ (48%)</td>
-                <td class="gc_rate">1,574.8</td>
+                <td class="op_rate">526,915</td>
+                <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉▉▉▉ (66%)</td>
+                <td class="gc_rate">1,178.3</td>
             </tr>
             <tr data-benchmark="liteCustomJsonLayout">
                 <td class="benchmark">liteCustomJsonLayout</td>
-                <td class="tla">✗</td>
-                <td class="op_rate">290,527</td>
-                <td class="op_rate_bar">▉▉▉▉▉▉▉▉ (41%)</td>
-                <td class="gc_rate">1,440.4</td>
-            </tr>
-            <tr data-benchmark="liteCustomJsonLayout">
-                <td class="benchmark">liteCustomJsonLayout</td>
-                <td class="tla">✓</td>
-                <td class="op_rate">283,389</td>
-                <td class="op_rate_bar">▉▉▉▉▉▉▉▉ (40%)</td>
-                <td class="gc_rate">1,430.5</td>
+                <td class="op_rate">476,307</td>
+                <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉▉▉ (60%)</td>
+                <td class="gc_rate">1,202.0</td>
             </tr>
             <tr data-benchmark="fullLogstashLayout">
                 <td class="benchmark">fullLogstashLayout</td>
-                <td class="tla">✗</td>
-                <td class="op_rate">62,988</td>
-                <td class="op_rate_bar">▉▉ (9%)</td>
-                <td class="gc_rate">6.4</td>
-            </tr>
-            <tr data-benchmark="fullLogstashLayout">
-                <td class="benchmark">fullLogstashLayout</td>
-                <td class="tla">✓</td>
-                <td class="op_rate">62,612</td>
-                <td class="op_rate_bar">▉▉ (9%)</td>
-                <td class="gc_rate">6.4</td>
+                <td class="op_rate">61,630</td>
+                <td class="op_rate_bar">▉▉ (8%)</td>
+                <td class="gc_rate">7.7</td>
             </tr>
             <tr data-benchmark="fullDefaultJsonLayout">
                 <td class="benchmark">fullDefaultJsonLayout</td>
-                <td class="tla">✓</td>
-                <td class="op_rate">8,964</td>
-                <td class="op_rate_bar">▉ (1%)</td>
-                <td class="gc_rate">1,927.1</td>
+                <td class="op_rate">13,781</td>
+                <td class="op_rate_bar">▉ (2%)</td>
+                <td class="gc_rate">1,263.8</td>
             </tr>
             <tr data-benchmark="fullCustomJsonLayout">
                 <td class="benchmark">fullCustomJsonLayout</td>
-                <td class="tla">✓</td>
-                <td class="op_rate">8,751</td>
-                <td class="op_rate_bar">▉ (1%)</td>
-                <td class="gc_rate">1,925.5</td>
-            </tr>
-            <tr data-benchmark="fullDefaultJsonLayout">
-                <td class="benchmark">fullDefaultJsonLayout</td>
-                <td class="tla">✗</td>
-                <td class="op_rate">8,491</td>
-                <td class="op_rate_bar">▉ (1%)</td>
-                <td class="gc_rate">1,866.7</td>
-            </tr>
-            <tr data-benchmark="fullCustomJsonLayout">
-                <td class="benchmark">fullCustomJsonLayout</td>
-                <td class="tla">✗</td>
-                <td class="op_rate">8,369</td>
-                <td class="op_rate_bar">▉ (1%)</td>
-                <td class="gc_rate">1,827.5</td>
+                <td class="op_rate">12,783</td>
+                <td class="op_rate_bar">▉ (2%)</td>
+                <td class="gc_rate">1,173.9</td>
             </tr>
         </tbody>
     </table>
     <p id="footnotes">
-        <sup>*</sup> Thread local allocations (i.e., <code>log4j2.enable.threadlocals</code> flag) enabled?<br/>
-        <sup>**</sup> 99<sup>th</sup> percentile
+        <sup>*</sup> 99<sup>th</sup> percentile
     </p>
 </div>
 
@@ -403,19 +353,19 @@ Let us try to answer some common questions:
   to Log4j 2 `JSONLayout`?** Log4j 2 `JSONLayout` employs a single Jackson view
   to generate JSON, XML, and YAML outputs. For this purpose, it uses Jackson
   `ObjectMapper`, which needs to walk over the class fields via reflection and
-  perform heavy branching and intermediate object instantiation. On the contrary,
-  `log4j2-logstash-layout` parses the given template once and compiles a
-  garbage-free and (to a certain extent) branching-free JSON generator using
-  Jackson `JsonGenerator`.
+  perform heavy branching and intermediate object instantiation. On the
+  contrary, `log4j2-logstash-layout` parses the given template once and
+  compiles an (almost) garbage- and (to a certain extent) branching-free
+  JSON generator employing Jackson `JsonGenerator`.
 
-- **Given `log4j2-logstash-layout` is garbage-free, how come MB/sec column is
-  never zero?** In the case of `liteLogstashLayout` benchmarks, the appearing
-  *0.3 MB/sec* is due to JVM internal allocations, `LogstashLayout` in
-  TLA-enabled mode indeed has zero allocations. Though, there are some caveats:
+- **Why is `log4j2-logstash-layout` is not totally garbage-free?**
 
-  - Failures to encode the passed `LogEvent` into the destination `ByteBuffer`,
-    trigger instantiation of a new `JsonGenerator` to reset the corrupted Jackson
-    state.
+  - Reusing Jackson `JsonGenerator`s necessitate state reset when it gets
+    corrupted. Though that is [easier said than done](https://groups.google.com/d/msg/jackson-user/vsJST_drx04/rFSF5jSyBQAJ),
+    prone to [bugs](https://github.com/vy/log4j2-logstash-layout/issues/27),
+    and does not bring much performance improvement. Hence we instantiate a
+    new `JsonGenerator` for each serialization to be on the safe (but still
+    fast) side.
 
   - Since `Throwable#getStackTrace()` clones the original
     `StackTraceElement[]`, accesses to (and hence rendering) stack traces can

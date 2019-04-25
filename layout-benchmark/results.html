@@ -8,12 +8,10 @@
 <body>
     <style>
         #results th, #results td { padding: 0.3em }
-        #results .tla { text-align: center }
         #results .op_rate, #results .gc_rate { text-align: right }
         #results th { background-color: #cfcfcf }
         #results tr[data-benchmark $= "LogstashLayout"] td { color: green }
         #results tr[data-benchmark $= "LogstashLayout"] td.benchmark,
-        #results tr[data-benchmark $= "LogstashLayout"] td.tla,
         #results tr[data-benchmark $= "LogstashLayout"] td.op_rate,
         #results tr[data-benchmark $= "LogstashLayout"] td.gc_rate
         { font-weight: bold }
@@ -24,101 +22,51 @@
             <thead>
                 <tr>
                     <th>Benchmark</th>
-                    <th>TLA?<sup>*</sup></th>
-                    <th colspan="2">ops/sec<sup>**</sup></th>
-                    <th>MB/sec<sup>**</sup></th>
+                    <th colspan="2">ops/sec<sup>*</sup></th>
+                    <th>MB/sec<sup>*</sup></th>
                 </tr>
             </thead>
             <tbody>
                 <tr data-benchmark="liteLogstashLayout">
                     <td class="benchmark">liteLogstashLayout</td>
-                    <td class="tla">✓</td>
-                    <td class="op_rate">700,297</td>
+                    <td class="op_rate">793,597</td>
                     <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉ (100%)</td>
-                    <td class="gc_rate">0.3</td>
-                </tr>
-                <tr data-benchmark="liteLogstashLayout">
-                    <td class="benchmark">liteLogstashLayout</td>
-                    <td class="tla">✗</td>
-                    <td class="op_rate">700,144</td>
-                    <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉ (100%)</td>
-                    <td class="gc_rate">0.3</td>
+                    <td class="gc_rate">1.5</td>
                 </tr>
                 <tr data-benchmark="liteDefaultJsonLayout">
                     <td class="benchmark">liteDefaultJsonLayout</td>
-                    <td class="tla">✓</td>
-                    <td class="op_rate">342,474</td>
-                    <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉ (49%)</td>
-                    <td class="gc_rate">1,597.2</td>
-                </tr>
-                <tr data-benchmark="liteDefaultJsonLayout">
-                    <td class="benchmark">liteDefaultJsonLayout</td>
-                    <td class="tla">✗</td>
-                    <td class="op_rate">337,688</td>
-                    <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉ (48%)</td>
-                    <td class="gc_rate">1,574.8</td>
+                    <td class="op_rate">526,915</td>
+                    <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉▉▉▉ (66%)</td>
+                    <td class="gc_rate">1,178.3</td>
                 </tr>
                 <tr data-benchmark="liteCustomJsonLayout">
                     <td class="benchmark">liteCustomJsonLayout</td>
-                    <td class="tla">✗</td>
-                    <td class="op_rate">290,527</td>
-                    <td class="op_rate_bar">▉▉▉▉▉▉▉▉ (41%)</td>
-                    <td class="gc_rate">1,440.4</td>
-                </tr>
-                <tr data-benchmark="liteCustomJsonLayout">
-                    <td class="benchmark">liteCustomJsonLayout</td>
-                    <td class="tla">✓</td>
-                    <td class="op_rate">283,389</td>
-                    <td class="op_rate_bar">▉▉▉▉▉▉▉▉ (40%)</td>
-                    <td class="gc_rate">1,430.5</td>
+                    <td class="op_rate">476,307</td>
+                    <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉▉▉ (60%)</td>
+                    <td class="gc_rate">1,202.0</td>
                 </tr>
                 <tr data-benchmark="fullLogstashLayout">
                     <td class="benchmark">fullLogstashLayout</td>
-                    <td class="tla">✗</td>
-                    <td class="op_rate">62,988</td>
-                    <td class="op_rate_bar">▉▉ (9%)</td>
-                    <td class="gc_rate">6.4</td>
-                </tr>
-                <tr data-benchmark="fullLogstashLayout">
-                    <td class="benchmark">fullLogstashLayout</td>
-                    <td class="tla">✓</td>
-                    <td class="op_rate">62,612</td>
-                    <td class="op_rate_bar">▉▉ (9%)</td>
-                    <td class="gc_rate">6.4</td>
+                    <td class="op_rate">61,630</td>
+                    <td class="op_rate_bar">▉▉ (8%)</td>
+                    <td class="gc_rate">7.7</td>
                 </tr>
                 <tr data-benchmark="fullDefaultJsonLayout">
                     <td class="benchmark">fullDefaultJsonLayout</td>
-                    <td class="tla">✓</td>
-                    <td class="op_rate">8,964</td>
-                    <td class="op_rate_bar">▉ (1%)</td>
-                    <td class="gc_rate">1,927.1</td>
+                    <td class="op_rate">13,781</td>
+                    <td class="op_rate_bar">▉ (2%)</td>
+                    <td class="gc_rate">1,263.8</td>
                 </tr>
                 <tr data-benchmark="fullCustomJsonLayout">
                     <td class="benchmark">fullCustomJsonLayout</td>
-                    <td class="tla">✓</td>
-                    <td class="op_rate">8,751</td>
-                    <td class="op_rate_bar">▉ (1%)</td>
-                    <td class="gc_rate">1,925.5</td>
-                </tr>
-                <tr data-benchmark="fullDefaultJsonLayout">
-                    <td class="benchmark">fullDefaultJsonLayout</td>
-                    <td class="tla">✗</td>
-                    <td class="op_rate">8,491</td>
-                    <td class="op_rate_bar">▉ (1%)</td>
-                    <td class="gc_rate">1,866.7</td>
-                </tr>
-                <tr data-benchmark="fullCustomJsonLayout">
-                    <td class="benchmark">fullCustomJsonLayout</td>
-                    <td class="tla">✗</td>
-                    <td class="op_rate">8,369</td>
-                    <td class="op_rate_bar">▉ (1%)</td>
-                    <td class="gc_rate">1,827.5</td>
+                    <td class="op_rate">12,783</td>
+                    <td class="op_rate_bar">▉ (2%)</td>
+                    <td class="gc_rate">1,173.9</td>
                 </tr>
             </tbody>
         </table>
         <p id="footnotes">
-            <sup>*</sup> Thread local allocations (i.e., <code>log4j2.enable.threadlocals</code> flag) enabled?<br/>
-            <sup>**</sup> 99<sup>th</sup> percentile
+            <sup>*</sup> 99<sup>th</sup> percentile
         </p>
     </div>
 </body>
