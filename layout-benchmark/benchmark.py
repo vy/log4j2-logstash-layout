@@ -21,21 +21,19 @@ BENCHMARK_DIR = os.path.dirname(os.path.realpath(__file__))
 PROJECT_DIR = os.path.abspath(os.path.join(BENCHMARK_DIR, ".."))
 
 
-def get_json_output_file(tla_enabled):
-    filename = "results-tla-{}.json".format(tla_enabled)
-    return os.path.join(BENCHMARK_DIR, filename)
+def get_json_output_file():
+    return os.path.join(BENCHMARK_DIR, "results.json")
 
 
-def get_mvn_output_file(tla_enabled):
-    filename = "results-tla-{}.out".format(tla_enabled)
-    return os.path.join(BENCHMARK_DIR, filename)
+def get_mvn_output_file():
+    return os.path.join(BENCHMARK_DIR, "results.out")
 
 
-def run_benchmark(tla_enabled):
-    LOGGER.info("Starting benchmark... (tla_enabled={})".format(tla_enabled))
+def run_benchmark():
+    LOGGER.info("Starting benchmark...")
     start_instant_seconds = time.time()
-    json_output_file = get_json_output_file(tla_enabled)
-    mvn_output_file = get_mvn_output_file(tla_enabled)
+    json_output_file = get_json_output_file()
+    mvn_output_file = get_mvn_output_file()
     with open(mvn_output_file, "w") as mvn_output_file_handle:
         env = os.environ.copy()
         env["MAVEN_OPTS"] = "-XX:+TieredCompilation -XX:+AggressiveOpts"
@@ -48,7 +46,6 @@ def run_benchmark(tla_enabled):
              "exec:java",
              "-Dlog4j2.garbagefreeThreadContextMap=true",
              "-Dlog4j2.enableDirectEncoders=true",
-             "-Dlog4j2.enable.threadlocals={}".format(str(tla_enabled).lower()),
              "-Dlog4j2.logstashLayoutBenchmark.jsonOutputFile={}".format(json_output_file)],
             env=env,
             bufsize=1,
@@ -59,37 +56,25 @@ def run_benchmark(tla_enabled):
         popen.communicate()
         return_code = popen.returncode
         if return_code != 0:
-            raise Exception("benchmark failure (tla_enabled={}, return_code={})".format(tla_enabled, return_code))
+            raise Exception("benchmark failure (return_code={})".format(return_code))
         stop_instant_seconds = time.time()
         total_duration_seconds = stop_instant_seconds - start_instant_seconds
-        LOGGER.info("Completed benchmark... (tla_enabled={}, total_duration_seconds={})".format(tla_enabled, total_duration_seconds))
-
-
-def run_benchmarks():
-    LOGGER.info("Starting benchmarks...")
-    start_instant_seconds = time.time()
-    for tla_enabled in [True, False]:
-        run_benchmark(tla_enabled)
-    stop_instant_seconds = time.time()
-    total_duration_seconds = stop_instant_seconds - start_instant_seconds
-    LOGGER.info("Completed benchmarks... (total_duration_seconds={})".format(total_duration_seconds))
+        LOGGER.info("Completed benchmark... (total_duration_seconds={})".format(total_duration_seconds))
 
 
 def read_results():
 
     # Collect results.
     results = []
-    for tla_enabled in [True, False]:
-        json_output_file = get_json_output_file(tla_enabled)
-        with open(json_output_file) as json_output_file_handle:
-            json_dicts = json.load(json_output_file_handle)
-            for json_dict in json_dicts:
-                results.append({
-                    "tla_enabled": tla_enabled,
-                    "benchmark": json_dict["benchmark"],
-                    "op_rate": json_dict["primaryMetric"]["scorePercentiles"]["99.0"],
-                    "gc_rate": json_dict["secondaryMetrics"][u"·gc.alloc.rate"]["scorePercentiles"]["99.0"]
-                })
+    json_output_file = get_json_output_file()
+    with open(json_output_file) as json_output_file_handle:
+        json_dicts = json.load(json_output_file_handle)
+        for json_dict in json_dicts:
+            results.append({
+                "benchmark": json_dict["benchmark"],
+                "op_rate": json_dict["primaryMetric"]["scorePercentiles"]["99.0"],
+                "gc_rate": json_dict["secondaryMetrics"][u"·gc.alloc.rate"]["scorePercentiles"]["99.0"]
+            })
 
     # Enrich results with normalized op rate slowdown.
     max_op_rate = max([result["op_rate"] for result in results])
@@ -115,12 +100,10 @@ def plot_results():
 <body>
     <style>
         #results th, #results td { padding: 0.3em }
-        #results .tla { text-align: center }
         #results .op_rate, #results .gc_rate { text-align: right }
         #results th { background-color: #cfcfcf }
         #results tr[data-benchmark $= "LogstashLayout"] td { color: green }
         #results tr[data-benchmark $= "LogstashLayout"] td.benchmark,
-        #results tr[data-benchmark $= "LogstashLayout"] td.tla,
         #results tr[data-benchmark $= "LogstashLayout"] td.op_rate,
         #results tr[data-benchmark $= "LogstashLayout"] td.gc_rate
         { font-weight: bold }
@@ -131,9 +114,8 @@ def plot_results():
             <thead>
                 <tr>
                     <th>Benchmark</th>
-                    <th>TLA?<sup>*</sup></th>
-                    <th colspan="2">ops/sec<sup>**</sup></th>
-                    <th>MB/sec<sup>**</sup></th>
+                    <th colspan="2">ops/sec<sup>*</sup></th>
+                    <th>MB/sec<sup>*</sup></th>
                 </tr>
             </thead>
             <tbody>""")
@@ -142,14 +124,12 @@ def plot_results():
             html_file_handle.write("""
                 <tr data-benchmark="{}">
                     <td class="benchmark">{}</td>
-                    <td class="tla">{}</td>
                     <td class="op_rate">{}</td>
                     <td class="op_rate_bar">{}</td>
                     <td class="gc_rate">{}</td>
                 </tr>""".format(
                 benchmark_name,
                 benchmark_name,
-                "✓" if result["tla_enabled"] else "✗",
                 "{:,.0f}".format(result["op_rate"] * 1e3),
                 ("▉" * (1 + int(19 * result["op_rate_norm"]))) + (" ({:.0f}%)".format(100 * result["op_rate_norm"])),
                 "{:,.1f}".format(result["gc_rate"])))
@@ -157,8 +137,7 @@ def plot_results():
             </tbody>
         </table>
         <p id="footnotes">
-            <sup>*</sup> Thread local allocations (i.e., <code>log4j2.enable.threadlocals</code> flag) enabled?<br/>
-            <sup>**</sup> 99<sup>th</sup> percentile
+            <sup>*</sup> 99<sup>th</sup> percentile
         </p>
     </div>
 </body>
@@ -166,7 +145,7 @@ def plot_results():
 
 
 def main():
-    run_benchmarks()
+    run_benchmark()
     plot_results()
 
 

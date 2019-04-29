@@ -1,6 +1,5 @@
 package com.vlkan.log4j2.logstash.layout;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vlkan.log4j2.logstash.layout.resolver.EventResolverContext;
@@ -9,7 +8,6 @@ import com.vlkan.log4j2.logstash.layout.resolver.TemplateResolver;
 import com.vlkan.log4j2.logstash.layout.resolver.TemplateResolvers;
 import com.vlkan.log4j2.logstash.layout.util.ByteBufferDestinations;
 import com.vlkan.log4j2.logstash.layout.util.ByteBufferOutputStream;
-import com.vlkan.log4j2.logstash.layout.util.JsonGenerators;
 import com.vlkan.log4j2.logstash.layout.util.Uris;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -116,6 +114,12 @@ public class LogstashLayout implements Layout<String> {
         return FastDateFormat.getInstance(builder.dateTimeFormatPattern, timeZone);
     }
 
+    // Exposed for tests.
+    Supplier<LogstashLayoutSerializationContext> getSerializationContextSupplier() {
+        return serializationContextSupplier;
+    }
+
+    @Override
     public String toSerializable(LogEvent event) {
         try (LogstashLayoutSerializationContext context = serializationContextSupplier.get()) {
             encode(event, context);
@@ -141,22 +145,16 @@ public class LogstashLayout implements Layout<String> {
             encode(event, context);
             ByteBuffer byteBuffer = context.getOutputStream().getByteBuffer();
             byteBuffer.flip();
-            ByteBufferDestinations.writeToUnsynchronized(byteBuffer, destination);
+            synchronized (destination) {
+                ByteBufferDestinations.writeToUnsynchronized(byteBuffer, destination);
+            }
+            byteBuffer.clear();
         } catch (Exception error) {
             throw new RuntimeException("failed serializing JSON", error);
         }
     }
 
     private void encode(LogEvent event, LogstashLayoutSerializationContext context) throws IOException {
-        try {
-            unsafeEncode(event, context);
-        } catch (JsonGenerationException ignored) {
-            JsonGenerators.rescueJsonGeneratorState(context.getOutputStream().getByteBuffer(), context.getJsonGenerator());
-            unsafeEncode(event, context);
-        }
-    }
-
-    private void unsafeEncode(LogEvent event, LogstashLayoutSerializationContext context) throws IOException {
         JsonGenerator jsonGenerator = context.getJsonGenerator();
         eventResolver.resolve(event, jsonGenerator);
         jsonGenerator.flush();
