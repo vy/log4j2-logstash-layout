@@ -5,7 +5,7 @@
 
     <groupId>com.vlkan.log4j2</groupId>
     <artifactId>log4j2-logstash-layout-parent</artifactId>
-    <version>0.18-SNAPSHOT</version>
+    <version>0.18</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -45,7 +45,7 @@
         <url>http://github.com/vy/log4j2-logstash-layout</url>
         <connection>scm:git:git@github.com:vy/log4j2-logstash-layout.git</connection>
         <developerConnection>scm:git:git@github.com:vy/log4j2-logstash-layout.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>v0.18</tag>
     </scm>
 
     <distributionManagement>
