@@ -388,6 +388,7 @@ Let us try to answer some common questions:
 # Contributors
 
 - [bakomchik](https://github.com/bakomchik)
+- [chrissydee](https://github.com/chrissydee)
 - [Eric Schwartz](https://github.com/emschwar)
 - [Michael K. Edwards](https://github.com/mkedwards)
 - [Mikael Strand](https://github.com/MikaelStrand)
