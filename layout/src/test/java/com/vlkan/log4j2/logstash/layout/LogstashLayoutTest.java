@@ -223,6 +223,8 @@ public class LogstashLayoutTest {
         ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
         eventTemplateRootNode.put("mapValue1", "${map:key1}");
         eventTemplateRootNode.put("mapValue2", "${map:key2}");
+        eventTemplateRootNode.put("nestedLookupEmptyValue", "${map:noExist:-${map:noExist2:-${map:noExist3:-}}}");
+        eventTemplateRootNode.put("nestedLookupStaticValue", "${map:noExist:-${map:noExist2:-${map:noExist3:-Static Value}}}");
         String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
@@ -251,6 +253,8 @@ public class LogstashLayoutTest {
         JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
         assertThat(point(rootNode, "mapValue1").asText()).isEqualTo("val1");
         assertThat(point(rootNode, "mapValue2").asText()).isEqualTo("val2");
+        assertThat(point(rootNode, "nestedLookupEmptyValue").isMissingNode());
+        assertThat(point(rootNode, "nestedLookupStaticValue").asText()).isEqualTo("Static Value");
     }
 
 
