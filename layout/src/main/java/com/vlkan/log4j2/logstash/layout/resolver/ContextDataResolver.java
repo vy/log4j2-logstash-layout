@@ -3,7 +3,6 @@ package com.vlkan.log4j2.logstash.layout.resolver;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.vlkan.log4j2.logstash.layout.util.JsonGenerators;
 import org.apache.logging.log4j.core.LogEvent;
-import org.apache.logging.log4j.util.BiConsumer;
 import org.apache.logging.log4j.util.IndexedStringMap;
 import org.apache.logging.log4j.util.ReadOnlyStringMap;
 
@@ -29,7 +28,7 @@ class ContextDataResolver implements EventResolver {
     }
 
     @Override
-    public void resolve(LogEvent logEvent, final JsonGenerator jsonGenerator) throws IOException {
+    public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
 
         // Retrieve context data.
         ReadOnlyStringMap contextData = logEvent.getContextData();
@@ -51,7 +50,7 @@ class ContextDataResolver implements EventResolver {
         }
 
         // Otherwise return all context data matching the MDC key pattern.
-        final Pattern keyPattern = context.getMdcKeyPattern();
+        Pattern keyPattern = context.getMdcKeyPattern();
         jsonGenerator.writeStartObject();
         if (contextData instanceof IndexedStringMap) {  // First, try access-by-id, which is GC free.
             resolveIndexedMap(jsonGenerator, (IndexedStringMap) contextData, keyPattern);
@@ -71,13 +70,10 @@ class ContextDataResolver implements EventResolver {
         }
     }
 
-    private void resolveGenericMap(final JsonGenerator jsonGenerator, ReadOnlyStringMap contextData, final Pattern keyPattern) {
-        contextData.forEach(new BiConsumer<String, Object>() {
-            @Override
-            public void accept(String key, Object value) {
-                boolean keyMatches = keyPattern == null || keyPattern.matcher(key).matches();
-                resolveEntry(jsonGenerator, key, value, keyMatches);
-            }
+    private void resolveGenericMap(JsonGenerator jsonGenerator, ReadOnlyStringMap contextData, Pattern keyPattern) {
+        contextData.forEach((key, value) -> {
+            boolean keyMatches = keyPattern == null || keyPattern.matcher(key).matches();
+            resolveEntry(jsonGenerator, key, value, keyMatches);
         });
     }
 

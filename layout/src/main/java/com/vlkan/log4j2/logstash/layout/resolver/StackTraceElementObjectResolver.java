@@ -6,33 +6,17 @@ import java.io.IOException;
 
 class StackTraceElementObjectResolver implements TemplateResolver<StackTraceElement> {
 
-    private static final TemplateResolver<StackTraceElement> CLASS_NAME_RESOLVER = new TemplateResolver<StackTraceElement>() {
-        @Override
-        public void resolve(StackTraceElement stackTraceElement, JsonGenerator jsonGenerator) throws IOException {
-            jsonGenerator.writeString(stackTraceElement.getClassName());
-        }
-    };
+    private static final TemplateResolver<StackTraceElement> CLASS_NAME_RESOLVER =
+            (stackTraceElement, jsonGenerator) -> jsonGenerator.writeString(stackTraceElement.getClassName());
 
-    private static final TemplateResolver<StackTraceElement> METHOD_NAME_RESOLVER = new TemplateResolver<StackTraceElement>() {
-        @Override
-        public void resolve(StackTraceElement stackTraceElement, JsonGenerator jsonGenerator) throws IOException {
-            jsonGenerator.writeString(stackTraceElement.getMethodName());
-        }
-    };
+    private static final TemplateResolver<StackTraceElement> METHOD_NAME_RESOLVER =
+            (stackTraceElement, jsonGenerator) -> jsonGenerator.writeString(stackTraceElement.getMethodName());
 
-    private static final TemplateResolver<StackTraceElement> FILE_NAME_RESOLVER = new TemplateResolver<StackTraceElement>() {
-        @Override
-        public void resolve(StackTraceElement stackTraceElement, JsonGenerator jsonGenerator) throws IOException {
-            jsonGenerator.writeString(stackTraceElement.getFileName());
-        }
-    };
+    private static final TemplateResolver<StackTraceElement> FILE_NAME_RESOLVER =
+            (stackTraceElement, jsonGenerator) -> jsonGenerator.writeString(stackTraceElement.getFileName());
 
-    private static final TemplateResolver<StackTraceElement> LINE_NUMBER_RESOLVER = new TemplateResolver<StackTraceElement>() {
-        @Override
-        public void resolve(StackTraceElement stackTraceElement, JsonGenerator jsonGenerator) throws IOException {
-            jsonGenerator.writeNumber(stackTraceElement.getLineNumber());
-        }
-    };
+    private static final TemplateResolver<StackTraceElement> LINE_NUMBER_RESOLVER =
+            (stackTraceElement, jsonGenerator) -> jsonGenerator.writeNumber(stackTraceElement.getLineNumber());
 
     private final TemplateResolver<StackTraceElement> internalResolver;
 

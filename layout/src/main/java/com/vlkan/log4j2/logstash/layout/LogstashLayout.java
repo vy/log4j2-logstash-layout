@@ -145,6 +145,7 @@ public class LogstashLayout implements Layout<String> {
             encode(event, context);
             ByteBuffer byteBuffer = context.getOutputStream().getByteBuffer();
             byteBuffer.flip();
+            // noinspection SynchronizationOnLocalVariableOrMethodParameter
             synchronized (destination) {
                 ByteBufferDestinations.writeToUnsynchronized(byteBuffer, destination);
             }

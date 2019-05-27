@@ -14,7 +14,7 @@ class ThreadResolver implements EventResolver {
         this.internalResolver = createInternalResolver(context, key);
     }
 
-    private static EventResolver createInternalResolver(final EventResolverContext context, String key) {
+    private static EventResolver createInternalResolver(EventResolverContext context, String key) {
         switch (key) {
             case "name": return createNameResolver(context);
             case "id": return createIdResolver();
@@ -23,38 +23,29 @@ class ThreadResolver implements EventResolver {
         throw new IllegalArgumentException("unknown key: " + key);
     }
 
-    private static EventResolver createNameResolver(final EventResolverContext context) {
-        return new EventResolver() {
-            @Override
-            public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-                String threadName = logEvent.getThreadName();
-                boolean threadNameExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(threadName);
-                if (threadNameExcluded) {
-                    jsonGenerator.writeNull();
-                } else {
-                    jsonGenerator.writeString(threadName);
-                }
+    private static EventResolver createNameResolver(EventResolverContext context) {
+        return (logEvent, jsonGenerator) -> {
+            String threadName = logEvent.getThreadName();
+            boolean threadNameExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(threadName);
+            if (threadNameExcluded) {
+                jsonGenerator.writeNull();
+            } else {
+                jsonGenerator.writeString(threadName);
             }
         };
     }
 
     private static EventResolver createIdResolver() {
-        return new EventResolver() {
-            @Override
-            public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-                long threadId = logEvent.getThreadId();
-                jsonGenerator.writeNumber(threadId);
-            }
+        return (logEvent, jsonGenerator) -> {
+            long threadId = logEvent.getThreadId();
+            jsonGenerator.writeNumber(threadId);
         };
     }
 
     private static EventResolver createPriorityResolver() {
-        return new EventResolver() {
-            @Override
-            public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-                int threadPriority = logEvent.getThreadPriority();
-                jsonGenerator.writeNumber(threadPriority);
-            }
+        return (logEvent, jsonGenerator) -> {
+            int threadPriority = logEvent.getThreadPriority();
+            jsonGenerator.writeNumber(threadPriority);
         };
     }
 

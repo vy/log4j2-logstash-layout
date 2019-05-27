@@ -8,20 +8,14 @@ import java.io.IOException;
 
 class TimestampResolver implements EventResolver {
 
-    private static final EventResolver MILLIS_RESOLVER = new EventResolver() {
-        @Override
-        public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-            long timeMillis = logEvent.getTimeMillis();
-            jsonGenerator.writeNumber(timeMillis);
-        }
+    private static final EventResolver MILLIS_RESOLVER = (logEvent, jsonGenerator) -> {
+        long timeMillis = logEvent.getTimeMillis();
+        jsonGenerator.writeNumber(timeMillis);
     };
 
-    private static final EventResolver NANOS_RESOLVER = new EventResolver() {
-        @Override
-        public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-            long nanoTime = logEvent.getNanoTime();
-            jsonGenerator.writeNumber(nanoTime);
-        }
+    private static final EventResolver NANOS_RESOLVER = (logEvent, jsonGenerator) -> {
+        long nanoTime = logEvent.getNanoTime();
+        jsonGenerator.writeNumber(nanoTime);
     };
 
     private final EventResolver internalResolver;
@@ -30,7 +24,7 @@ class TimestampResolver implements EventResolver {
         this.internalResolver = createInternalResolver(context, key);
     }
 
-    private static EventResolver createInternalResolver(final EventResolverContext context, String key) {
+    private static EventResolver createInternalResolver(EventResolverContext context, String key) {
         if (key == null) {
             return createFormatResolver(context);
         }
@@ -41,15 +35,12 @@ class TimestampResolver implements EventResolver {
         throw new IllegalArgumentException("unknown key: " + key);
     }
 
-    private static EventResolver createFormatResolver(final EventResolverContext context) {
-        return new EventResolver() {
-            @Override
-            public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-                long timestampMillis = logEvent.getTimeMillis();
-                FastDateFormat timestampFormat = context.getTimestampFormat();
-                String timestamp = timestampFormat.format(timestampMillis);
-                jsonGenerator.writeString(timestamp);
-            }
+    private static EventResolver createFormatResolver(EventResolverContext context) {
+        return (logEvent, jsonGenerator) -> {
+            long timestampMillis = logEvent.getTimeMillis();
+            FastDateFormat timestampFormat = context.getTimestampFormat();
+            String timestamp = timestampFormat.format(timestampMillis);
+            jsonGenerator.writeString(timestamp);
         };
     }
 

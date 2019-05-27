@@ -13,61 +13,49 @@ class ExceptionResolver implements EventResolver {
 
                 @Override
                 EventResolver createClassNameResolver() {
-                    return new EventResolver() {
-                        @Override
-                        public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-                            Throwable exception = logEvent.getThrown();
-                            if (exception == null) {
-                                jsonGenerator.writeNull();
-                            } else {
-                                String exceptionClassName = exception.getClass().getCanonicalName();
-                                jsonGenerator.writeString(exceptionClassName);
-                            }
-                        }
-                    };
-                }
-
-                @Override
-                EventResolver createMessageResolver(final EventResolverContext context) {
-                    return new EventResolver() {
-                        @Override
-                        public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-                            Throwable exception = logEvent.getThrown();
-                            if (exception != null) {
-                                String exceptionMessage = exception.getMessage();
-                                boolean exceptionMessageExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(exceptionMessage);
-                                if (!exceptionMessageExcluded) {
-                                    jsonGenerator.writeString(exceptionMessage);
-                                    return;
-                                }
-                            }
+                    return (logEvent, jsonGenerator) -> {
+                        Throwable exception = logEvent.getThrown();
+                        if (exception == null) {
                             jsonGenerator.writeNull();
+                        } else {
+                            String exceptionClassName = exception.getClass().getCanonicalName();
+                            jsonGenerator.writeString(exceptionClassName);
                         }
                     };
                 }
 
                 @Override
-                EventResolver createStackTraceTextResolver(final EventResolverContext context) {
-                    return new EventResolver() {
-                        @Override
-                        public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-                            Throwable exception = logEvent.getThrown();
-                            if (exception != null) {
-                                StackTraceTextResolver.getInstance().resolve(exception, jsonGenerator);
+                EventResolver createMessageResolver(EventResolverContext context) {
+                    return (logEvent, jsonGenerator) -> {
+                        Throwable exception = logEvent.getThrown();
+                        if (exception != null) {
+                            String exceptionMessage = exception.getMessage();
+                            boolean exceptionMessageExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(exceptionMessage);
+                            if (!exceptionMessageExcluded) {
+                                jsonGenerator.writeString(exceptionMessage);
+                                return;
                             }
+                        }
+                        jsonGenerator.writeNull();
+                    };
+                }
+
+                @Override
+                EventResolver createStackTraceTextResolver(EventResolverContext context) {
+                    return (logEvent, jsonGenerator) -> {
+                        Throwable exception = logEvent.getThrown();
+                        if (exception != null) {
+                            StackTraceTextResolver.getInstance().resolve(exception, jsonGenerator);
                         }
                     };
                 }
 
                 @Override
-                EventResolver createStackTraceObjectResolver(final EventResolverContext context) {
-                    return new EventResolver() {
-                        @Override
-                        public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-                            Throwable exception = logEvent.getThrown();
-                            if (exception != null) {
-                                context.getStackTraceObjectResolver().resolve(exception, jsonGenerator);
-                            }
+                EventResolver createStackTraceObjectResolver(EventResolverContext context) {
+                    return (logEvent, jsonGenerator) -> {
+                        Throwable exception = logEvent.getThrown();
+                        if (exception != null) {
+                            context.getStackTraceObjectResolver().resolve(exception, jsonGenerator);
                         }
                     };
                 }

@@ -8,15 +8,12 @@ import java.io.IOException;
 
 class MarkerResolver implements EventResolver {
 
-    private static final TemplateResolver<LogEvent> NAME_RESOLVER = new TemplateResolver<LogEvent>() {
-        @Override
-        public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-            Marker marker = logEvent.getMarker();
-            if (marker == null) {
-                jsonGenerator.writeNull();
-            } else {
-                jsonGenerator.writeString(marker.getName());
-            }
+    private static final TemplateResolver<LogEvent> NAME_RESOLVER = (logEvent, jsonGenerator) -> {
+        Marker marker = logEvent.getMarker();
+        if (marker == null) {
+            jsonGenerator.writeNull();
+        } else {
+            jsonGenerator.writeString(marker.getName());
         }
     };
 

@@ -1,6 +1,5 @@
 package com.vlkan.log4j2.logstash.layout.resolver;
 
-import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -8,32 +7,24 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.core.LogEvent;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 public enum TemplateResolvers {;
 
-    private static final TemplateResolver<?> EMPTY_ARRAY_RESOLVER = new TemplateResolver<Object>() {
-        @Override
-        public void resolve(Object ignored, JsonGenerator jsonGenerator) throws IOException {
-            jsonGenerator.writeStartArray();
-            jsonGenerator.writeEndArray();
-        }
+    private static final TemplateResolver<?> EMPTY_ARRAY_RESOLVER = (TemplateResolver<Object>) (ignored, jsonGenerator) -> {
+        jsonGenerator.writeStartArray();
+        jsonGenerator.writeEndArray();
     };
 
-    private static final TemplateResolver<?> EMPTY_OBJECT_RESOLVER = new TemplateResolver<Object>() {
-        @Override
-        public void resolve(Object ignored, JsonGenerator jsonGenerator) throws IOException {
-            jsonGenerator.writeStartObject();
-            jsonGenerator.writeEndObject();
-        }
+    private static final TemplateResolver<?> EMPTY_OBJECT_RESOLVER = (TemplateResolver<Object>) (ignored, jsonGenerator) -> {
+        jsonGenerator.writeStartObject();
+        jsonGenerator.writeEndObject();
     };
 
-    private static final TemplateResolver<?> NULL_NODE_RESOLVER = new TemplateResolver<Object>() {
-        @Override
-        public void resolve(Object ignored, JsonGenerator jsonGenerator) throws IOException {
-            jsonGenerator.writeNull();
-        }
-    };
+    private static final TemplateResolver<?> NULL_NODE_RESOLVER = (TemplateResolver<Object>) (ignored, jsonGenerator) -> jsonGenerator.writeNull();
 
     public static <V, C extends TemplateResolverContext<V, C>> TemplateResolver<V> ofTemplate(C context, String template) {
         ObjectNode node;
@@ -46,7 +37,7 @@ public enum TemplateResolvers {;
         return ofNode(context, node);
     }
 
-    private static <V, C extends TemplateResolverContext<V, C>> TemplateResolver<V> ofNode(C context, final JsonNode node) {
+    private static <V, C extends TemplateResolverContext<V, C>> TemplateResolver<V> ofNode(C context, JsonNode node) {
 
         // Check for known types.
         JsonNodeType nodeType = node.getNodeType();
@@ -57,21 +48,14 @@ public enum TemplateResolvers {;
         }
 
         // Create constant resolver for the JSON.
-        return new TemplateResolver<V>() {
-
-            @Override
-            public void resolve(V ignored, JsonGenerator jsonGenerator) throws IOException {
-                jsonGenerator.writeTree(node);
-            }
-
-        };
+        return (ignored, jsonGenerator) -> jsonGenerator.writeTree(node);
 
     }
 
-    private static <V, C extends TemplateResolverContext<V, C>> TemplateResolver<V> ofArrayNode(final C context, final JsonNode arrayNode) {
+    private static <V, C extends TemplateResolverContext<V, C>> TemplateResolver<V> ofArrayNode(C context, JsonNode arrayNode) {
 
         // Create resolver for each children.
-        final List<TemplateResolver<V>> itemResolvers = new ArrayList<>();
+        List<TemplateResolver<V>> itemResolvers = new ArrayList<>();
         for (int itemIndex = 0; itemIndex < arrayNode.size(); itemIndex++) {
             JsonNode itemNode = arrayNode.get(itemIndex);
             TemplateResolver<V> itemResolver = ofNode(context, itemNode);
@@ -85,26 +69,23 @@ public enum TemplateResolvers {;
         }
 
         // Create a parent resolver collecting each child resolver execution.
-        return new TemplateResolver<V>() {
-            @Override
-            public void resolve(V value, JsonGenerator jsonGenerator) throws IOException {
-                jsonGenerator.writeStartArray();
-                // noinspection ForLoopReplaceableByForEach (avoid iterator instantiation)
-                for (int itemResolverIndex = 0; itemResolverIndex < itemResolvers.size(); itemResolverIndex++) {
-                    TemplateResolver<V> itemResolver = itemResolvers.get(itemResolverIndex);
-                    itemResolver.resolve(value, jsonGenerator);
-                }
-                jsonGenerator.writeEndArray();
+        return (value, jsonGenerator) -> {
+            jsonGenerator.writeStartArray();
+            // noinspection ForLoopReplaceableByForEach (avoid iterator instantiation)
+            for (int itemResolverIndex = 0; itemResolverIndex < itemResolvers.size(); itemResolverIndex++) {
+                TemplateResolver<V> itemResolver = itemResolvers.get(itemResolverIndex);
+                itemResolver.resolve(value, jsonGenerator);
             }
+            jsonGenerator.writeEndArray();
         };
 
     }
 
-    private static <V, C extends TemplateResolverContext<V, C>> TemplateResolver<V> ofObjectNode(final C context, final JsonNode srcNode) {
+    private static <V, C extends TemplateResolverContext<V, C>> TemplateResolver<V> ofObjectNode(C context, JsonNode srcNode) {
 
         // Create resolver for each object field.
-        final List<String> fieldNames = new ArrayList<>();
-        final List<TemplateResolver<V>> fieldResolvers = new ArrayList<>();
+        List<String> fieldNames = new ArrayList<>();
+        List<TemplateResolver<V>> fieldResolvers = new ArrayList<>();
         Iterator<Map.Entry<String, JsonNode>> srcNodeFieldIterator = srcNode.fields();
         while (srcNodeFieldIterator.hasNext()) {
             Map.Entry<String, JsonNode> srcNodeField = srcNodeFieldIterator.next();
@@ -116,33 +97,30 @@ public enum TemplateResolvers {;
         }
 
         // Short-circuit if the object is empty.
-        final int fieldCount = fieldNames.size();
+        int fieldCount = fieldNames.size();
         if (fieldCount == 0) {
             @SuppressWarnings("unchecked") TemplateResolver<V> emptyObjectResolver = (TemplateResolver<V>) EMPTY_OBJECT_RESOLVER;
             return emptyObjectResolver;
         }
 
         // Create a parent resolver collecting each object field resolver execution.
-        return new TemplateResolver<V>() {
-            @Override
-            public void resolve(V value, JsonGenerator jsonGenerator) throws IOException {
-                jsonGenerator.writeStartObject();
-                for (int fieldIndex = 0; fieldIndex < fieldCount; fieldIndex++) {
-                    String fieldName = fieldNames.get(fieldIndex);
-                    TemplateResolver<V> fieldResolver = fieldResolvers.get(fieldIndex);
-                    jsonGenerator.writeFieldName(fieldName);
-                    fieldResolver.resolve(value, jsonGenerator);
-                }
-                jsonGenerator.writeEndObject();
+        return (value, jsonGenerator) -> {
+            jsonGenerator.writeStartObject();
+            for (int fieldIndex = 0; fieldIndex < fieldCount; fieldIndex++) {
+                String fieldName = fieldNames.get(fieldIndex);
+                TemplateResolver<V> fieldResolver = fieldResolvers.get(fieldIndex);
+                jsonGenerator.writeFieldName(fieldName);
+                fieldResolver.resolve(value, jsonGenerator);
             }
+            jsonGenerator.writeEndObject();
         };
 
     }
 
-    private static <V, C extends TemplateResolverContext<V, C>> TemplateResolver<V> ofStringNode(final C context, JsonNode textNode) {
+    private static <V, C extends TemplateResolverContext<V, C>> TemplateResolver<V> ofStringNode(C context, JsonNode textNode) {
 
         // Short-circuit if content is blank and not allowed.
-        final String fieldValue = textNode.asText();
+        String fieldValue = textNode.asText();
         if (context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(fieldValue)) {
             @SuppressWarnings("unchecked") TemplateResolver<V> nullNodeResolver = (TemplateResolver<V>) NULL_NODE_RESOLVER;
             return nullNodeResolver;
@@ -167,46 +145,31 @@ public enum TemplateResolvers {;
         if (substitutionNeeded) {
             if (EventResolverContext.class.isAssignableFrom(context.getContextClass())) {
                 // Use Log4j substitutor with LogEvent.
-                return new TemplateResolver<V>() {
-
-                    @Override
-                    public void resolve(V value, JsonGenerator jsonGenerator) throws IOException {
-                        LogEvent logEvent = (LogEvent) value;
-                        String replacedText = context.getSubstitutor().replace(logEvent, fieldValue);
-                        boolean replacedTextExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(replacedText);
-                        if (replacedTextExcluded) {
-                            jsonGenerator.writeNull();
-                        } else {
-                            jsonGenerator.writeString(replacedText);
-                        }
+                return (value, jsonGenerator) -> {
+                    LogEvent logEvent = (LogEvent) value;
+                    String replacedText = context.getSubstitutor().replace(logEvent, fieldValue);
+                    boolean replacedTextExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(replacedText);
+                    if (replacedTextExcluded) {
+                        jsonGenerator.writeNull();
+                    } else {
+                        jsonGenerator.writeString(replacedText);
                     }
-
                 };
             } else {
                 // Use standalone Log4j substitutor.
-                return new TemplateResolver<V>() {
-
-                    @Override
-                    public void resolve(V value, JsonGenerator jsonGenerator) throws IOException {
-                        String replacedText = context.getSubstitutor().replace(null, fieldValue);
-                        boolean replacedTextExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(replacedText);
-                        if (replacedTextExcluded) {
-                            jsonGenerator.writeNull();
-                        } else {
-                            jsonGenerator.writeString(replacedText);
-                        }
+                return (value, jsonGenerator) -> {
+                    String replacedText = context.getSubstitutor().replace(null, fieldValue);
+                    boolean replacedTextExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(replacedText);
+                    if (replacedTextExcluded) {
+                        jsonGenerator.writeNull();
+                    } else {
+                        jsonGenerator.writeString(replacedText);
                     }
-
                 };
             }
         } else {
             // Write the field value as is. (Blank value check has already been done at the top.)
-            return new TemplateResolver<V>() {
-                @Override
-                public void resolve(V value, JsonGenerator jsonGenerator) throws IOException {
-                    jsonGenerator.writeString(fieldValue);
-                }
-            };
+            return (value, jsonGenerator) -> jsonGenerator.writeString(fieldValue);
         }
 
     }

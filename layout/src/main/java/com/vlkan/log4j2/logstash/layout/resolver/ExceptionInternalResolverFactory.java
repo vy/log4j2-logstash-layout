@@ -1,18 +1,8 @@
 package com.vlkan.log4j2.logstash.layout.resolver;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import org.apache.logging.log4j.core.LogEvent;
-
-import java.io.IOException;
-
 abstract class ExceptionInternalResolverFactory {
 
-    private static final EventResolver NULL_RESOLVER = new EventResolver() {
-        @Override
-        public void resolve(LogEvent ignored, JsonGenerator jsonGenerator) throws IOException {
-            jsonGenerator.writeNull();
-        }
-    };
+    private static final EventResolver NULL_RESOLVER = (ignored, jsonGenerator) -> jsonGenerator.writeNull();
 
     EventResolver createInternalResolver(EventResolverContext context, String key) {
 

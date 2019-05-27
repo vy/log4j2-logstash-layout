@@ -12,7 +12,6 @@ import org.openjdk.jmh.annotations.State;
 import java.util.List;
 
 @State(Scope.Benchmark)
-@SuppressWarnings("WeakerAccess")   // Public access is required when using JMH @State annotation.
 public class LogstashLayoutBenchmarkState {
 
     private static final Configuration CONFIGURATION = new DefaultConfiguration();

@@ -8,12 +8,7 @@ import java.io.IOException;
 
 class SourceResolver implements EventResolver {
 
-    private static final EventResolver NULL_RESOLVER = new EventResolver() {
-        @Override
-        public void resolve(LogEvent value, JsonGenerator jsonGenerator) throws IOException {
-            jsonGenerator.writeNull();
-        }
-    };
+    private static final EventResolver NULL_RESOLVER = (value, jsonGenerator) -> jsonGenerator.writeNull();
 
     private final EventResolver internalResolver;
 
@@ -34,72 +29,60 @@ class SourceResolver implements EventResolver {
         throw new IllegalArgumentException("unknown key: " + key);
     }
 
-    private static EventResolver createClassNameResolver(final EventResolverContext context) {
-        return new EventResolver() {
-            @Override
-            public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-                StackTraceElement logEventSource = logEvent.getSource();
-                if (logEventSource != null) {
-                    String sourceClassName = logEventSource.getClassName();
-                    boolean sourceClassNameExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(sourceClassName);
-                    if (!sourceClassNameExcluded) {
-                        jsonGenerator.writeString(sourceClassName);
-                        return;
-                    }
+    private static EventResolver createClassNameResolver(EventResolverContext context) {
+        return (logEvent, jsonGenerator) -> {
+            StackTraceElement logEventSource = logEvent.getSource();
+            if (logEventSource != null) {
+                String sourceClassName = logEventSource.getClassName();
+                boolean sourceClassNameExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(sourceClassName);
+                if (!sourceClassNameExcluded) {
+                    jsonGenerator.writeString(sourceClassName);
+                    return;
                 }
-                jsonGenerator.writeNull();
             }
+            jsonGenerator.writeNull();
         };
     }
 
-    private static EventResolver createFileNameResolver(final EventResolverContext context) {
-        return new EventResolver() {
-            @Override
-            public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-                StackTraceElement logEventSource = logEvent.getSource();
-                if (logEventSource != null) {
-                    String sourceFileName = logEventSource.getFileName();
-                    boolean sourceFileNameExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(sourceFileName);
-                    if (!sourceFileNameExcluded) {
-                        jsonGenerator.writeString(sourceFileName);
-                        return;
-                    }
+    private static EventResolver createFileNameResolver(EventResolverContext context) {
+        return (logEvent, jsonGenerator) -> {
+            StackTraceElement logEventSource = logEvent.getSource();
+            if (logEventSource != null) {
+                String sourceFileName = logEventSource.getFileName();
+                boolean sourceFileNameExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(sourceFileName);
+                if (!sourceFileNameExcluded) {
+                    jsonGenerator.writeString(sourceFileName);
+                    return;
                 }
-                jsonGenerator.writeNull();
             }
+            jsonGenerator.writeNull();
         };
     }
 
     private static EventResolver createLineNumberResolver() {
-        return new EventResolver() {
-            @Override
-            public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-                StackTraceElement logEventSource = logEvent.getSource();
-                if (logEventSource == null) {
-                    jsonGenerator.writeNull();
-                } else {
-                    int sourceLineNumber = logEventSource.getLineNumber();
-                    jsonGenerator.writeNumber(sourceLineNumber);
-                }
+        return (logEvent, jsonGenerator) -> {
+            StackTraceElement logEventSource = logEvent.getSource();
+            if (logEventSource == null) {
+                jsonGenerator.writeNull();
+            } else {
+                int sourceLineNumber = logEventSource.getLineNumber();
+                jsonGenerator.writeNumber(sourceLineNumber);
             }
         };
     }
 
-    private static EventResolver createMethodNameResolver(final EventResolverContext context) {
-        return new EventResolver() {
-            @Override
-            public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-                StackTraceElement logEventSource = logEvent.getSource();
-                if (logEventSource != null) {
-                    String sourceMethodName = logEventSource.getMethodName();
-                    boolean sourceMethodNameExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(sourceMethodName);
-                    if (!sourceMethodNameExcluded) {
-                        jsonGenerator.writeString(sourceMethodName);
-                        return;
-                    }
+    private static EventResolver createMethodNameResolver(EventResolverContext context) {
+        return (logEvent, jsonGenerator) -> {
+            StackTraceElement logEventSource = logEvent.getSource();
+            if (logEventSource != null) {
+                String sourceMethodName = logEventSource.getMethodName();
+                boolean sourceMethodNameExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(sourceMethodName);
+                if (!sourceMethodNameExcluded) {
+                    jsonGenerator.writeString(sourceMethodName);
+                    return;
                 }
-                jsonGenerator.writeNull();
             }
+            jsonGenerator.writeNull();
         };
     }
 

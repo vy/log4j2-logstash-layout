@@ -14,69 +14,57 @@ class ExceptionRootCauseResolver implements EventResolver {
 
                 @Override
                 EventResolver createClassNameResolver() {
-                    return new EventResolver() {
-                        @Override
-                        public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-                            Throwable exception = logEvent.getThrown();
-                            if (exception == null) {
-                                jsonGenerator.writeNull();
-                            } else {
-                                Throwable rootCause = Throwables.getRootCause(exception);
-                                String rootCauseClassName = rootCause.getClass().getCanonicalName();
-                                jsonGenerator.writeString(rootCauseClassName);
-                            }
-                        }
-                    };
-                }
-
-                @Override
-                EventResolver createMessageResolver(final EventResolverContext context) {
-                    return new EventResolver() {
-                        @Override
-                        public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-                            Throwable exception = logEvent.getThrown();
-                            if (exception != null) {
-                                Throwable rootCause = Throwables.getRootCause(exception);
-                                String rootCauseMessage = rootCause.getMessage();
-                                boolean rootCauseMessageExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(rootCauseMessage);
-                                if (!rootCauseMessageExcluded) {
-                                    jsonGenerator.writeString(rootCauseMessage);
-                                    return;
-                                }
-                            }
+                    return (logEvent, jsonGenerator) -> {
+                        Throwable exception = logEvent.getThrown();
+                        if (exception == null) {
                             jsonGenerator.writeNull();
+                        } else {
+                            Throwable rootCause = Throwables.getRootCause(exception);
+                            String rootCauseClassName = rootCause.getClass().getCanonicalName();
+                            jsonGenerator.writeString(rootCauseClassName);
                         }
                     };
                 }
 
                 @Override
-                EventResolver createStackTraceTextResolver(final EventResolverContext context) {
-                    return new EventResolver() {
-                        @Override
-                        public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-                            Throwable exception = logEvent.getThrown();
-                            if (exception == null) {
-                                jsonGenerator.writeNull();
-                            } else {
-                                Throwable rootCause = Throwables.getRootCause(exception);
-                                StackTraceTextResolver.getInstance().resolve(rootCause, jsonGenerator);
+                EventResolver createMessageResolver(EventResolverContext context) {
+                    return (logEvent, jsonGenerator) -> {
+                        Throwable exception = logEvent.getThrown();
+                        if (exception != null) {
+                            Throwable rootCause = Throwables.getRootCause(exception);
+                            String rootCauseMessage = rootCause.getMessage();
+                            boolean rootCauseMessageExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(rootCauseMessage);
+                            if (!rootCauseMessageExcluded) {
+                                jsonGenerator.writeString(rootCauseMessage);
+                                return;
                             }
+                        }
+                        jsonGenerator.writeNull();
+                    };
+                }
+
+                @Override
+                EventResolver createStackTraceTextResolver(EventResolverContext context) {
+                    return (logEvent, jsonGenerator) -> {
+                        Throwable exception = logEvent.getThrown();
+                        if (exception == null) {
+                            jsonGenerator.writeNull();
+                        } else {
+                            Throwable rootCause = Throwables.getRootCause(exception);
+                            StackTraceTextResolver.getInstance().resolve(rootCause, jsonGenerator);
                         }
                     };
                 }
 
                 @Override
-                EventResolver createStackTraceObjectResolver(final EventResolverContext context) {
-                    return new EventResolver() {
-                        @Override
-                        public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-                            Throwable exception = logEvent.getThrown();
-                            if (exception == null) {
-                                jsonGenerator.writeNull();
-                            } else {
-                                Throwable rootCause = Throwables.getRootCause(exception);
-                                context.getStackTraceObjectResolver().resolve(rootCause, jsonGenerator);
-                            }
+                EventResolver createStackTraceObjectResolver(EventResolverContext context) {
+                    return (logEvent, jsonGenerator) -> {
+                        Throwable exception = logEvent.getThrown();
+                        if (exception == null) {
+                            jsonGenerator.writeNull();
+                        } else {
+                            Throwable rootCause = Throwables.getRootCause(exception);
+                            context.getStackTraceObjectResolver().resolve(rootCause, jsonGenerator);
                         }
                     };
                 }
