@@ -1,3 +1,9 @@
+### (2019-??-??) v0.19
+
+- Added `${json:map:xxx}` resolver for `MapLookup`s. (#33)
+
+- Fix the fallback to Log4j generic substitution for non-`${json:*}` templates. (#33)
+
 ### (2019-04-29) v0.18
 
 - Recover from corrupted `JsonGenerator` state after an exception. (#27)
