@@ -148,7 +148,7 @@ public enum TemplateResolvers {;
             return nullNodeResolver;
         }
 
-        // Try to resolve the directive.
+        // Try to resolve the directive as a ${json:xxx} parameter.
         TemplateResolverRequest resolverRequest = readResolverRequest(fieldValue);
         if (resolverRequest != null) {
             TemplateResolverFactory<V, C, ? extends TemplateResolver<V>> resolverFactory =
@@ -158,54 +158,65 @@ public enum TemplateResolvers {;
             }
         }
 
-        // Check if substitution is possible.
-        @SuppressWarnings("StringEquality") final boolean substitutionSupported =
-                fieldValue != context.getSubstitutor().replace(null, fieldValue);
+        // This is the fallback template resolver that delegates every other substitution
+        // to Log4j. This will be the case for every template value that does not use ${json:xxx}
+        // This is especially useful because it serves as a mechanism to resolve values at runtime
+        // when this library does not offer specific resolvers for the usecase.
 
-        if (substitutionSupported) {
-            if (LogEvent.class.isAssignableFrom(context.getContextClass())) {
-                // Use Log4j substitutor with LogEvent.
-                return new TemplateResolver<V>() {
+        // First try to resolve the value at initialisation phase. This will avoid having to resolve
+        // the same value multiple times at runtime.
+        // If the string remains the same, then Log4j was not able to replace the provided value with a
+        // resolved value.
+        final String staticallyResolvedValue = context.getSubstitutor().replace(null, fieldValue);
 
-                    @Override
-                    public void resolve(V value, JsonGenerator jsonGenerator) throws IOException {
-                        LogEvent logEvent = (LogEvent) value;
-                        String replacedText = context.getSubstitutor().replace(logEvent, fieldValue);
-                        boolean replacedTextExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(replacedText);
-                        if (replacedTextExcluded) {
-                            jsonGenerator.writeNull();
-                        } else {
-                            jsonGenerator.writeString(replacedText);
-                        }
-                    }
+        @SuppressWarnings("StringEquality")
+        final boolean unresolved = (fieldValue == staticallyResolvedValue);
 
-                };
-            } else {
-                // Use standalone Log4j substitutor.
-                return new TemplateResolver<V>() {
-
-                    @Override
-                    public void resolve(V value, JsonGenerator jsonGenerator) throws IOException {
-                        String replacedText = context.getSubstitutor().replace(null, fieldValue);
-                        boolean replacedTextExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(replacedText);
-                        if (replacedTextExcluded) {
-                            jsonGenerator.writeNull();
-                        } else {
-                            jsonGenerator.writeString(replacedText);
-                        }
-                    }
-
-                };
-            }
-        } else {
-            // Write the field value as is. (Blank value check has already been done at the top.)
+        if (unresolved) {
+            // Log4j could not resolve the value without having context of a LogEvent.
+            // Defer the resolution at a later time during runtime.
             return new TemplateResolver<V>() {
                 @Override
                 public void resolve(V value, JsonGenerator jsonGenerator) throws IOException {
-                    jsonGenerator.writeString(fieldValue);
+
+                    // Check if the value needed to be resolved is a LogEvent. if so, then simply delegate
+                    // the resolution logic to Log4j with the LogEvent as context
+                    String replacedText;
+                    if (LogEvent.class.isAssignableFrom(value.getClass())) {
+                        LogEvent logEvent = (LogEvent) value;
+                        replacedText = context.getSubstitutor().replace(logEvent, fieldValue);
+                    } else {
+                        // The value is not a LogEvent, so try to resolve the fieldValue as a static string with Log4j.
+                        // A substitution can still take place here because Log4j has inbuilt substitutors that do not needd
+                        // context of the LogEvent, but rather take their information from other areas.
+                        replacedText = context.getSubstitutor().replace(null, fieldValue);
+                    }
+
+                    boolean replacedTextExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(replacedText);
+                    if (replacedTextExcluded) {
+                        jsonGenerator.writeNull();
+                    } else {
+                        jsonGenerator.writeString(replacedText);
+                    }
                 }
             };
         }
+        else {
+            return new TemplateResolver<V>() {
+                @Override
+                public void resolve(V value, JsonGenerator jsonGenerator) throws IOException {
+                    // Write the field value as is unless the plugin has been configured to rule out
+                    // empty or null fields.
+                    boolean replacedTextExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(staticallyResolvedValue);
+                    if (replacedTextExcluded) {
+                        jsonGenerator.writeNull();
+                    } else {
+                        jsonGenerator.writeString(staticallyResolvedValue);
+                    }
+                }
+            };
+        }
+
 
     }
 

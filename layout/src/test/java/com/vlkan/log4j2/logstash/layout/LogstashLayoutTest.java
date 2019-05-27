@@ -17,6 +17,7 @@ import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 import org.apache.logging.log4j.core.impl.Log4jLogEvent;
 import org.apache.logging.log4j.core.layout.ByteBufferDestination;
 import org.apache.logging.log4j.core.lookup.MainMapLookup;
+import org.apache.logging.log4j.message.MapMessage;
 import org.apache.logging.log4j.message.SimpleMessage;
 import org.apache.logging.log4j.message.StringMapMessage;
 import org.apache.logging.log4j.util.SortedArrayStringMap;
@@ -214,6 +215,48 @@ public class LogstashLayoutTest {
         assertThat(point(rootNode, staticFieldName).asText()).isEqualTo(staticFieldValue);
 
     }
+
+    @Test
+    public void test_log4j_deferred_runtime_resolver_map_message() throws Exception {
+
+        // Create the event template.
+        ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
+        eventTemplateRootNode.put("mapValue1", "${map:key1}");
+        eventTemplateRootNode.put("mapValue2", "${map:key2}");
+        eventTemplateRootNode.put("nestedLookupEmptyValue", "${map:noExist:-${map:noExist2:-${map:noExist3:-}}}");
+        eventTemplateRootNode.put("nestedLookupStaticValue", "${map:noExist:-${map:noExist2:-${map:noExist3:-Static Value}}}");
+        String eventTemplate = eventTemplateRootNode.toString();
+
+        // Create the layout.
+        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        String timeZoneId = TimeZone.getTimeZone("Europe/Malta").getID();
+        LogstashLayout layout = LogstashLayout
+                .newBuilder()
+                .setConfiguration(configuration)
+                .setEventTemplate(eventTemplate)
+                .setTimeZoneId(timeZoneId)
+                .build();
+
+        // Create the MapMessage log event.
+        MapMessage mapMessage = new MapMessage().with("key1", "val1").with("key2", "val2");
+        LogEvent logEvent = Log4jLogEvent
+                .newBuilder()
+                .setLoggerName(LogstashLayoutTest.class.getSimpleName())
+                .setLevel(Level.INFO)
+                .setMessage(mapMessage)
+                .setTimeMillis(System.currentTimeMillis())
+                .build();
+
+
+        // Check the serialized event.
+        String serializedLogEvent = layout.toSerializable(logEvent);
+        JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
+        assertThat(point(rootNode, "mapValue1").asText()).isEqualTo("val1");
+        assertThat(point(rootNode, "mapValue2").asText()).isEqualTo("val2");
+        assertThat(point(rootNode, "nestedLookupEmptyValue").isMissingNode());
+        assertThat(point(rootNode, "nestedLookupStaticValue").asText()).isEqualTo("Static Value");
+    }
+
 
     @Test
     public void test_property_injection() throws Exception {
@@ -517,6 +560,39 @@ public class LogstashLayoutTest {
         assertThat(point(rootNode, mdcFieldName, mdcPatternMismatchedKey)).isInstanceOf(MissingNode.class);
         assertThat(point(rootNode, mdcDirectlyAccessedNullPropertyKey)).isInstanceOf(MissingNode.class);
 
+    }
+
+    @Test
+    public void test_mapResolver() throws IOException {
+        MapMessage message = new MapMessage().with("key1", "val1");
+        LogEvent logEvent = Log4jLogEvent
+                .newBuilder()
+                .setLoggerName(LogstashLayoutTest.class.getSimpleName())
+                .setLevel(Level.INFO)
+                .setMessage(message)
+                .build();
+
+
+        // Create event template node with empty property and MDC fields.
+        ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
+        eventTemplateRootNode.put("mapValue1", "${json:map:key1}");
+        eventTemplateRootNode.put("mapValue2", "${json:map:noExist}");
+        String eventTemplate = eventTemplateRootNode.toString();
+
+        // Create the layout.
+        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        LogstashLayout layout = LogstashLayout
+                .newBuilder()
+                .setConfiguration(configuration)
+                .setEventTemplate(eventTemplate)
+                .setEmptyPropertyExclusionEnabled(true)
+                .build();
+
+        // Check serialized event.
+        String serializedLogEvent = layout.toSerializable(logEvent);
+        JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
+        assertThat(point(rootNode, "mapValue1").asText()).isEqualTo("val1");
+        assertThat(point(rootNode, "mapValue2").isMissingNode()).isTrue();
     }
 
     @Test
