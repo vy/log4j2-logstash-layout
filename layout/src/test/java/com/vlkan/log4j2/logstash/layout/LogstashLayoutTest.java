@@ -237,7 +237,7 @@ public class LogstashLayoutTest {
                 .setTimeZoneId(timeZoneId)
                 .build();
 
-        // Create the MapMessage log event.
+        // Create the log event with a MapMessage.
         MapMessage mapMessage = new MapMessage().with("key1", "val1").with("key2", "val2");
         LogEvent logEvent = Log4jLogEvent
                 .newBuilder()
@@ -247,7 +247,6 @@ public class LogstashLayoutTest {
                 .setTimeMillis(System.currentTimeMillis())
                 .build();
 
-
         // Check the serialized event.
         String serializedLogEvent = layout.toSerializable(logEvent);
         JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
@@ -255,6 +254,7 @@ public class LogstashLayoutTest {
         assertThat(point(rootNode, "mapValue2").asText()).isEqualTo("val2");
         assertThat(point(rootNode, "nestedLookupEmptyValue").isMissingNode());
         assertThat(point(rootNode, "nestedLookupStaticValue").asText()).isEqualTo("Static Value");
+
     }
 
 
@@ -563,7 +563,9 @@ public class LogstashLayoutTest {
     }
 
     @Test
-    public void test_mapResolver() throws IOException {
+    public void test_MapResolver() throws IOException {
+
+        // Create the log event.
         MapMessage message = new MapMessage().with("key1", "val1");
         LogEvent logEvent = Log4jLogEvent
                 .newBuilder()
@@ -572,8 +574,7 @@ public class LogstashLayoutTest {
                 .setMessage(message)
                 .build();
 
-
-        // Create event template node with empty property and MDC fields.
+        // Create the event template node with map values.
         ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
         eventTemplateRootNode.put("mapValue1", "${json:map:key1}");
         eventTemplateRootNode.put("mapValue2", "${json:map:noExist}");
@@ -593,6 +594,7 @@ public class LogstashLayoutTest {
         JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
         assertThat(point(rootNode, "mapValue1").asText()).isEqualTo("val1");
         assertThat(point(rootNode, "mapValue2").isMissingNode()).isTrue();
+
     }
 
     @Test

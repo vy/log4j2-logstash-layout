@@ -27,18 +27,23 @@ class MapResolver implements EventResolver {
 
     @Override
     public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
+
+        // If the event message is not of type MapMessage, then do not even try to perform the map lookup.
         if (!(logEvent.getMessage() instanceof MapMessage)) {
-            // If the log4j event is not even a MapMessage then do not even try to perform the map lookup.
             jsonGenerator.writeNull();
         }
 
-        // Perform the Map lookup against Log4j
-        String resolvedValue = MAP_LOOKUP.lookup(logEvent, key);
-        boolean valueExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(resolvedValue);
-        if (valueExcluded) {
-            jsonGenerator.writeNull();
-        } else {
-            jsonGenerator.writeObject(resolvedValue);
+        // Perform the map lookup against Log4j.
+        else {
+            String resolvedValue = MAP_LOOKUP.lookup(logEvent, key);
+            boolean valueExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(resolvedValue);
+            if (valueExcluded) {
+                jsonGenerator.writeNull();
+            } else {
+                jsonGenerator.writeObject(resolvedValue);
+            }
         }
+
     }
+
 }
