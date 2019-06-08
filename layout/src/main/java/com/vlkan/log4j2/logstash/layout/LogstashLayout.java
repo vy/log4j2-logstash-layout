@@ -91,7 +91,8 @@ public class LogstashLayout implements Layout<String> {
                 objectMapper,
                 builder.maxByteCount,
                 builder.prettyPrintEnabled,
-                builder.emptyPropertyExclusionEnabled);
+                builder.emptyPropertyExclusionEnabled,
+                builder.maxStringLength);
 
     }
 
@@ -240,6 +241,9 @@ public class LogstashLayout implements Layout<String> {
         @PluginBuilderAttribute
         private int maxByteCount = 1024 * 512;  // 512 KiB
 
+        @PluginBuilderAttribute
+        private int maxStringLength = 0;
+
         private Builder() {
             // Do nothing.
         }
@@ -379,6 +383,15 @@ public class LogstashLayout implements Layout<String> {
             return this;
         }
 
+        public int getMaxStringLength() {
+            return maxStringLength;
+        }
+
+        public Builder setMaxStringLength(int maxStringLength) {
+            this.maxStringLength = maxStringLength;
+            return this;
+        }
+
         @Override
         public LogstashLayout build() {
             validate();
@@ -398,6 +411,7 @@ public class LogstashLayout implements Layout<String> {
                         "both stackTraceElementTemplate and stackTraceElementTemplateUri are blank");
             }
             Validate.isTrue(maxByteCount > 0, "maxByteCount requires a non-zero positive integer");
+            Validate.isTrue(maxStringLength >= 0, "maxStringLength requires a positive integer");
         }
 
         @Override
@@ -414,6 +428,7 @@ public class LogstashLayout implements Layout<String> {
                     ", mdcKeyPattern='" + mdcKeyPattern + '\'' +
                     ", lineSeparator='" + escapedLineSeparator + '\'' +
                     ", maxByteCount='" + maxByteCount + '\'' +
+                    ", maxStringLength='" + maxStringLength + '\'' +
                     '}';
         }
 

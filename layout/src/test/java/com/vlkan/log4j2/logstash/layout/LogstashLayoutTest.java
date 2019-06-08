@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vlkan.log4j2.logstash.layout.util.Throwables;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
@@ -868,6 +869,46 @@ public class LogstashLayoutTest {
         // Compare outputs.
         assertThat(toSerializableOutput).isEqualTo(toByteArrayOutput);
         assertThat(toByteArrayOutput).isEqualTo(encodeOutput);
+
+    }
+
+    @Test
+    public void test_maxStringLength() throws IOException {
+
+        // Create the log event.
+        int maxStringLength = 30;
+        String truncatedMessage = StringUtils.repeat('m', maxStringLength);
+        SimpleMessage message = new SimpleMessage(truncatedMessage + 'M');
+        LogEvent logEvent = Log4jLogEvent
+                .newBuilder()
+                .setLoggerName(LogstashLayoutTest.class.getSimpleName())
+                .setLevel(Level.INFO)
+                .setMessage(message)
+                .build();
+
+        // Create the event template node with map values.
+        ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
+        eventTemplateRootNode.put("message", "${json:message}");
+        String truncatedKey = StringUtils.repeat("k", maxStringLength);
+        String truncatedValue = StringUtils.repeat("v", maxStringLength);
+        eventTemplateRootNode.put(truncatedKey + "K", truncatedValue + "V");
+        String eventTemplate = eventTemplateRootNode.toString();
+
+        // Create the layout.
+        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        LogstashLayout layout = LogstashLayout
+                .newBuilder()
+                .setConfiguration(configuration)
+                .setEventTemplate(eventTemplate)
+                .setEmptyPropertyExclusionEnabled(false)
+                .setMaxStringLength(maxStringLength)
+                .build();
+
+        // Check serialized event.
+        String serializedLogEvent = layout.toSerializable(logEvent);
+        JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
+        assertThat(point(rootNode, "message").asText()).isEqualTo(truncatedMessage);
+        assertThat(point(rootNode, truncatedKey).asText()).isEqualTo(truncatedValue);
 
     }
 

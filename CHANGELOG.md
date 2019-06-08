@@ -1,6 +1,8 @@
 ### (2019-??-??) v0.19
 
-- Added `${json:map:xxx}` resolver for `MapLookup`s. (#33)
+- Add `maxStringLength` parameter enabling truncation of string fields. (#31)
+
+- Add `${json:map:xxx}` resolver for `MapLookup`s. (#33)
 
 - Fix the fallback to Log4j generic substitution for non-`${json:*}` templates. (#33)
 

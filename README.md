@@ -131,6 +131,12 @@ This generates an output as follows:
 | `stackTraceElementTemplateUri` | String | JSON template for rendering `StackTraceElement`s (defaults to [`classpath:Log4j2StackTraceElementLayout.json`](layout/src/main/resources/Log4j2StackTraceElementLayout.json)) |
 | `lineSeparator` | String | used to separate log outputs (defaults to `System.lineSeparator()`) |
 | `maxByteCount` | int | used to cap the internal `byte[]` buffer used for serialization (defaults to 512 KiB) |
+| `maxStringLength`<sup>†</sup> | int | truncate string values longer than the specified limit (defaults to 0) |
+
+<sup>†</sup> Note that string value truncation via `maxStringLength` can take
+place both in object keys and values, and this operation does not leave any
+trace behind. `maxStringLength` is intended as a soft protection against bogus
+input and one should always rely on `maxByteCount` for a hard limit.
 
 `eventTemplateUri` denotes the URI pointing to the JSON template that will be used
 while formatting the `LogEvent`s. By default, `LogstashLayout` ships
