@@ -1,4 +1,4 @@
-### (2019-??-??) v0.19
+### (2019-06-13) v0.19
 
 - Add `maxStringLength` parameter enabling truncation of string fields. (#31)
 
