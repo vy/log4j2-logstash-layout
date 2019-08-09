@@ -1,3 +1,7 @@
+### (2019-08-09) v0.20
+
+- Use UTF-8 while serializing stack traces.
+
 ### (2019-06-13) v0.19
 
 - Add `maxStringLength` parameter enabling truncation of string fields. (#31)
