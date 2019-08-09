@@ -38,7 +38,7 @@ import java.util.TimeZone;
         printObject = true)
 public class LogstashLayout implements Layout<String> {
 
-    private static final Charset CHARSET = StandardCharsets.UTF_8;
+    public static final Charset CHARSET = StandardCharsets.UTF_8;
 
     private static final String CONTENT_TYPE = "application/json; charset=" + CHARSET;
 
