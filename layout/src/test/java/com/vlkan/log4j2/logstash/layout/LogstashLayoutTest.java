@@ -912,4 +912,64 @@ public class LogstashLayoutTest {
 
     }
 
+    private static final class NonAsciiUtf8MethodNameContainingException extends RuntimeException {;
+
+        private static final String NON_ASCII_UTF8_TEXT = "அஆஇฬ๘";
+
+        private static final NonAsciiUtf8MethodNameContainingException INSTANCE = createInstance();
+
+        private static NonAsciiUtf8MethodNameContainingException createInstance() {
+            try {
+                throwException_அஆஇฬ๘();
+                throw new IllegalStateException("should not have reached here");
+            } catch (NonAsciiUtf8MethodNameContainingException exception) {
+                return exception;
+            }
+        }
+
+        private static void throwException_அஆஇฬ๘() {
+            throw new NonAsciiUtf8MethodNameContainingException("exception with non-ASCII UTF-8 method name");
+        }
+
+        private NonAsciiUtf8MethodNameContainingException(String message) {
+            super(message);
+        }
+
+    }
+
+    @Test
+    public void test_exception_with_nonAscii_utf8_method_name() throws IOException {
+
+        // Create the log event.
+        SimpleMessage message = new SimpleMessage("Hello, World!");
+        RuntimeException exception = NonAsciiUtf8MethodNameContainingException.INSTANCE;
+        LogEvent logEvent = Log4jLogEvent
+                .newBuilder()
+                .setLoggerName(LogstashLayoutTest.class.getSimpleName())
+                .setLevel(Level.ERROR)
+                .setMessage(message)
+                .setThrown(exception)
+                .build();
+
+        // Create the event template.
+        ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
+        eventTemplateRootNode.put("ex_stacktrace", "${json:exception:stackTrace:text}");
+        String eventTemplate = eventTemplateRootNode.toString();
+
+        // Create the layout.
+        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        LogstashLayout layout = LogstashLayout
+                .newBuilder()
+                .setConfiguration(configuration)
+                .setStackTraceEnabled(true)
+                .setEventTemplate(eventTemplate)
+                .build();
+
+        // Check the serialized event.
+        String serializedLogEvent = layout.toSerializable(logEvent);
+        JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
+        assertThat(point(rootNode, "ex_stacktrace").asText()).contains(NonAsciiUtf8MethodNameContainingException.NON_ASCII_UTF8_TEXT);
+
+    }
+
 }

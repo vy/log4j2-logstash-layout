@@ -58,6 +58,18 @@
         <plugins>
 
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin.version}</version>
+                <configuration>
+                    <!-- Enforcing a non-UTF-8 encoding to check that the layout
+                         indeed handles everything in UTF-8 without implicitly
+                         relying on the system defaults. -->
+                    <argLine>-Dfile.encoding=US-ASCII</argLine>
+                </configuration>
+            </plugin>
+
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <executions>

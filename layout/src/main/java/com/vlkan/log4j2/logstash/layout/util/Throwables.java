@@ -5,15 +5,15 @@ import com.vlkan.log4j2.logstash.layout.LogstashLayout;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 
 public enum Throwables {;
 
     public static String serializeStackTrace(Throwable exception) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        try (PrintStream printStream = new PrintStream(outputStream, false, LogstashLayout.CHARSET.name())) {
+        String charsetName = LogstashLayout.CHARSET.name();
+        try (PrintStream printStream = new PrintStream(outputStream, false, charsetName)) {
             exception.printStackTrace(printStream);
-            return outputStream.toString(StandardCharsets.UTF_8.name());
+            return outputStream.toString(charsetName);
         }  catch (UnsupportedEncodingException error) {
             throw new RuntimeException("failed converting the stack trace to string", error);
         }

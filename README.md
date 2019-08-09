@@ -1,6 +1,6 @@
 [![Build Status](https://secure.travis-ci.org/vy/log4j2-logstash-layout.svg)](http://travis-ci.org/vy/log4j2-logstash-layout)
 [![Maven Central](https://img.shields.io/maven-central/v/com.vlkan.log4j2/log4j2-logstash-layout-parent.svg)](https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.vlkan.log4j2%22)
-[![License](https://img.shields.io/github/license/vy/log4j2-logstash-layout.svg)](http://www.apache.org/licenses/LICENSE-2.0.txt)
+[![License](https://img.shields.io/github/license/vy/log4j2-logstash-layout.svg)](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
 `LogstashLayout` is **the fastest** [Log4j 2](https://logging.apache.org/log4j/2.x/)
 JSON layout allowing schema customization and [Logstash](https://www.elastic.co/products/logstash)-friendly
