@@ -8,6 +8,7 @@ import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.message.Message;
 import org.apache.logging.log4j.message.MultiformatMessage;
 import org.apache.logging.log4j.message.ObjectMessage;
+import org.apache.logging.log4j.message.SimpleMessage;
 
 import java.io.IOException;
 
@@ -57,6 +58,11 @@ class MessageResolver implements EventResolver {
 
     private void resolveJson(Message message, JsonGenerator jsonGenerator) throws IOException {
 
+        // Try SimpleMessage serializer.
+        if (writeSimpleMessage(jsonGenerator, message)) {
+            return;
+        }
+
         // Try MultiformatMessage serializer.
         if (writeMultiformatMessage(jsonGenerator, message)) {
             return;
@@ -69,6 +75,26 @@ class MessageResolver implements EventResolver {
 
         // Fallback to plain Object write.
         writeObject(message, jsonGenerator);
+
+    }
+
+    private boolean writeSimpleMessage(JsonGenerator jsonGenerator, Message message) throws IOException {
+
+        // Check type.
+        if (!(message instanceof SimpleMessage)) {
+            return false;
+        }
+        SimpleMessage simpleMessage = (SimpleMessage) message;
+
+        // Write message.
+        String formattedMessage = simpleMessage.getFormattedMessage();
+        boolean messageExcluded = context.isEmptyPropertyExclusionEnabled() && StringUtils.isEmpty(formattedMessage);
+        if (messageExcluded) {
+            jsonGenerator.writeNull();
+        } else {
+            jsonGenerator.writeString(formattedMessage);
+        }
+        return true;
 
     }
 

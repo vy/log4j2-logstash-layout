@@ -1,5 +1,7 @@
 ### (2019-09-??) v0.21
 
+- Support `SimpleMessage` in `${json:message:json}` directive. (#36)
+
 - Support `ObjectMessage` in `${json:message:json}` directive. (#36)
 
 ### (2019-08-09) v0.20

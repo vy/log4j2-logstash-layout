@@ -753,7 +753,7 @@ public class LogstashLayoutTest {
         // Check the serialized event.
         String serializedLogEvent = layout.toSerializable(logEvent);
         JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
-        assertThat(point(rootNode, "message", "message").asText()).isEqualTo("Hello, World!");
+        assertThat(point(rootNode, "message").asText()).isEqualTo("Hello, World!");
 
     }
 
