@@ -1,5 +1,7 @@
 ### (2019-09-??) v0.21
 
+- Cache and reuse the most recently formatted timestamp. (#42)
+
 - Support user provided `ObjectMapper`s. (#35)
 
 - Support `SimpleMessage` in `${json:message:json}` directive. (#36)

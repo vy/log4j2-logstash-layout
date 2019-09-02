@@ -36,11 +36,28 @@ class TimestampResolver implements EventResolver {
     }
 
     private static EventResolver createFormatResolver(EventResolverContext context) {
-        return (logEvent, jsonGenerator) -> {
-            long timestampMillis = logEvent.getTimeMillis();
-            FastDateFormat timestampFormat = context.getTimestampFormat();
-            String timestamp = timestampFormat.format(timestampMillis);
-            jsonGenerator.writeString(timestamp);
+        return new EventResolver() {
+
+            private volatile long lastTimestampMillis = -1;
+
+            private volatile String lastTimestamp;
+
+            @Override
+            public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
+                long timestampMillis = logEvent.getTimeMillis();
+                String timestamp;
+                synchronized (this) {
+                    if (lastTimestampMillis != timestampMillis) {
+                        lastTimestampMillis = timestampMillis;
+                        FastDateFormat timestampFormat = context.getTimestampFormat();
+                        timestamp = lastTimestamp = timestampFormat.format(timestampMillis);
+                    } else {
+                        timestamp = lastTimestamp;
+                    }
+                }
+                jsonGenerator.writeString(timestamp);
+            }
+
         };
     }
 

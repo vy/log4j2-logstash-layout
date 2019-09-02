@@ -30,7 +30,7 @@ enum LogEventFixture {;
         Level level = Level.DEBUG;
         String loggerFqcn = "f.q.c.n" + id;
         String loggerName = "a.B" + id;
-        int timeMillis = 1;
+        long timeMillis = System.currentTimeMillis();
         return Log4jLogEvent
                 .newBuilder()
                 .setLoggerName(loggerName)
@@ -71,8 +71,8 @@ enum LogEventFixture {;
         Level level = Level.DEBUG;
         String loggerFqcn = "f.q.c.n" + id;
         String loggerName = "a.B" + id;
-        int timeMillis = Math.abs(id.hashCode());
-        int nanoTime = timeMillis * 2;
+        long timeMillis = System.currentTimeMillis();
+        long nanoTime = timeMillis * 2;
 
         return Log4jLogEvent
                 .newBuilder()
