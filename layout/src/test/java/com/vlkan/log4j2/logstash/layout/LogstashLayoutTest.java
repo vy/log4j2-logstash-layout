@@ -2,6 +2,7 @@ package com.vlkan.log4j2.logstash.layout;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.MissingNode;
@@ -31,10 +32,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static com.vlkan.log4j2.logstash.layout.ObjectMapperFixture.OBJECT_MAPPER;
@@ -47,6 +45,10 @@ public class LogstashLayoutTest {
     private static final List<LogEvent> LOG_EVENTS = LogEventFixture.createFullLogEvents(5);
 
     private static final JsonNodeFactory JSON_NODE_FACTORY = JsonNodeFactory.instance;
+
+    private static final SimpleDateFormat CUSTOM_OBJECT_MAPPER_DATE_FORMAT = new SimpleDateFormat("'year='YYYY', month='MM', day='dd");
+
+    private static final ObjectMapper CUSTOM_OBJECT_MAPPER = new ObjectMapper().setDateFormat(CUSTOM_OBJECT_MAPPER_DATE_FORMAT);
 
     @Test
     public void test_serialized_event() throws IOException {
@@ -981,6 +983,7 @@ public class LogstashLayoutTest {
             }
         }
 
+        @SuppressWarnings("NonAsciiCharacters")
         private static void throwException_அஆஇฬ๘() {
             throw new NonAsciiUtf8MethodNameContainingException("exception with non-ASCII UTF-8 method name");
         }
@@ -1023,6 +1026,58 @@ public class LogstashLayoutTest {
         String serializedLogEvent = layout.toSerializable(logEvent);
         JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
         assertThat(point(rootNode, "ex_stacktrace").asText()).contains(NonAsciiUtf8MethodNameContainingException.NON_ASCII_UTF8_TEXT);
+
+    }
+
+    @Test
+    public void test_custom_ObjectMapper() throws IOException {
+        testCustomObjectMapper(LogstashLayout
+                .newBuilder()
+                .setObjectMapper(CUSTOM_OBJECT_MAPPER));
+    }
+
+    @Test
+    public void test_custom_ObjectMapper_factory_method() throws IOException {
+        testCustomObjectMapper(LogstashLayout
+                .newBuilder()
+                .setObjectMapperFactoryMethod("com.vlkan.log4j2.logstash.layout.LogstashLayoutTest.getCustomObjectMapper"));
+    }
+
+    @SuppressWarnings("unused")
+    public static ObjectMapper getCustomObjectMapper() {
+        return CUSTOM_OBJECT_MAPPER;
+    }
+
+    private void testCustomObjectMapper(LogstashLayout.Builder layoutBuilder) throws IOException {
+
+        // Create the log event.
+        Date logEventDate = new Date();
+        ObjectMessage message = new ObjectMessage(logEventDate);
+        LogEvent logEvent = Log4jLogEvent
+                .newBuilder()
+                .setLoggerName(LogstashLayoutTest.class.getSimpleName())
+                .setLevel(Level.INFO)
+                .setMessage(message)
+                .setTimeMillis(logEventDate.getTime())
+                .build();
+
+        // Create the event template.
+        ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
+        eventTemplateRootNode.put("message", "${json:message:json}");
+        String eventTemplate = eventTemplateRootNode.toString();
+
+        // Create the layout.
+        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        LogstashLayout layout = layoutBuilder
+                .setConfiguration(configuration)
+                .setEventTemplate(eventTemplate)
+                .build();
+
+        // Check the serialized event.
+        String serializedLogEvent = layout.toSerializable(logEvent);
+        String expectedTimestamp = CUSTOM_OBJECT_MAPPER_DATE_FORMAT.format(logEventDate);
+        JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
+        assertThat(point(rootNode, "message").asText()).isEqualTo(expectedTimestamp);
 
     }
 

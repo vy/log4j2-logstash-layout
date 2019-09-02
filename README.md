@@ -132,6 +132,8 @@ This generates an output as follows:
 | `lineSeparator` | String | used to separate log outputs (defaults to `System.lineSeparator()`) |
 | `maxByteCount` | int | used to cap the internal `byte[]` buffer used for serialization (defaults to 512 KiB) |
 | `maxStringLength`<sup>†</sup> | int | truncate string values longer than the specified limit (defaults to 0) |
+| `objectMapper` | ObjectMapper | custom object mapper (defaults to `LogstashLayout.DEFAULT_OBJECT_MAPPER`) |
+| `objectMapperFactoryMethod` | String | custom object mapper factory method |
 
 <sup>†</sup> Note that string value truncation via `maxStringLength` can take
 place both in object keys and values, and this operation does not leave any
