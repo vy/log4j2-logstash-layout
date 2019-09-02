@@ -2,10 +2,12 @@ package com.vlkan.log4j2.logstash.layout.resolver;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.vlkan.log4j2.logstash.layout.util.JsonGenerators;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.message.Message;
 import org.apache.logging.log4j.message.MultiformatMessage;
+import org.apache.logging.log4j.message.ObjectMessage;
 
 import java.io.IOException;
 
@@ -55,10 +57,26 @@ class MessageResolver implements EventResolver {
 
     private void resolveJson(Message message, JsonGenerator jsonGenerator) throws IOException {
 
-        // Check message type.
-        if (!(message instanceof MultiformatMessage)) {
-            writeMessageObject(message, jsonGenerator);
+        // Try MultiformatMessage serializer.
+        if (writeMultiformatMessage(jsonGenerator, message)) {
             return;
+        }
+
+        // Try ObjectMessage serializer.
+        if (writeObjectMessage(jsonGenerator, message)) {
+            return;
+        }
+
+        // Fallback to plain Object write.
+        writeObject(message, jsonGenerator);
+
+    }
+
+    private boolean writeMultiformatMessage(JsonGenerator jsonGenerator, Message message) throws IOException {
+
+        // Check type.
+        if (!(message instanceof MultiformatMessage)) {
+            return false;
         }
         MultiformatMessage multiformatMessage = (MultiformatMessage) message;
 
@@ -71,12 +89,14 @@ class MessageResolver implements EventResolver {
                 break;
             }
         }
+
+        // Get the formatted message, if there is any.
         if (!jsonSupported) {
-            writeMessageObject(message, jsonGenerator);
-            return;
+            writeObject(message, jsonGenerator);
+            return true;
         }
 
-        // Read JSON.
+        // Write the formatted JSON.
         String messageJson = multiformatMessage.getFormattedMessage(FORMATS);
         JsonNode jsonNode = readMessageJson(context, messageJson);
         boolean nodeExcluded = isNodeExcluded(jsonNode);
@@ -85,6 +105,7 @@ class MessageResolver implements EventResolver {
         } else {
             jsonGenerator.writeTree(jsonNode);
         }
+        return true;
 
     }
 
@@ -96,7 +117,7 @@ class MessageResolver implements EventResolver {
         }
     }
 
-    private void writeMessageObject(Message message, JsonGenerator jsonGenerator) throws IOException {
+    private void writeObject(Message message, JsonGenerator jsonGenerator) throws IOException {
 
         // Resolve text node.
         String formattedMessage = resolveText(message);
@@ -132,6 +153,21 @@ class MessageResolver implements EventResolver {
         }
 
         return false;
+
+    }
+
+    private boolean writeObjectMessage(JsonGenerator jsonGenerator, Message message) throws IOException {
+
+        // Check type.
+        if (!(message instanceof ObjectMessage)) {
+            return false;
+        }
+
+        // Serialize object.
+        ObjectMessage objectMessage = (ObjectMessage) message;
+        Object object = objectMessage.getParameter();
+        JsonGenerators.writeObject(jsonGenerator, object);
+        return true;
 
     }
 

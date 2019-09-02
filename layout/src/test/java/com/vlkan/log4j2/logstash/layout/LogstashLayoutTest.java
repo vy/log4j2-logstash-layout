@@ -1,5 +1,6 @@
 package com.vlkan.log4j2.logstash.layout;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
@@ -19,6 +20,7 @@ import org.apache.logging.log4j.core.impl.Log4jLogEvent;
 import org.apache.logging.log4j.core.layout.ByteBufferDestination;
 import org.apache.logging.log4j.core.lookup.MainMapLookup;
 import org.apache.logging.log4j.message.MapMessage;
+import org.apache.logging.log4j.message.ObjectMessage;
 import org.apache.logging.log4j.message.SimpleMessage;
 import org.apache.logging.log4j.message.StringMapMessage;
 import org.apache.logging.log4j.util.SortedArrayStringMap;
@@ -752,6 +754,58 @@ public class LogstashLayoutTest {
         String serializedLogEvent = layout.toSerializable(logEvent);
         JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
         assertThat(point(rootNode, "message", "message").asText()).isEqualTo("Hello, World!");
+
+    }
+
+    private static final class ObjectMessageAttachment {
+
+        @JsonProperty
+        private final int id;
+
+        @JsonProperty
+        private final String name;
+
+        private ObjectMessageAttachment(int id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+    }
+
+    @Test
+    public void test_message_object() throws IOException {
+
+        // Create the log event.
+        int id = Math.abs((int) (Math.random() * Integer.MAX_VALUE));
+        String name = "name-" + id;
+        ObjectMessageAttachment attachment = new ObjectMessageAttachment(id, name);
+        ObjectMessage message = new ObjectMessage(attachment);
+        LogEvent logEvent = Log4jLogEvent
+                .newBuilder()
+                .setLoggerName(LogstashLayoutTest.class.getSimpleName())
+                .setLevel(Level.INFO)
+                .setMessage(message)
+                .build();
+
+        // Create the event template.
+        ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
+        eventTemplateRootNode.put("message", "${json:message:json}");
+        String eventTemplate = eventTemplateRootNode.toString();
+
+        // Create the layout.
+        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        LogstashLayout layout = LogstashLayout
+                .newBuilder()
+                .setConfiguration(configuration)
+                .setStackTraceEnabled(true)
+                .setEventTemplate(eventTemplate)
+                .build();
+
+        // Check the serialized event.
+        String serializedLogEvent = layout.toSerializable(logEvent);
+        JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
+        assertThat(point(rootNode, "message", "id").asInt()).isEqualTo(attachment.id);
+        assertThat(point(rootNode, "message", "name").asText()).isEqualTo(attachment.name);
 
     }
 
