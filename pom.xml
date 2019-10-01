@@ -68,12 +68,12 @@
         <java.version>1.8</java.version>
 
         <!-- library versions -->
-        <assertj-core.version>3.12.2</assertj-core.version>
+        <assertj-core.version>3.13.2</assertj-core.version>
         <commons-lang3.version>3.9</commons-lang3.version>
         <jackson.version>2.9.10</jackson.version>
         <jmh.version>1.21</jmh.version>
         <junit.version>4.13-beta-3</junit.version>
-        <log4j2.version>2.11.2</log4j2.version>
+        <log4j2.version>2.12.1</log4j2.version>
 
         <!-- plugin versions -->
         <build-helper-maven-plugin.version>3.0.0</build-helper-maven-plugin.version>
