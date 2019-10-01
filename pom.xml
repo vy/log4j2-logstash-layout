@@ -70,7 +70,7 @@
         <!-- library versions -->
         <assertj-core.version>3.12.2</assertj-core.version>
         <commons-lang3.version>3.9</commons-lang3.version>
-        <jackson.version>2.9.9</jackson.version>
+        <jackson.version>2.9.10</jackson.version>
         <jmh.version>1.21</jmh.version>
         <junit.version>4.13-beta-3</junit.version>
         <log4j2.version>2.11.2</log4j2.version>
