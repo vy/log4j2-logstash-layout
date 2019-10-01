@@ -66,6 +66,7 @@ public class LogstashLayoutTest {
         String firstMdcKeyExcludingRegex = mdcKeys.isEmpty() ? null : String.format("^(?!%s).*$", Pattern.quote(firstMdcKey));
         List<String> ndcItems = logEvent.getContextStack().asList();
         String firstNdcItem = ndcItems.get(0);
+        @SuppressWarnings("ConstantConditions")
         String firstNdcItemExcludingRegex = ndcItems.isEmpty() ? null : String.format("^(?!%s).*$", Pattern.quote(firstNdcItem));
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
@@ -530,6 +531,7 @@ public class LogstashLayoutTest {
         contextData.putValue(mdcPatternMismatchedKey, mdcPatternMismatchedValue);
         String mdcDirectlyAccessedNullPropertyKey = "mdcKey4";
         String mdcDirectlyAccessedNullPropertyValue = null;
+        // noinspection ConstantConditions
         contextData.putValue(mdcDirectlyAccessedNullPropertyKey, mdcDirectlyAccessedNullPropertyValue);
         LogEvent logEvent = Log4jLogEvent
                 .newBuilder()
@@ -1030,25 +1032,7 @@ public class LogstashLayoutTest {
     }
 
     @Test
-    public void test_custom_ObjectMapper() throws IOException {
-        testCustomObjectMapper(LogstashLayout
-                .newBuilder()
-                .setObjectMapper(CUSTOM_OBJECT_MAPPER));
-    }
-
-    @Test
     public void test_custom_ObjectMapper_factory_method() throws IOException {
-        testCustomObjectMapper(LogstashLayout
-                .newBuilder()
-                .setObjectMapperFactoryMethod("com.vlkan.log4j2.logstash.layout.LogstashLayoutTest.getCustomObjectMapper"));
-    }
-
-    @SuppressWarnings("unused")
-    public static ObjectMapper getCustomObjectMapper() {
-        return CUSTOM_OBJECT_MAPPER;
-    }
-
-    private void testCustomObjectMapper(LogstashLayout.Builder layoutBuilder) throws IOException {
 
         // Create the log event.
         Date logEventDate = new Date();
@@ -1068,7 +1052,9 @@ public class LogstashLayoutTest {
 
         // Create the layout.
         BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
-        LogstashLayout layout = layoutBuilder
+        LogstashLayout layout = LogstashLayout
+                .newBuilder()
+                .setObjectMapperFactoryMethod("com.vlkan.log4j2.logstash.layout.LogstashLayoutTest.getCustomObjectMapper")
                 .setConfiguration(configuration)
                 .setEventTemplate(eventTemplate)
                 .build();
@@ -1079,6 +1065,11 @@ public class LogstashLayoutTest {
         JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
         assertThat(point(rootNode, "message").asText()).isEqualTo(expectedTimestamp);
 
+    }
+
+    @SuppressWarnings("unused")
+    public static ObjectMapper getCustomObjectMapper() {
+        return CUSTOM_OBJECT_MAPPER;
     }
 
 }

@@ -45,8 +45,6 @@ public class LogstashLayout implements Layout<String> {
 
     private static final byte[] EMPTY_OBJECT_JSON_BYTES = "{}".getBytes(CHARSET);
 
-    private static final ObjectMapper DEFAULT_OBJECT_MAPPER = new ObjectMapper();
-
     private final TemplateResolver<LogEvent> eventResolver;
 
     private final byte[] lineSeparatorBytes;
@@ -56,7 +54,7 @@ public class LogstashLayout implements Layout<String> {
     private LogstashLayout(Builder builder) {
 
         // Create StackTraceElement resolver.
-        ObjectMapper objectMapper = createObjectMapper(builder.objectMapper, builder.objectMapperFactoryMethod);
+        ObjectMapper objectMapper = createObjectMapper(builder.objectMapperFactoryMethod);
         StrSubstitutor substitutor = builder.config.getStrSubstitutor();
         TemplateResolver<StackTraceElement> stackTraceElementObjectResolver = null;
         if (builder.stackTraceEnabled) {
@@ -99,20 +97,21 @@ public class LogstashLayout implements Layout<String> {
 
     }
 
-    private static ObjectMapper createObjectMapper(ObjectMapper objectMapper, String objectMapperFactoryMethod) {
-        if (objectMapperFactoryMethod != null) {
-            try {
-                int splitterIndex = objectMapperFactoryMethod.lastIndexOf('.');
-                String className = objectMapperFactoryMethod.substring(0, splitterIndex);
-                String methodName = objectMapperFactoryMethod.substring(splitterIndex + 1);
-                Class<?> clazz = Class.forName(className);
+    private static ObjectMapper createObjectMapper(String objectMapperFactoryMethod) {
+        try {
+            int splitterIndex = objectMapperFactoryMethod.lastIndexOf('.');
+            String className = objectMapperFactoryMethod.substring(0, splitterIndex);
+            String methodName = objectMapperFactoryMethod.substring(splitterIndex + 1);
+            Class<?> clazz = Class.forName(className);
+            if ("new".equals(methodName)) {
+                return (ObjectMapper) clazz.newInstance();
+            } else {
                 Method method = clazz.getMethod(methodName);
                 return (ObjectMapper) method.invoke(null);
-            } catch (Exception error) {
-                throw new RuntimeException(error);
             }
+        } catch (Exception error) {
+            throw new RuntimeException(error);
         }
-        return objectMapper;
     }
 
     private static String readEventTemplate(Builder builder) {
@@ -264,10 +263,7 @@ public class LogstashLayout implements Layout<String> {
         private int maxStringLength = 0;
 
         @PluginBuilderAttribute
-        private ObjectMapper objectMapper = DEFAULT_OBJECT_MAPPER;
-
-        @PluginBuilderAttribute
-        private String objectMapperFactoryMethod;
+        private String objectMapperFactoryMethod = "com.fasterxml.jackson.databind.ObjectMapper.new";
 
         private Builder() {
             // Do nothing.
@@ -417,15 +413,6 @@ public class LogstashLayout implements Layout<String> {
             return this;
         }
 
-        public ObjectMapper getObjectMapper() {
-            return objectMapper;
-        }
-
-        public Builder setObjectMapper(ObjectMapper objectMapper) {
-            this.objectMapper = objectMapper;
-            return this;
-        }
-
         public String getObjectMapperFactoryMethod() {
             return objectMapperFactoryMethod;
         }
@@ -455,9 +442,7 @@ public class LogstashLayout implements Layout<String> {
             }
             Validate.isTrue(maxByteCount > 0, "maxByteCount requires a non-zero positive integer");
             Validate.isTrue(maxStringLength >= 0, "maxStringLength requires a positive integer");
-            Validate.isTrue(
-                    objectMapper != null || objectMapperFactoryMethod != null,
-                    "both objectMapper and objectMapperFactoryMethod are null");
+            Validate.notNull(objectMapperFactoryMethod, "objectMapperFactoryMethod");
         }
 
         @Override
