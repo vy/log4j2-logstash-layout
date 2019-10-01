@@ -127,14 +127,26 @@ This generates an output as follows:
 | `ndcPattern` | String | regex to filter NDC items |
 | `eventTemplate` | String | inline JSON template for rendering `LogEvent`s (has priority over `eventTemplateUri`) |
 | `eventTemplateUri` | String | JSON template for rendering `LogEvent`s (defaults to [`classpath:LogstashJsonEventLayoutV1.json`](layout/src/main/resources/LogstashJsonEventLayoutV1.json)) |
+| `eventTemplateAdditionalFields`<sup>†</sup> | KeyValuePair | additional key-value pairs appended to the root of the event template |
 | `stackTraceElementTemplate` | String | inline JSON template for rendering `StackTraceElement`s (has priority over `stackTraceElementTemplateUri`) |
 | `stackTraceElementTemplateUri` | String | JSON template for rendering `StackTraceElement`s (defaults to [`classpath:Log4j2StackTraceElementLayout.json`](layout/src/main/resources/Log4j2StackTraceElementLayout.json)) |
 | `lineSeparator` | String | used to separate log outputs (defaults to `System.lineSeparator()`) |
 | `maxByteCount` | int | used to cap the internal `byte[]` buffer used for serialization (defaults to 512 KiB) |
-| `maxStringLength`<sup>†</sup> | int | truncate string values longer than the specified limit (defaults to 0) |
+| `maxStringLength`<sup>‡</sup> | int | truncate string values longer than the specified limit (defaults to 0) |
 | `objectMapperFactoryMethod` | String | custom object mapper factory method (defaults to `com.fasterxml.jackson.databind.ObjectMapper.new`) |
 
-<sup>†</sup> Note that string value truncation via `maxStringLength` can take
+<sup>†</sup> One can configure additional event template fields as follows:
+
+```xml
+<LogstashLayout ...>
+    <EventTemplateAdditionalFields>
+        <KeyValuePair key="serviceName" value="auth-service"/>
+        <KeyValuePair key="containerId" value="6ede3f0ca7d9"/>
+    </EventTemplateAdditionalFields>
+</LogstashLayout>
+```
+
+<sup>‡</sup> Note that string value truncation via `maxStringLength` can take
 place both in object keys and values, and this operation does not leave any
 trace behind. `maxStringLength` is intended as a soft protection against bogus
 input and one should always rely on `maxByteCount` for a hard limit.

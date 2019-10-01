@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.util.KeyValuePair;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,6 +28,8 @@ public enum TemplateResolvers {;
     private static final TemplateResolver<?> NULL_NODE_RESOLVER = (TemplateResolver<Object>) (ignored, jsonGenerator) -> jsonGenerator.writeNull();
 
     public static <V, C extends TemplateResolverContext<V, C>> TemplateResolver<V> ofTemplate(C context, String template) {
+
+        // Read the template.
         ObjectNode node;
         try {
             node = context.getObjectMapper().readValue(template, ObjectNode.class);
@@ -34,7 +37,21 @@ public enum TemplateResolvers {;
             String message = String.format("failed parsing template (template=%s)", template);
             throw new RuntimeException(message, error);
         }
+
+        // Append the additional fields.
+        if (context instanceof EventResolverContext) {
+            EventResolverContext eventResolverContext = (EventResolverContext) context;
+            KeyValuePair[] additionalFields = eventResolverContext.getAdditionalFields();
+            if (additionalFields != null) {
+                for (KeyValuePair additionalField : additionalFields) {
+                    node.put(additionalField.getKey(), additionalField.getValue());
+                }
+            }
+        }
+
+        // Resolve the template.
         return ofNode(context, node);
+
     }
 
     private static <V, C extends TemplateResolverContext<V, C>> TemplateResolver<V> ofNode(C context, JsonNode node) {

@@ -1,5 +1,7 @@
 ### (2019-09-??) v0.21
 
+- Add `eventTemplateAdditionalFields` parameter. (#43)
+
 - Cache and reuse the most recently formatted timestamp. (#42)
 
 - Support user provided `ObjectMapper`s. (#35)

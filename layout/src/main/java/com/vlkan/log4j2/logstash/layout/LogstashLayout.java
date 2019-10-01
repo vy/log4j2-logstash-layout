@@ -15,12 +15,10 @@ import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.Node;
-import org.apache.logging.log4j.core.config.plugins.Plugin;
-import org.apache.logging.log4j.core.config.plugins.PluginBuilderAttribute;
-import org.apache.logging.log4j.core.config.plugins.PluginBuilderFactory;
-import org.apache.logging.log4j.core.config.plugins.PluginConfiguration;
+import org.apache.logging.log4j.core.config.plugins.*;
 import org.apache.logging.log4j.core.layout.ByteBufferDestination;
 import org.apache.logging.log4j.core.lookup.StrSubstitutor;
+import org.apache.logging.log4j.core.util.KeyValuePair;
 import org.apache.logging.log4j.core.util.datetime.FastDateFormat;
 import org.apache.logging.log4j.util.Supplier;
 
@@ -83,6 +81,7 @@ public class LogstashLayout implements Layout<String> {
                 .setEmptyPropertyExclusionEnabled(builder.emptyPropertyExclusionEnabled)
                 .setMdcKeyPattern(builder.mdcKeyPattern)
                 .setNdcPattern(builder.ndcPattern)
+                .setAdditionalFields(builder.eventTemplateAdditionalFields.pairs)
                 .build();
         this.eventResolver = TemplateResolvers.ofTemplate(resolverContext, eventTemplate);
 
@@ -212,7 +211,7 @@ public class LogstashLayout implements Layout<String> {
     }
 
     @SuppressWarnings({"unused", "WeakerAccess"})
-    public static class Builder implements org.apache.logging.log4j.core.util.Builder<LogstashLayout> {
+    public static final class Builder implements org.apache.logging.log4j.core.util.Builder<LogstashLayout> {
 
         @PluginConfiguration
         private Configuration config;
@@ -240,6 +239,9 @@ public class LogstashLayout implements Layout<String> {
 
         @PluginBuilderAttribute
         private String eventTemplateUri = "classpath:LogstashJsonEventLayoutV1.json";
+
+        @PluginElement("EventTemplateAdditionalFields")
+        private EventTemplateAdditionalFields eventTemplateAdditionalFields = EventTemplateAdditionalFields.EMPTY;
 
         @PluginBuilderAttribute
         private String stackTraceElementTemplate = null;
@@ -350,6 +352,15 @@ public class LogstashLayout implements Layout<String> {
             return this;
         }
 
+        public EventTemplateAdditionalFields getEventTemplateAdditionalFields() {
+            return eventTemplateAdditionalFields;
+        }
+
+        public Builder setEventTemplateAdditionalFields(EventTemplateAdditionalFields eventTemplateAdditionalFields) {
+            this.eventTemplateAdditionalFields = eventTemplateAdditionalFields;
+            return this;
+        }
+
         public String getStackTraceElementTemplate() {
             return stackTraceElementTemplate;
         }
@@ -435,6 +446,7 @@ public class LogstashLayout implements Layout<String> {
             Validate.isTrue(
                     !StringUtils.isBlank(eventTemplate) || !StringUtils.isBlank(eventTemplateUri),
                     "both eventTemplate and eventTemplateUri are blank");
+            Validate.notNull(eventTemplateAdditionalFields, "eventTemplateAdditionalFields");
             if (stackTraceEnabled) {
                 Validate.isTrue(
                         !StringUtils.isBlank(stackTraceElementTemplate) || !StringUtils.isBlank(stackTraceElementTemplateUri),
@@ -445,22 +457,54 @@ public class LogstashLayout implements Layout<String> {
             Validate.notNull(objectMapperFactoryMethod, "objectMapperFactoryMethod");
         }
 
-        @Override
-        public String toString() {
-            String escapedLineSeparator = lineSeparator.replace("\\", "\\\\");
-            return "Builder{prettyPrintEnabled=" + prettyPrintEnabled +
-                    ", locationInfoEnabled=" + locationInfoEnabled +
-                    ", stackTraceEnabled=" + stackTraceEnabled +
-                    ", emptyPropertyExclusionEnabled=" + emptyPropertyExclusionEnabled +
-                    ", dateTimeFormatPattern='" + dateTimeFormatPattern + '\'' +
-                    ", timeZoneId='" + timeZoneId + '\'' +
-                    ", eventTemplate='" + eventTemplate + '\'' +
-                    ", eventTemplateUri='" + eventTemplateUri + '\'' +
-                    ", mdcKeyPattern='" + mdcKeyPattern + '\'' +
-                    ", lineSeparator='" + escapedLineSeparator + '\'' +
-                    ", maxByteCount='" + maxByteCount + '\'' +
-                    ", maxStringLength='" + maxStringLength + '\'' +
-                    '}';
+    }
+
+    // We need this ugly model and its builder just to be able to allow
+    // key-value pairs in a dedicated element.
+    @SuppressWarnings({"unused", "WeakerAccess"})
+    @Plugin(name = "EventTemplateAdditionalFields", category = Node.CATEGORY, printObject = true)
+    public static final class EventTemplateAdditionalFields {
+
+        private static final EventTemplateAdditionalFields EMPTY = newBuilder().build();
+
+        private final KeyValuePair[] pairs;
+
+        private EventTemplateAdditionalFields(Builder builder) {
+            this.pairs = builder.pairs;
+        }
+
+        public KeyValuePair[] getPairs() {
+            return pairs;
+        }
+
+        @PluginBuilderFactory
+        public static Builder newBuilder() {
+            return new Builder();
+        }
+
+        public static class Builder implements org.apache.logging.log4j.core.util.Builder<EventTemplateAdditionalFields> {
+
+            @PluginElement("EventTemplateAdditionalField")
+            private KeyValuePair[] pairs;
+
+            private Builder() {
+                // Do nothing.
+            }
+
+            public KeyValuePair[] getPairs() {
+                return pairs;
+            }
+
+            public Builder setPairs(KeyValuePair[] pairs) {
+                this.pairs = pairs;
+                return this;
+            }
+
+            @Override
+            public EventTemplateAdditionalFields build() {
+                return new EventTemplateAdditionalFields(this);
+            }
+
         }
 
     }

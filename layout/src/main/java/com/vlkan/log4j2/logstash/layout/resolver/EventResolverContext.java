@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.lookup.StrSubstitutor;
+import org.apache.logging.log4j.core.util.KeyValuePair;
 import org.apache.logging.log4j.core.util.datetime.FastDateFormat;
 
 import java.util.Map;
@@ -29,6 +30,8 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
 
     private final Pattern ndcPattern;
 
+    private final KeyValuePair[] additionalFields;
+
     public EventResolverContext(Builder builder) {
         this.objectMapper = builder.objectMapper;
         this.substitutor = builder.substitutor;
@@ -41,6 +44,7 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
         this.emptyPropertyExclusionEnabled = builder.emptyPropertyExclusionEnabled;
         this.mdcKeyPattern = builder.mdcKeyPattern == null ? null : Pattern.compile(builder.mdcKeyPattern);
         this.ndcPattern = builder.ndcPattern == null ? null : Pattern.compile(builder.ndcPattern);
+        this.additionalFields = builder.additionalFields;
     }
 
     @Override
@@ -75,7 +79,7 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
         return stackTraceEnabled;
     }
 
-    public TemplateResolver<Throwable> getStackTraceObjectResolver() {
+    TemplateResolver<Throwable> getStackTraceObjectResolver() {
         return stackTraceObjectResolver;
     }
 
@@ -90,6 +94,10 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
 
     Pattern getNdcPattern() {
         return ndcPattern;
+    }
+
+    KeyValuePair[] getAdditionalFields() {
+        return additionalFields;
     }
 
     public static Builder newBuilder() {
@@ -115,6 +123,8 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
         private String mdcKeyPattern;
 
         private String ndcPattern;
+
+        private KeyValuePair[] additionalFields;
 
         private Builder() {
             // Do nothing.
@@ -198,6 +208,11 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
 
         public Builder setNdcPattern(String ndcPattern) {
             this.ndcPattern = ndcPattern;
+            return this;
+        }
+
+        public Builder setAdditionalFields(KeyValuePair[] additionalFields) {
+            this.additionalFields = additionalFields;
             return this;
         }
 

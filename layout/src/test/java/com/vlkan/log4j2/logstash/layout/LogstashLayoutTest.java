@@ -20,6 +20,7 @@ import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 import org.apache.logging.log4j.core.impl.Log4jLogEvent;
 import org.apache.logging.log4j.core.layout.ByteBufferDestination;
 import org.apache.logging.log4j.core.lookup.MainMapLookup;
+import org.apache.logging.log4j.core.util.KeyValuePair;
 import org.apache.logging.log4j.message.MapMessage;
 import org.apache.logging.log4j.message.ObjectMessage;
 import org.apache.logging.log4j.message.SimpleMessage;
@@ -66,7 +67,6 @@ public class LogstashLayoutTest {
         String firstMdcKeyExcludingRegex = mdcKeys.isEmpty() ? null : String.format("^(?!%s).*$", Pattern.quote(firstMdcKey));
         List<String> ndcItems = logEvent.getContextStack().asList();
         String firstNdcItem = ndcItems.get(0);
-        @SuppressWarnings("ConstantConditions")
         String firstNdcItemExcludingRegex = ndcItems.isEmpty() ? null : String.format("^(?!%s).*$", Pattern.quote(firstNdcItem));
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
@@ -531,7 +531,6 @@ public class LogstashLayoutTest {
         contextData.putValue(mdcPatternMismatchedKey, mdcPatternMismatchedValue);
         String mdcDirectlyAccessedNullPropertyKey = "mdcKey4";
         String mdcDirectlyAccessedNullPropertyValue = null;
-        // noinspection ConstantConditions
         contextData.putValue(mdcDirectlyAccessedNullPropertyKey, mdcDirectlyAccessedNullPropertyValue);
         LogEvent logEvent = Log4jLogEvent
                 .newBuilder()
@@ -1070,6 +1069,53 @@ public class LogstashLayoutTest {
     @SuppressWarnings("unused")
     public static ObjectMapper getCustomObjectMapper() {
         return CUSTOM_OBJECT_MAPPER;
+    }
+
+    @Test
+    public void test_event_template_additional_fields() throws IOException {
+
+        // Create the log event.
+        SimpleMessage message = new SimpleMessage("Hello, World!");
+        RuntimeException exception = NonAsciiUtf8MethodNameContainingException.INSTANCE;
+        Level level = Level.ERROR;
+        LogEvent logEvent = Log4jLogEvent
+                .newBuilder()
+                .setLoggerName(LogstashLayoutTest.class.getSimpleName())
+                .setLevel(level)
+                .setMessage(message)
+                .setThrown(exception)
+                .build();
+
+        // Create the event template.
+        ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
+        eventTemplateRootNode.put("level", "${json:level}");
+        String eventTemplate = eventTemplateRootNode.toString();
+
+        // Create the layout.
+        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        KeyValuePair additionalField1 = new KeyValuePair("message", "${json:message}");
+        KeyValuePair additionalField2 = new KeyValuePair("@version", "1");
+        KeyValuePair[] additionalFieldPairs = {additionalField1, additionalField2};
+        LogstashLayout.EventTemplateAdditionalFields additionalFields = LogstashLayout
+                .EventTemplateAdditionalFields
+                .newBuilder()
+                .setPairs(additionalFieldPairs)
+                .build();
+        LogstashLayout layout = LogstashLayout
+                .newBuilder()
+                .setConfiguration(configuration)
+                .setStackTraceEnabled(true)
+                .setEventTemplate(eventTemplate)
+                .setEventTemplateAdditionalFields(additionalFields)
+                .build();
+
+        // Check the serialized event.
+        String serializedLogEvent = layout.toSerializable(logEvent);
+        JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
+        assertThat(point(rootNode, "level").asText()).isEqualTo(level.name());
+        assertThat(point(rootNode, additionalField1.getKey()).asText()).isEqualTo(message.getFormattedMessage());
+        assertThat(point(rootNode, additionalField2.getKey()).asText()).isEqualTo(additionalField2.getValue());
+
     }
 
 }

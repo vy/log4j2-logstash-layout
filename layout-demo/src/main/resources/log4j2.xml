@@ -5,7 +5,12 @@
             <LogstashLayout dateTimeFormatPattern="yyyy-MM-dd'T'HH:mm:ss.SSSZZZ"
                             prettyPrintEnabled="true"
                             locationInfoEnabled="true"
-                            eventTemplateUri="classpath:LogstashJsonEventLayoutV1.json"/>
+                            eventTemplateUri="classpath:LogstashJsonEventLayoutV1.json">
+                <EventTemplateAdditionalFields>
+                    <KeyValuePair key="groupId" value="com.vlkan.log4j2"/>
+                    <KeyValuePair key="artifactId" value="log4j2-logstash-layout-demo"/>
+                </EventTemplateAdditionalFields>
+            </LogstashLayout>
         </Console>
     </Appenders>
     <Loggers>
