@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.core.util.JsonGeneratorDelegate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vlkan.log4j2.logstash.layout.util.ByteBufferOutputStream;
+import com.vlkan.log4j2.logstash.layout.util.ByteBufferOutputStreamPool;
 import org.apache.logging.log4j.util.Supplier;
 
 import java.io.IOException;
@@ -29,8 +30,9 @@ enum LogstashLayoutSerializationContexts {;
             boolean emptyPropertyExclusionEnabled,
             int maxStringLength) {
         JsonFactory jsonFactory = new JsonFactory(objectMapper);
+        ByteBufferOutputStreamPool outputStreamPool = new ByteBufferOutputStreamPool(maxByteCount);
         return () -> {
-            ByteBufferOutputStream outputStream = new ByteBufferOutputStream(maxByteCount);
+            ByteBufferOutputStream outputStream = outputStreamPool.acquire();
             JsonGenerator jsonGenerator = createJsonGenerator(
                     jsonFactory,
                     outputStream,
@@ -52,6 +54,7 @@ enum LogstashLayoutSerializationContexts {;
                 @Override
                 public void close() throws Exception {
                     jsonGenerator.close();
+                    outputStreamPool.release(outputStream);
                 }
 
             };
