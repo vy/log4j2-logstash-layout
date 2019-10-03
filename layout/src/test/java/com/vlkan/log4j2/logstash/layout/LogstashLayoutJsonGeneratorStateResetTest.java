@@ -100,7 +100,7 @@ public class LogstashLayoutJsonGeneratorStateResetTest {
     }
 
     private void test_JsonGenerator_state_reset() {
-        LogstashLayoutSerializationContext serializationContext = LAYOUT.getSerializationContextSupplier().get();
+        LogstashLayoutSerializationContext serializationContext = LAYOUT.getSerializationContextPool().acquire();
         ByteBuffer byteBuffer = serializationContext.getOutputStream().getByteBuffer();
         JsonGenerator jsonGenerator = serializationContext.getJsonGenerator();
         JsonStreamContext outputContext = jsonGenerator.getOutputContext();

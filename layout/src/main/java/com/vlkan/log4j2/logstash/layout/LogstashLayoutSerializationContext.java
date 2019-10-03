@@ -9,4 +9,6 @@ interface LogstashLayoutSerializationContext extends AutoCloseable {
 
     JsonGenerator getJsonGenerator();
 
+    void reset();
+
 }

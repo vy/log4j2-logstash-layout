@@ -8,6 +8,7 @@ import com.vlkan.log4j2.logstash.layout.resolver.TemplateResolver;
 import com.vlkan.log4j2.logstash.layout.resolver.TemplateResolvers;
 import com.vlkan.log4j2.logstash.layout.util.ByteBufferDestinations;
 import com.vlkan.log4j2.logstash.layout.util.ByteBufferOutputStream;
+import com.vlkan.log4j2.logstash.layout.util.AutoCloseables;
 import com.vlkan.log4j2.logstash.layout.util.Uris;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -20,7 +21,6 @@ import org.apache.logging.log4j.core.layout.ByteBufferDestination;
 import org.apache.logging.log4j.core.lookup.StrSubstitutor;
 import org.apache.logging.log4j.core.util.KeyValuePair;
 import org.apache.logging.log4j.core.util.datetime.FastDateFormat;
-import org.apache.logging.log4j.util.Supplier;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -47,7 +47,7 @@ public class LogstashLayout implements Layout<String> {
 
     private final byte[] lineSeparatorBytes;
 
-    private final Supplier<LogstashLayoutSerializationContext> serializationContextSupplier;
+    private final LogstashLayoutSerializationContextPool serializationContextPool;
 
     private LogstashLayout(Builder builder) {
 
@@ -85,14 +85,15 @@ public class LogstashLayout implements Layout<String> {
                 .build();
         this.eventResolver = TemplateResolvers.ofTemplate(resolverContext, eventTemplate);
 
-        // Create the serialization context supplier.
+        // Create the serialization context pool.
         this.lineSeparatorBytes = builder.lineSeparator.getBytes(CHARSET);
-        this.serializationContextSupplier = LogstashLayoutSerializationContexts.createSupplier(
+        this.serializationContextPool = new LogstashLayoutSerializationContextPool(
                 objectMapper,
                 builder.maxByteCount,
                 builder.prettyPrintEnabled,
                 builder.emptyPropertyExclusionEnabled,
-                builder.maxStringLength);
+                builder.maxStringLength,
+                builder.maxSerializationContextPoolSize);
 
     }
 
@@ -133,33 +134,42 @@ public class LogstashLayout implements Layout<String> {
     }
 
     // Exposed for tests.
-    Supplier<LogstashLayoutSerializationContext> getSerializationContextSupplier() {
-        return serializationContextSupplier;
+    LogstashLayoutSerializationContextPool getSerializationContextPool() {
+        return serializationContextPool;
     }
 
     @Override
     public String toSerializable(LogEvent event) {
-        try (LogstashLayoutSerializationContext context = serializationContextSupplier.get()) {
+        LogstashLayoutSerializationContext context = serializationContextPool.acquire();
+        try {
             encode(event, context);
-            return context.getOutputStream().toString(CHARSET);
+            String serializedEvent = context.getOutputStream().toString(CHARSET);
+            serializationContextPool.release(context);
+            return serializedEvent;
         } catch (Exception error) {
+            AutoCloseables.closeUnchecked(context);
             throw new RuntimeException("failed serializing JSON", error);
         }
     }
 
     @Override
     public byte[] toByteArray(LogEvent event) {
-        try (LogstashLayoutSerializationContext context = serializationContextSupplier.get()) {
+        LogstashLayoutSerializationContext context = serializationContextPool.acquire();
+        try {
             encode(event, context);
-            return context.getOutputStream().toByteArray();
+            byte[] serializedEventBytes = context.getOutputStream().toByteArray();
+            serializationContextPool.release(context);
+            return serializedEventBytes;
         } catch (Exception error) {
+            AutoCloseables.closeUnchecked(context);
             throw new RuntimeException("failed serializing JSON", error);
         }
     }
 
     @Override
     public void encode(LogEvent event, ByteBufferDestination destination) {
-        try (LogstashLayoutSerializationContext context = serializationContextSupplier.get()) {
+        LogstashLayoutSerializationContext context = serializationContextPool.acquire();
+        try {
             encode(event, context);
             ByteBuffer byteBuffer = context.getOutputStream().getByteBuffer();
             byteBuffer.flip();
@@ -167,8 +177,9 @@ public class LogstashLayout implements Layout<String> {
             synchronized (destination) {
                 ByteBufferDestinations.writeToUnsynchronized(byteBuffer, destination);
             }
-            byteBuffer.clear();
+            serializationContextPool.release(context);
         } catch (Exception error) {
+            AutoCloseables.closeUnchecked(context);
             throw new RuntimeException("failed serializing JSON", error);
         }
     }
@@ -263,6 +274,9 @@ public class LogstashLayout implements Layout<String> {
 
         @PluginBuilderAttribute
         private int maxStringLength = 0;
+
+        @PluginBuilderAttribute
+        private int maxSerializationContextPoolSize = 50;
 
         @PluginBuilderAttribute
         private String objectMapperFactoryMethod = "com.fasterxml.jackson.databind.ObjectMapper.new";
@@ -424,6 +438,15 @@ public class LogstashLayout implements Layout<String> {
             return this;
         }
 
+        public int getMaxSerializationContextPoolSize() {
+            return maxSerializationContextPoolSize;
+        }
+
+        public Builder setMaxSerializationContextPoolSize(int maxSerializationContextPoolSize) {
+            this.maxSerializationContextPoolSize = maxSerializationContextPoolSize;
+            return this;
+        }
+
         public String getObjectMapperFactoryMethod() {
             return objectMapperFactoryMethod;
         }
@@ -455,6 +478,9 @@ public class LogstashLayout implements Layout<String> {
             Validate.isTrue(maxByteCount > 0, "maxByteCount requires a non-zero positive integer");
             Validate.isTrue(maxStringLength >= 0, "maxStringLength requires a positive integer");
             Validate.notNull(objectMapperFactoryMethod, "objectMapperFactoryMethod");
+            Validate.isTrue(
+                    maxSerializationContextPoolSize > 0,
+                    "maxSerializationContextPoolSize requires a non-zero positive integer");
         }
 
     }

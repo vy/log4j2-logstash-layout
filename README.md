@@ -133,6 +133,7 @@ This generates an output as follows:
 | `lineSeparator` | String | used to separate log outputs (defaults to `System.lineSeparator()`) |
 | `maxByteCount` | int | used to cap the internal `byte[]` buffer used for serialization (defaults to 512 KiB) |
 | `maxStringLength`<sup>‡</sup> | int | truncate string values longer than the specified limit (defaults to 0) |
+| `maxSerializationContextPoolSize` | int | cached serialization context (`JsonGenerator`, `byte[]` of size `maxByteCount`, etc.) count (defaults to 50) |
 | `objectMapperFactoryMethod` | String | custom object mapper factory method (defaults to `com.fasterxml.jackson.databind.ObjectMapper.new`) |
 
 <sup>†</sup> One can configure additional event template fields as follows:
