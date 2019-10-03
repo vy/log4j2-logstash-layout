@@ -42,10 +42,11 @@ class ExceptionResolver implements EventResolver {
 
                 @Override
                 EventResolver createStackTraceTextResolver(EventResolverContext context) {
+                    StackTraceTextResolver stackTraceTextResolver = new StackTraceTextResolver(context.getWriterPool());
                     return (logEvent, jsonGenerator) -> {
                         Throwable exception = logEvent.getThrown();
                         if (exception != null) {
-                            StackTraceTextResolver.getInstance().resolve(exception, jsonGenerator);
+                            stackTraceTextResolver.resolve(exception, jsonGenerator);
                         }
                     };
                 }

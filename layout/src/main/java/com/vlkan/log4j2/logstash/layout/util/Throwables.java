@@ -1,23 +1,6 @@
 package com.vlkan.log4j2.logstash.layout.util;
 
-import com.vlkan.log4j2.logstash.layout.LogstashLayout;
-
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
-
 public enum Throwables {;
-
-    public static String serializeStackTrace(Throwable exception) {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        String charsetName = LogstashLayout.CHARSET.name();
-        try (PrintStream printStream = new PrintStream(outputStream, false, charsetName)) {
-            exception.printStackTrace(printStream);
-            return outputStream.toString(charsetName);
-        }  catch (UnsupportedEncodingException error) {
-            throw new RuntimeException("failed converting the stack trace to string", error);
-        }
-    }
 
     public static Throwable getRootCause(Throwable throwable) {
 

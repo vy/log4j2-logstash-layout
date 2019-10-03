@@ -45,13 +45,14 @@ class ExceptionRootCauseResolver implements EventResolver {
 
                 @Override
                 EventResolver createStackTraceTextResolver(EventResolverContext context) {
+                    StackTraceTextResolver stackTraceTextResolver = new StackTraceTextResolver(context.getWriterPool());
                     return (logEvent, jsonGenerator) -> {
                         Throwable exception = logEvent.getThrown();
                         if (exception == null) {
                             jsonGenerator.writeNull();
                         } else {
                             Throwable rootCause = Throwables.getRootCause(exception);
-                            StackTraceTextResolver.getInstance().resolve(rootCause, jsonGenerator);
+                            stackTraceTextResolver.resolve(rootCause, jsonGenerator);
                         }
                     };
                 }

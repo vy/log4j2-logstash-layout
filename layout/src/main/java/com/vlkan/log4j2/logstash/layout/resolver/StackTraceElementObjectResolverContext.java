@@ -61,26 +61,14 @@ public class StackTraceElementObjectResolverContext implements TemplateResolverC
             // Do nothing.
         }
 
-        public ObjectMapper getObjectMapper() {
-            return objectMapper;
-        }
-
         public Builder setObjectMapper(ObjectMapper objectMapper) {
             this.objectMapper = objectMapper;
             return this;
         }
 
-        public StrSubstitutor getSubstitutor() {
-            return substitutor;
-        }
-
         public Builder setSubstitutor(StrSubstitutor substitutor) {
             this.substitutor = substitutor;
             return this;
-        }
-
-        public boolean isEmptyPropertyExclusionEnabled() {
-            return emptyPropertyExclusionEnabled;
         }
 
         public Builder setEmptyPropertyExclusionEnabled(boolean emptyPropertyExclusionEnabled) {

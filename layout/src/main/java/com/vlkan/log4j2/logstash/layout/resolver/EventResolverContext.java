@@ -1,6 +1,7 @@
 package com.vlkan.log4j2.logstash.layout.resolver;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vlkan.log4j2.logstash.layout.util.BufferedPrintWriterPool;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.lookup.StrSubstitutor;
@@ -15,6 +16,8 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
     private final ObjectMapper objectMapper;
 
     private final StrSubstitutor substitutor;
+
+    private final BufferedPrintWriterPool writerPool;
 
     private final FastDateFormat timestampFormat;
 
@@ -35,6 +38,7 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
     public EventResolverContext(Builder builder) {
         this.objectMapper = builder.objectMapper;
         this.substitutor = builder.substitutor;
+        this.writerPool = builder.writerPool;
         this.timestampFormat = builder.timestampFormat;
         this.locationInfoEnabled = builder.locationInfoEnabled;
         this.stackTraceEnabled = builder.stackTraceEnabled;
@@ -65,6 +69,10 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
     @Override
     public StrSubstitutor getSubstitutor() {
         return substitutor;
+    }
+
+    BufferedPrintWriterPool getWriterPool() {
+        return writerPool;
     }
 
     FastDateFormat getTimestampFormat() {
@@ -110,6 +118,8 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
 
         private StrSubstitutor substitutor;
 
+        private BufferedPrintWriterPool writerPool;
+
         private FastDateFormat timestampFormat;
 
         private boolean locationInfoEnabled;
@@ -130,17 +140,9 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
             // Do nothing.
         }
 
-        public ObjectMapper getObjectMapper() {
-            return objectMapper;
-        }
-
         public Builder setObjectMapper(ObjectMapper objectMapper) {
             this.objectMapper = objectMapper;
             return this;
-        }
-
-        public StrSubstitutor getSubstitutor() {
-            return substitutor;
         }
 
         public Builder setSubstitutor(StrSubstitutor substitutor) {
@@ -148,8 +150,9 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
             return this;
         }
 
-        public FastDateFormat getTimestampFormat() {
-            return timestampFormat;
+        public Builder setWriterPool(BufferedPrintWriterPool writerPool) {
+            this.writerPool = writerPool;
+            return this;
         }
 
         public Builder setTimestampFormat(FastDateFormat timestampFormat) {
@@ -157,17 +160,9 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
             return this;
         }
 
-        public boolean isLocationInfoEnabled() {
-            return locationInfoEnabled;
-        }
-
         public Builder setLocationInfoEnabled(boolean locationInfoEnabled) {
             this.locationInfoEnabled = locationInfoEnabled;
             return this;
-        }
-
-        public boolean isStackTraceEnabled() {
-            return stackTraceEnabled;
         }
 
         public Builder setStackTraceEnabled(boolean stackTraceEnabled) {
@@ -175,17 +170,9 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
             return this;
         }
 
-        public TemplateResolver<StackTraceElement> getStackTraceElementObjectResolver() {
-            return stackTraceElementObjectResolver;
-        }
-
         public Builder setStackTraceElementObjectResolver(TemplateResolver<StackTraceElement> stackTraceElementObjectResolver) {
             this.stackTraceElementObjectResolver = stackTraceElementObjectResolver;
             return this;
-        }
-
-        public boolean isEmptyPropertyExclusionEnabled() {
-            return emptyPropertyExclusionEnabled;
         }
 
         public Builder setEmptyPropertyExclusionEnabled(boolean emptyPropertyExclusionEnabled) {
@@ -193,17 +180,9 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
             return this;
         }
 
-        public String getMdcKeyPattern() {
-            return mdcKeyPattern;
-        }
-
         public Builder setMdcKeyPattern(String mdcKeyPattern) {
             this.mdcKeyPattern = mdcKeyPattern;
             return this;
-        }
-
-        public String getNdcPattern() {
-            return ndcPattern;
         }
 
         public Builder setNdcPattern(String ndcPattern) {
@@ -224,6 +203,7 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
         private void validate() {
             Validate.notNull(objectMapper, "objectMapper");
             Validate.notNull(substitutor, "substitutor");
+            Validate.notNull(writerPool, "writerPool");
             Validate.notNull(timestampFormat, "timestampFormat");
             if (stackTraceEnabled) {
                 Validate.notNull(stackTraceElementObjectResolver, "stackTraceElementObjectResolver");

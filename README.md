@@ -133,7 +133,8 @@ This generates an output as follows:
 | `lineSeparator` | String | used to separate log outputs (defaults to `System.lineSeparator()`) |
 | `maxByteCount` | int | used to cap the internal `byte[]` buffer used for serialization (defaults to 512 KiB) |
 | `maxStringLength`<sup>‡</sup> | int | truncate string values longer than the specified limit (defaults to 0) |
-| `maxSerializationContextPoolSize` | int | cached serialization context (`JsonGenerator`, `byte[]` of size `maxByteCount`, etc.) count (defaults to 50) |
+| `maxSerializationContextPoolSize` | int | number of cached serialization contexts, i.e., `JsonGenerator`, `byte[]` of size `maxByteCount`, etc. (defaults to 50) |
+| `maxWriterPoolSize`<sup>§</sup> | int | number of cached `Writer`s backed by `char[]` of size `maxStringLength` or `maxByteCount` (defaults to 50) |
 | `objectMapperFactoryMethod` | String | custom object mapper factory method (defaults to `com.fasterxml.jackson.databind.ObjectMapper.new`) |
 
 <sup>†</sup> One can configure additional event template fields as follows:
@@ -156,6 +157,9 @@ input and one should always rely on `maxByteCount` for a hard limit.
 while formatting the `LogEvent`s. By default, `LogstashLayout` ships
 [`LogstashJsonEventLayoutV1.json`](layout/src/main/resources/LogstashJsonEventLayoutV1.json)
 providing [the official Logstash `JSONEventLayoutV1`](https://github.com/logstash/log4j-jsonevent-layout).
+
+<sup>§</sup> `maxWriterPoolSize` is only used while serializing stack traces
+into text, that is, for `stackTrace:text` directive.
 
 ```json
 {

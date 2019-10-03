@@ -6,10 +6,7 @@ import com.vlkan.log4j2.logstash.layout.resolver.EventResolverContext;
 import com.vlkan.log4j2.logstash.layout.resolver.StackTraceElementObjectResolverContext;
 import com.vlkan.log4j2.logstash.layout.resolver.TemplateResolver;
 import com.vlkan.log4j2.logstash.layout.resolver.TemplateResolvers;
-import com.vlkan.log4j2.logstash.layout.util.ByteBufferDestinations;
-import com.vlkan.log4j2.logstash.layout.util.ByteBufferOutputStream;
-import com.vlkan.log4j2.logstash.layout.util.AutoCloseables;
-import com.vlkan.log4j2.logstash.layout.util.Uris;
+import com.vlkan.log4j2.logstash.layout.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.core.Layout;
@@ -37,7 +34,7 @@ import java.util.TimeZone;
         printObject = true)
 public class LogstashLayout implements Layout<String> {
 
-    public static final Charset CHARSET = StandardCharsets.UTF_8;
+    static final Charset CHARSET = StandardCharsets.UTF_8;
 
     private static final String CONTENT_TYPE = "application/json; charset=" + CHARSET;
 
@@ -69,11 +66,16 @@ public class LogstashLayout implements Layout<String> {
 
         // Create LogEvent resolver.
         String eventTemplate = readEventTemplate(builder);
+        int writerCapacity = builder.maxStringLength > 0
+                ? builder.maxStringLength
+                : builder.maxByteCount;
+        BufferedPrintWriterPool writerPool = new BufferedPrintWriterPool(builder.maxWriterPoolSize, writerCapacity);
         FastDateFormat timestampFormat = readDateFormat(builder);
         EventResolverContext resolverContext = EventResolverContext
                 .newBuilder()
                 .setObjectMapper(objectMapper)
                 .setSubstitutor(substitutor)
+                .setWriterPool(writerPool)
                 .setTimestampFormat(timestampFormat)
                 .setLocationInfoEnabled(builder.locationInfoEnabled)
                 .setStackTraceEnabled(builder.stackTraceEnabled)
@@ -279,6 +281,9 @@ public class LogstashLayout implements Layout<String> {
         private int maxSerializationContextPoolSize = 50;
 
         @PluginBuilderAttribute
+        private int maxWriterPoolSize = 50;
+
+        @PluginBuilderAttribute
         private String objectMapperFactoryMethod = "com.fasterxml.jackson.databind.ObjectMapper.new";
 
         private Builder() {
@@ -447,6 +452,15 @@ public class LogstashLayout implements Layout<String> {
             return this;
         }
 
+        public int getMaxWriterPoolSize() {
+            return maxWriterPoolSize;
+        }
+
+        public Builder setMaxWriterPoolSize(int maxWriterPoolSize) {
+            this.maxWriterPoolSize = maxWriterPoolSize;
+            return this;
+        }
+
         public String getObjectMapperFactoryMethod() {
             return objectMapperFactoryMethod;
         }
@@ -477,10 +491,13 @@ public class LogstashLayout implements Layout<String> {
             }
             Validate.isTrue(maxByteCount > 0, "maxByteCount requires a non-zero positive integer");
             Validate.isTrue(maxStringLength >= 0, "maxStringLength requires a positive integer");
-            Validate.notNull(objectMapperFactoryMethod, "objectMapperFactoryMethod");
             Validate.isTrue(
                     maxSerializationContextPoolSize > 0,
                     "maxSerializationContextPoolSize requires a non-zero positive integer");
+            Validate.isTrue(
+                    maxWriterPoolSize > 0,
+                    "maxWriterPoolSize requires a non-zero positive integer");
+            Validate.notNull(objectMapperFactoryMethod, "objectMapperFactoryMethod");
         }
 
     }

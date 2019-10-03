@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.vlkan.log4j2.logstash.layout.util.Throwables;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Marker;
@@ -29,7 +28,10 @@ import org.apache.logging.log4j.util.SortedArrayStringMap;
 import org.apache.logging.log4j.util.StringMap;
 import org.junit.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -67,6 +69,7 @@ public class LogstashLayoutTest {
         String firstMdcKeyExcludingRegex = mdcKeys.isEmpty() ? null : String.format("^(?!%s).*$", Pattern.quote(firstMdcKey));
         List<String> ndcItems = logEvent.getContextStack().asList();
         String firstNdcItem = ndcItems.get(0);
+        @SuppressWarnings("ConstantConditions")
         String firstNdcItemExcludingRegex = ndcItems.isEmpty() ? null : String.format("^(?!%s).*$", Pattern.quote(firstNdcItem));
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
@@ -114,8 +117,19 @@ public class LogstashLayoutTest {
         if (thrown != null) {
             assertThat(point(rootNode, "exception_class").asText()).isEqualTo(thrown.getClass().getCanonicalName());
             assertThat(point(rootNode, "exception_message").asText()).isEqualTo(thrown.getMessage());
-            String stackTrace = Throwables.serializeStackTrace(thrown);
+            String stackTrace = serializeStackTrace(thrown);
             assertThat(point(rootNode, "stacktrace").asText()).isEqualTo(stackTrace);
+        }
+    }
+
+    private static String serializeStackTrace(Throwable exception) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        String charsetName = LogstashLayout.CHARSET.name();
+        try (PrintStream printStream = new PrintStream(outputStream, false, charsetName)) {
+            exception.printStackTrace(printStream);
+            return outputStream.toString(charsetName);
+        }  catch (UnsupportedEncodingException error) {
+            throw new RuntimeException("failed converting the stack trace to string", error);
         }
     }
 
@@ -531,6 +545,7 @@ public class LogstashLayoutTest {
         contextData.putValue(mdcPatternMismatchedKey, mdcPatternMismatchedValue);
         String mdcDirectlyAccessedNullPropertyKey = "mdcKey4";
         String mdcDirectlyAccessedNullPropertyValue = null;
+        // noinspection ConstantConditions
         contextData.putValue(mdcDirectlyAccessedNullPropertyKey, mdcDirectlyAccessedNullPropertyValue);
         LogEvent logEvent = Log4jLogEvent
                 .newBuilder()
