@@ -21,6 +21,7 @@ the following additional features:
 
 - [Usage](#usage)
 - [Predefined Templates](#templates)
+- [Features](#features)
 - [FAT JAR](#fat-jar)
 - [Appender Support](#appender-support)
 - [Performance](#performance)
@@ -275,6 +276,21 @@ demonstrating the usage of `LogstashLayout`.
 
 - [`EcsLayout.json`](layout/src/main/resources/EcsLayout.json) described by
   [the Elastic Common Schema (ECS) specification](https://www.elastic.co/guide/en/ecs/current/ecs-reference.html)
+
+<a name="features"></a>
+
+# Features
+
+Below is a feature comparison matrix between `LogstashLayout` and alternatives.
+
+| Feature | `LogstashLayout` | `JsonLayout` | `EcsLayout` |
+|---------|------------------|--------------|-------------|
+| Dependencies | Jackson | Jackson | None |
+| Full schema customization? | ✓ | ✕ | ✕ |
+| Timestamp customization? | ✓ | ✕ | ✕ |
+| (Almost) garbage-free? | ✓ | ✕ | ✓ |
+| Custom typed `Message` serialization? | ✓ | ✕ | ✕ |
+| Custom typed `MDC` value serialization? | ✓ | ✕ | ✕ |
 
 <a name="fat-jar"></a>
 
