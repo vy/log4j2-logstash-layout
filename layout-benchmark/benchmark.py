@@ -73,7 +73,7 @@ def read_results():
             results.append({
                 "benchmark": json_dict["benchmark"],
                 "op_rate": json_dict["primaryMetric"]["scorePercentiles"]["99.0"],
-                "gc_rate": json_dict["secondaryMetrics"][u"·gc.alloc.rate"]["scorePercentiles"]["99.0"]
+                "gc_rate": json_dict["secondaryMetrics"][u"·gc.alloc.rate.norm"]["scorePercentiles"]["99.0"]
             })
 
     # Enrich results with normalized op rate slowdown.
@@ -115,7 +115,7 @@ def plot_results():
                 <tr>
                     <th>Benchmark</th>
                     <th colspan="2">ops/sec<sup>*</sup></th>
-                    <th>MB/sec<sup>*</sup></th>
+                    <th>B/op<sup>*</sup></th>
                 </tr>
             </thead>
             <tbody>""")
@@ -132,7 +132,7 @@ def plot_results():
                 benchmark_name,
                 "{:,.0f}".format(result["op_rate"] * 1e3),
                 ("▉" * (1 + int(19 * result["op_rate_norm"]))) + (" ({:.0f}%)".format(100 * result["op_rate_norm"])),
-                "{:,.1f}".format(result["gc_rate"])))
+                "{:,.1f}".format(max(0, result["gc_rate"]))))
         html_file_handle.write("""
             </tbody>
         </table>

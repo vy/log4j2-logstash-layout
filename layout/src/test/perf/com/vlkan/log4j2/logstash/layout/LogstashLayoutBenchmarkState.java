@@ -1,5 +1,6 @@
 package com.vlkan.log4j2.logstash.layout;
 
+import co.elastic.logging.log4j2.EcsLayout;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.DefaultConfiguration;
@@ -18,11 +19,15 @@ public class LogstashLayoutBenchmarkState {
 
     private final ByteBufferDestination byteBufferDestination;
 
-    private final LogstashLayout logstashLayout;
+    private final LogstashLayout logstashLayout4JsonLayout;
+
+    private final LogstashLayout logstashLayout4EcsLayout;
 
     private final JsonLayout defaultJsonLayout;
 
     private final JsonLayout customJsonLayout;
+
+    private final EcsLayout ecsLayout;
 
     private final List<LogEvent> fullLogEvents;
 
@@ -30,20 +35,35 @@ public class LogstashLayoutBenchmarkState {
 
     public LogstashLayoutBenchmarkState() {
         this.byteBufferDestination = new BlackHoleByteBufferDestination(1024 * 512);
-        this.logstashLayout = createLogstashLayout();
+        this.logstashLayout4JsonLayout = createLogstashLayout4JsonLayout();
+        this.logstashLayout4EcsLayout = createLogstashLayout4EcsLayout();
         this.defaultJsonLayout = createDefaultJsonLayout();
         this.customJsonLayout = createCustomJsonLayout();
+        this.ecsLayout = createEcsLayout();
         int logEventCount = 1_000;
         this.fullLogEvents = LogEventFixture.createFullLogEvents(logEventCount);
         this.liteLogEvents = LogEventFixture.createLiteLogEvents(logEventCount);
     }
 
-    private static LogstashLayout createLogstashLayout() {
+    private static LogstashLayout createLogstashLayout4JsonLayout() {
         return LogstashLayout
                 .newBuilder()
                 .setConfiguration(CONFIGURATION)
                 .setEventTemplateUri("classpath:Log4j2JsonLayout.json")
+                .setEmptyPropertyExclusionEnabled(false)
                 .setStackTraceEnabled(true)
+                .setMaxByteCount(4096)
+                .build();
+    }
+
+    private static LogstashLayout createLogstashLayout4EcsLayout() {
+        return LogstashLayout
+                .newBuilder()
+                .setConfiguration(CONFIGURATION)
+                .setEventTemplateUri("classpath:EcsLayout.json")
+                .setEmptyPropertyExclusionEnabled(false)
+                .setStackTraceEnabled(true)
+                .setMaxByteCount(4096)
                 .build();
     }
 
@@ -60,12 +80,25 @@ public class LogstashLayoutBenchmarkState {
         return builder.build();
     }
 
+    private static EcsLayout createEcsLayout() {
+        return EcsLayout
+                .newBuilder()
+                .setConfiguration(CONFIGURATION)
+                .setServiceName("benchmark")
+                .setAdditionalFields(new KeyValuePair[0])
+                .build();
+    }
+
     ByteBufferDestination getByteBufferDestination() {
         return byteBufferDestination;
     }
 
-    LogstashLayout getLogstashLayout() {
-        return logstashLayout;
+    LogstashLayout getLogstashLayout4JsonLayout() {
+        return logstashLayout4JsonLayout;
+    }
+
+    LogstashLayout getLogstashLayout4EcsLayout() {
+        return logstashLayout4EcsLayout;
     }
 
     JsonLayout getDefaultJsonLayout() {
@@ -74,6 +107,10 @@ public class LogstashLayoutBenchmarkState {
 
     JsonLayout getCustomJsonLayout() {
         return customJsonLayout;
+    }
+
+    EcsLayout getEcsLayout() {
+        return ecsLayout;
     }
 
     List<LogEvent> getFullLogEvents() {

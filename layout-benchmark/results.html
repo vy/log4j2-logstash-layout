@@ -17,56 +17,80 @@
         { font-weight: bold }
         #results #footnotes { font-size: 0.8em; }
     </style>
-    <div id="results">
-        <table>
-            <thead>
-                <tr>
-                    <th>Benchmark</th>
-                    <th colspan="2">ops/sec<sup>*</sup></th>
-                    <th>MB/sec<sup>*</sup></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr data-benchmark="liteLogstashLayout">
-                    <td class="benchmark">liteLogstashLayout</td>
-                    <td class="op_rate">793,597</td>
-                    <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉ (100%)</td>
-                    <td class="gc_rate">1.5</td>
-                </tr>
-                <tr data-benchmark="liteDefaultJsonLayout">
-                    <td class="benchmark">liteDefaultJsonLayout</td>
-                    <td class="op_rate">526,915</td>
-                    <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉▉▉▉ (66%)</td>
-                    <td class="gc_rate">1,178.3</td>
-                </tr>
-                <tr data-benchmark="liteCustomJsonLayout">
-                    <td class="benchmark">liteCustomJsonLayout</td>
-                    <td class="op_rate">476,307</td>
-                    <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉▉▉ (60%)</td>
-                    <td class="gc_rate">1,202.0</td>
-                </tr>
-                <tr data-benchmark="fullLogstashLayout">
-                    <td class="benchmark">fullLogstashLayout</td>
-                    <td class="op_rate">61,630</td>
-                    <td class="op_rate_bar">▉▉ (8%)</td>
-                    <td class="gc_rate">7.7</td>
-                </tr>
-                <tr data-benchmark="fullDefaultJsonLayout">
-                    <td class="benchmark">fullDefaultJsonLayout</td>
-                    <td class="op_rate">13,781</td>
-                    <td class="op_rate_bar">▉ (2%)</td>
-                    <td class="gc_rate">1,263.8</td>
-                </tr>
-                <tr data-benchmark="fullCustomJsonLayout">
-                    <td class="benchmark">fullCustomJsonLayout</td>
-                    <td class="op_rate">12,783</td>
-                    <td class="op_rate_bar">▉ (2%)</td>
-                    <td class="gc_rate">1,173.9</td>
-                </tr>
-            </tbody>
-        </table>
-        <p id="footnotes">
-            <sup>*</sup> 99<sup>th</sup> percentile
-        </p>
-    </div>
+<div id="results">
+    <table>
+        <thead>
+            <tr>
+                <th>Benchmark</th>
+                <th colspan="2">ops/sec<sup>*</sup></th>
+                <th>MB/sec<sup>*</sup></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr data-benchmark="liteLogstashLayout4EcsLayout">
+                <td class="benchmark">liteLogstashLayout4EcsLayout</td>
+                <td class="op_rate">813,346</td>
+                <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉ (100%)</td>
+                <td class="gc_rate">4,545.0</td>
+            </tr>
+            <tr data-benchmark="liteEcsLayout">
+                <td class="benchmark">liteEcsLayout</td>
+                <td class="op_rate">603,469</td>
+                <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉ (74%)</td>
+                <td class="gc_rate">460.9</td>
+            </tr>
+            <tr data-benchmark="liteLogstashLayout4JsonLayout">
+                <td class="benchmark">liteLogstashLayout4JsonLayout</td>
+                <td class="op_rate">564,456</td>
+                <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉▉▉▉▉ (69%)</td>
+                <td class="gc_rate">492.7</td>
+            </tr>
+            <tr data-benchmark="liteDefaultJsonLayout">
+                <td class="benchmark">liteDefaultJsonLayout</td>
+                <td class="op_rate">294,590</td>
+                <td class="op_rate_bar">▉▉▉▉▉▉▉ (36%)</td>
+                <td class="gc_rate">5,101,398.2</td>
+            </tr>
+            <tr data-benchmark="liteCustomJsonLayout">
+                <td class="benchmark">liteCustomJsonLayout</td>
+                <td class="op_rate">258,302</td>
+                <td class="op_rate_bar">▉▉▉▉▉▉▉ (32%)</td>
+                <td class="gc_rate">5,516,833.5</td>
+            </tr>
+            <tr data-benchmark="fullLogstashLayout4JsonLayout">
+                <td class="benchmark">fullLogstashLayout4JsonLayout</td>
+                <td class="op_rate">70,755</td>
+                <td class="op_rate_bar">▉▉ (9%)</td>
+                <td class="gc_rate">108,258.8</td>
+            </tr>
+            <tr data-benchmark="fullLogstashLayout4EcsLayout">
+                <td class="benchmark">fullLogstashLayout4EcsLayout</td>
+                <td class="op_rate">41,913</td>
+                <td class="op_rate_bar">▉ (5%)</td>
+                <td class="gc_rate">35,690,881.3</td>
+            </tr>
+            <tr data-benchmark="fullEcsLayout">
+                <td class="benchmark">fullEcsLayout</td>
+                <td class="op_rate">16,594</td>
+                <td class="op_rate_bar">▉ (2%)</td>
+                <td class="gc_rate">46,495,593.1</td>
+            </tr>
+            <tr data-benchmark="fullDefaultJsonLayout">
+                <td class="benchmark">fullDefaultJsonLayout</td>
+                <td class="op_rate">8,484</td>
+                <td class="op_rate_bar">▉ (1%)</td>
+                <td class="gc_rate">234,422,375.7</td>
+            </tr>
+            <tr data-benchmark="fullCustomJsonLayout">
+                <td class="benchmark">fullCustomJsonLayout</td>
+                <td class="op_rate">8,456</td>
+                <td class="op_rate_bar">▉ (1%)</td>
+                <td class="gc_rate">234,624,867.7</td>
+            </tr>
+        </tbody>
+    </table>
+    <p id="footnotes">
+        <sup>*</sup> 99<sup>th</sup> percentile
+    </p>
+</div>
 </body>

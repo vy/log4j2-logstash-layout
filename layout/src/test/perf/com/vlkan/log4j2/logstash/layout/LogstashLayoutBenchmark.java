@@ -63,13 +63,23 @@ public class LogstashLayoutBenchmark {
     }
 
     @Benchmark
-    public static int fullLogstashLayout(LogstashLayoutBenchmarkState state) {
-        return benchmark(state.getLogstashLayout(), state.getFullLogEvents(), state.getByteBufferDestination());
+    public static int fullLogstashLayout4JsonLayout(LogstashLayoutBenchmarkState state) {
+        return benchmark(state.getLogstashLayout4JsonLayout(), state.getFullLogEvents(), state.getByteBufferDestination());
     }
 
     @Benchmark
-    public static int liteLogstashLayout(LogstashLayoutBenchmarkState state) {
-        return benchmark(state.getLogstashLayout(), state.getLiteLogEvents(), state.getByteBufferDestination());
+    public static int liteLogstashLayout4JsonLayout(LogstashLayoutBenchmarkState state) {
+        return benchmark(state.getLogstashLayout4JsonLayout(), state.getLiteLogEvents(), state.getByteBufferDestination());
+    }
+
+    @Benchmark
+    public static int fullLogstashLayout4EcsLayout(LogstashLayoutBenchmarkState state) {
+        return benchmark(state.getLogstashLayout4EcsLayout(), state.getFullLogEvents(), state.getByteBufferDestination());
+    }
+
+    @Benchmark
+    public static int liteLogstashLayout4EcsLayout(LogstashLayoutBenchmarkState state) {
+        return benchmark(state.getLogstashLayout4EcsLayout(), state.getLiteLogEvents(), state.getByteBufferDestination());
     }
 
     @Benchmark
@@ -90,6 +100,16 @@ public class LogstashLayoutBenchmark {
     @Benchmark
     public static int liteCustomJsonLayout(LogstashLayoutBenchmarkState state) {
         return benchmark(state.getCustomJsonLayout(), state.getLiteLogEvents(), state.getByteBufferDestination());
+    }
+
+    @Benchmark
+    public static int fullEcsLayout(LogstashLayoutBenchmarkState state) {
+        return benchmark(state.getEcsLayout(), state.getFullLogEvents(), state.getByteBufferDestination());
+    }
+
+    @Benchmark
+    public static int liteEcsLayout(LogstashLayoutBenchmarkState state) {
+        return benchmark(state.getEcsLayout(), state.getLiteLogEvents(), state.getByteBufferDestination());
     }
 
     private static int benchmark(Layout<String> layout, List<LogEvent> logEvents, ByteBufferDestination destination) {

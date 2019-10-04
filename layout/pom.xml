@@ -52,6 +52,12 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>co.elastic.logging</groupId>
+            <artifactId>log4j2-ecs-layout</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>

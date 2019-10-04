@@ -1,13 +1,13 @@
 [INFO] Scanning for projects...
 [INFO] 
 [INFO] --------------< com.vlkan.log4j2:log4j2-logstash-layout >---------------
-[INFO] Building log4j2-logstash-layout 0.18-SNAPSHOT
+[INFO] Building log4j2-logstash-layout 0.21-SNAPSHOT
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
 [INFO] --- exec-maven-plugin:1.6.0:java (default-cli) @ log4j2-logstash-layout ---
 # JMH version: 1.21
-# VM version: JDK 12, OpenJDK 64-Bit Server VM, 12+33
-# VM invoker: /home/vy/Software/share/java/jdk/12+33/bin/java
+# VM version: JDK 1.8.0_192-ea, Java HotSpot(TM) 64-Bit Server VM, 25.192-b04
+# VM invoker: /home/vy/Software/share/java/jdk/1.8.0_192/jre/bin/java
 # VM options: -XX:+TieredCompilation -XX:+AggressiveOpts -Dclassworlds.conf=/home/vy/Software/share/java/maven/latest/bin/m2.conf -Dmaven.home=/home/vy/Software/share/java/maven/latest -Dlibrary.jansi.path=/home/vy/Software/share/java/maven/latest/lib/jansi-native -Dmaven.multiModuleProjectDirectory=/home/vy/Projects/log4j2-logstash-layout
 # Warmup: 3 iterations, 20 s each
 # Measurement: 3 iterations, 30 s each
@@ -16,164 +16,154 @@
 # Benchmark mode: Throughput, ops/time
 # Benchmark: com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullCustomJsonLayout
 
-# Run progress: 0.00% complete, ETA 00:30:00
+# Run progress: 0.00% complete, ETA 00:50:00
 # Fork: 1 of 2
-OpenJDK 64-Bit Server VM warning: Ignoring option AggressiveOpts; support was removed in 12.0
-# Warmup Iteration   1: 11.566 ops/s
-# Warmup Iteration   2: 12.980 ops/s
-# Warmup Iteration   3: 12.155 ops/s
-Iteration   1: 12.312 ops/s
-                 ·gc.alloc.rate:                1130.648 MB/sec
-                 ·gc.alloc.rate.norm:           97900611.870 B/op
-                 ·gc.churn.Eden_Space:          1141.526 MB/sec
-                 ·gc.churn.Eden_Space.norm:     98842505.903 B/op
-                 ·gc.churn.Survivor_Space:      0.084 MB/sec
-                 ·gc.churn.Survivor_Space.norm: 7236.346 B/op
-                 ·gc.count:                     523.000 counts
-                 ·gc.time:                      146.000 ms
+# Warmup Iteration   1: 6.588 ops/s
+# Warmup Iteration   2: 7.400 ops/s
+# Warmup Iteration   3: 7.646 ops/s
+Iteration   1: 7.775 ops/s
+                 ·gc.alloc.rate:                ≈ 0 MB/sec
+                 ·gc.alloc.rate.norm:           ≈ 0 B/op
+                 ·gc.churn.Eden_Space:          1721.787 MB/sec
+                 ·gc.churn.Eden_Space.norm:     236077958.974 B/op
+                 ·gc.churn.Survivor_Space:      0.358 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 49127.692 B/op
+                 ·gc.count:                     790.000 counts
+                 ·gc.time:                      791.000 ms
                  ·stack:                        <delayed till summary>
 
-Iteration   2: 12.622 ops/s
-                 ·gc.alloc.rate:                1159.122 MB/sec
-                 ·gc.alloc.rate.norm:           97896856.633 B/op
-                 ·gc.churn.Eden_Space:          1168.741 MB/sec
-                 ·gc.churn.Eden_Space.norm:     98709279.515 B/op
-                 ·gc.churn.Survivor_Space:      0.084 MB/sec
-                 ·gc.churn.Survivor_Space.norm: 7063.916 B/op
-                 ·gc.count:                     535.000 counts
-                 ·gc.time:                      144.000 ms
+Iteration   2: 7.822 ops/s
+                 ·gc.alloc.rate:                ≈ 0 MB/sec
+                 ·gc.alloc.rate.norm:           ≈ 0 B/op
+                 ·gc.churn.Eden_Space:          1733.552 MB/sec
+                 ·gc.churn.Eden_Space.norm:     236263579.643 B/op
+                 ·gc.churn.Survivor_Space:      0.376 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 51219.336 B/op
+                 ·gc.count:                     794.000 counts
+                 ·gc.time:                      794.000 ms
                  ·stack:                        <delayed till summary>
 
-Iteration   3: 12.783 ops/s
-                 ·gc.alloc.rate:                1173.862 MB/sec
-                 ·gc.alloc.rate.norm:           97894596.083 B/op
-                 ·gc.churn.Eden_Space:          1185.686 MB/sec
-                 ·gc.churn.Eden_Space.norm:     98880693.167 B/op
-                 ·gc.churn.Survivor_Space:      0.089 MB/sec
-                 ·gc.churn.Survivor_Space.norm: 7393.583 B/op
-                 ·gc.count:                     543.000 counts
-                 ·gc.time:                      145.000 ms
+Iteration   3: 7.570 ops/s
+                 ·gc.alloc.rate:                ≈ 0 MB/sec
+                 ·gc.alloc.rate.norm:           ≈ 0 B/op
+                 ·gc.churn.Eden_Space:          1679.290 MB/sec
+                 ·gc.churn.Eden_Space.norm:     236463373.474 B/op
+                 ·gc.churn.Survivor_Space:      0.341 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 47957.789 B/op
+                 ·gc.count:                     771.000 counts
+                 ·gc.time:                      791.000 ms
                  ·stack:                        <delayed till summary>
 
 
-# Run progress: 8.33% complete, ETA 00:28:25
+# Run progress: 5.00% complete, ETA 00:49:08
 # Fork: 2 of 2
-OpenJDK 64-Bit Server VM warning: Ignoring option AggressiveOpts; support was removed in 12.0
-# Warmup Iteration   1: 10.489 ops/s
-# Warmup Iteration   2: 12.747 ops/s
-# Warmup Iteration   3: 12.743 ops/s
-Iteration   1: 12.231 ops/s
-                 ·gc.alloc.rate:                1123.139 MB/sec
-                 ·gc.alloc.rate.norm:           97901041.243 B/op
-                 ·gc.churn.Eden_Space:          1134.465 MB/sec
-                 ·gc.churn.Eden_Space.norm:     98888327.913 B/op
-                 ·gc.churn.Survivor_Space:      0.082 MB/sec
-                 ·gc.churn.Survivor_Space.norm: 7123.357 B/op
-                 ·gc.count:                     519.000 counts
-                 ·gc.time:                      141.000 ms
+# Warmup Iteration   1: 6.873 ops/s
+# Warmup Iteration   2: 8.425 ops/s
+# Warmup Iteration   3: 8.462 ops/s
+Iteration   1: 8.456 ops/s
+                 ·gc.alloc.rate:                1861.118 MB/sec
+                 ·gc.alloc.rate.norm:           234624867.685 B/op
+                 ·gc.churn.Eden_Space:          1875.874 MB/sec
+                 ·gc.churn.Eden_Space.norm:     236485095.559 B/op
+                 ·gc.churn.Survivor_Space:      0.391 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 49261.134 B/op
+                 ·gc.count:                     859.000 counts
+                 ·gc.time:                      856.000 ms
                  ·stack:                        <delayed till summary>
 
-Iteration   2: 11.800 ops/s
-                 ·gc.alloc.rate:                1083.696 MB/sec
-                 ·gc.alloc.rate.norm:           97907533.431 B/op
-                 ·gc.churn.Eden_Space:          1094.486 MB/sec
-                 ·gc.churn.Eden_Space.norm:     98882380.823 B/op
-                 ·gc.churn.Survivor_Space:      0.078 MB/sec
-                 ·gc.churn.Survivor_Space.norm: 7016.406 B/op
-                 ·gc.count:                     502.000 counts
-                 ·gc.time:                      140.000 ms
+Iteration   2: 8.337 ops/s
+                 ·gc.alloc.rate:                1835.005 MB/sec
+                 ·gc.alloc.rate.norm:           234624841.371 B/op
+                 ·gc.churn.Eden_Space:          1849.870 MB/sec
+                 ·gc.churn.Eden_Space.norm:     236525564.622 B/op
+                 ·gc.churn.Survivor_Space:      0.375 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 47950.661 B/op
+                 ·gc.count:                     849.000 counts
+                 ·gc.time:                      842.000 ms
                  ·stack:                        <delayed till summary>
 
-Iteration   3: 12.642 ops/s
-                 ·gc.alloc.rate:                1160.887 MB/sec
-                 ·gc.alloc.rate.norm:           97895876.421 B/op
-                 ·gc.churn.Eden_Space:          1171.817 MB/sec
-                 ·gc.churn.Eden_Space.norm:     98817576.926 B/op
-                 ·gc.churn.Survivor_Space:      0.085 MB/sec
-                 ·gc.churn.Survivor_Space.norm: 7190.316 B/op
-                 ·gc.count:                     537.000 counts
-                 ·gc.time:                      143.000 ms
+Iteration   3: 8.393 ops/s
+                 ·gc.alloc.rate:                ≈ 0 MB/sec
+                 ·gc.alloc.rate.norm:           ≈ 0 B/op
+                 ·gc.churn.Eden_Space:          1859.178 MB/sec
+                 ·gc.churn.Eden_Space.norm:     236142071.873 B/op
+                 ·gc.churn.Survivor_Space:      0.372 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 47249.524 B/op
+                 ·gc.count:                     851.000 counts
+                 ·gc.time:                      850.000 ms
                  ·stack:                        <delayed till summary>
 
 
 
 Result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullCustomJsonLayout":
-  12.398 ±(99.9%) 1.012 ops/s [Average]
-  (min, avg, max) = (11.800, 12.398, 12.783), stdev = 0.361
-  CI (99.9%): [11.386, 13.411] (assumes normal distribution)
+  8.059 ±(99.9%) 1.066 ops/s [Average]
+  (min, avg, max) = (7.570, 8.059, 8.456), stdev = 0.380
+  CI (99.9%): [6.993, 9.125] (assumes normal distribution)
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullCustomJsonLayout:·gc.alloc.rate":
-  1138.559 ±(99.9%) 92.818 MB/sec [Average]
-  (min, avg, max) = (1083.696, 1138.559, 1173.862), stdev = 33.100
-  CI (99.9%): [1045.740, 1231.377] (assumes normal distribution)
+  ≈ 0 MB/sec
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullCustomJsonLayout:·gc.alloc.rate.norm":
-  97899419.280 ±(99.9%) 13288.101 B/op [Average]
-  (min, avg, max) = (97894596.083, 97899419.280, 97907533.431), stdev = 4738.665
-  CI (99.9%): [97886131.180, 97912707.381] (assumes normal distribution)
+  ≈ 0 B/op
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullCustomJsonLayout:·gc.churn.Eden_Space":
-  1149.453 ±(99.9%) 92.953 MB/sec [Average]
-  (min, avg, max) = (1094.486, 1149.453, 1185.686), stdev = 33.148
-  CI (99.9%): [1056.501, 1242.406] (assumes normal distribution)
+  1786.592 ±(99.9%) 237.185 MB/sec [Average]
+  (min, avg, max) = (1679.290, 1786.592, 1875.874), stdev = 84.582
+  CI (99.9%): [1549.407, 2023.776] (assumes normal distribution)
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullCustomJsonLayout:·gc.churn.Eden_Space.norm":
-  98836794.041 ±(99.9%) 191519.611 B/op [Average]
-  (min, avg, max) = (98709279.515, 98836794.041, 98888327.913), stdev = 68297.738
-  CI (99.9%): [98645274.430, 99028313.652] (assumes normal distribution)
+  236326274.024 ±(99.9%) 536851.517 B/op [Average]
+  (min, avg, max) = (236077958.974, 236326274.024, 236525564.622), stdev = 191446.422
+  CI (99.9%): [235789422.507, 236863125.541] (assumes normal distribution)
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullCustomJsonLayout:·gc.churn.Survivor_Space":
-  0.083 ±(99.9%) 0.010 MB/sec [Average]
-  (min, avg, max) = (0.078, 0.083, 0.089), stdev = 0.004
-  CI (99.9%): [0.073, 0.094] (assumes normal distribution)
+  0.369 ±(99.9%) 0.048 MB/sec [Average]
+  (min, avg, max) = (0.341, 0.369, 0.391), stdev = 0.017
+  CI (99.9%): [0.320, 0.417] (assumes normal distribution)
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullCustomJsonLayout:·gc.churn.Survivor_Space.norm":
-  7170.654 ±(99.9%) 380.011 B/op [Average]
-  (min, avg, max) = (7016.406, 7170.654, 7393.583), stdev = 135.515
-  CI (99.9%): [6790.643, 7550.664] (assumes normal distribution)
+  48794.356 ±(99.9%) 3967.244 B/op [Average]
+  (min, avg, max) = (47249.524, 48794.356, 51219.336), stdev = 1414.758
+  CI (99.9%): [44827.112, 52761.600] (assumes normal distribution)
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullCustomJsonLayout:·gc.count":
-  3159.000 ±(99.9%) 0.001 counts [Sum]
-  (min, avg, max) = (502.000, 526.500, 543.000), stdev = 14.990
-  CI (99.9%): [3159.000, 3159.000] (assumes normal distribution)
+  4914.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (771.000, 819.000, 859.000), stdev = 38.194
+  CI (99.9%): [4914.000, 4914.000] (assumes normal distribution)
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullCustomJsonLayout:·gc.time":
-  859.000 ±(99.9%) 0.001 ms [Sum]
-  (min, avg, max) = (140.000, 143.167, 146.000), stdev = 2.317
-  CI (99.9%): [859.000, 859.000] (assumes normal distribution)
+  4924.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (791.000, 820.667, 856.000), stdev = 31.734
+  CI (99.9%): [4924.000, 4924.000] (assumes normal distribution)
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullCustomJsonLayout:·stack":
 Stack profiler:
 
 ....[Thread state distributions]....................................................................
- 50.0%         TIMED_WAITING
- 49.0%         RUNNABLE
-  1.0%         WAITING
-
-....[Thread state: TIMED_WAITING]...................................................................
- 50.0% 100.0% java.lang.Object.wait
+ 97.3%         RUNNABLE
+  2.7%         WAITING
 
 ....[Thread state: RUNNABLE]........................................................................
- 17.9%  36.5% com.fasterxml.jackson.databind.ser.std.StringSerializer.serialize
-  7.3%  14.9% jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke
-  6.0%  12.3% com.fasterxml.jackson.databind.ser.BeanPropertyWriter.serializeAsField
-  5.4%  11.0% com.fasterxml.jackson.core.json.WriterBasedJsonGenerator._flushBuffer
-  3.2%   6.6% com.fasterxml.jackson.core.json.WriterBasedJsonGenerator._writePPFieldName
-  2.3%   4.7% org.apache.logging.log4j.core.layout.AbstractLayout.encode
-  1.4%   2.8% com.fasterxml.jackson.core.json.WriterBasedJsonGenerator.writeRaw
-  1.2%   2.4% com.fasterxml.jackson.core.json.WriterBasedJsonGenerator.close
-  1.0%   2.1% com.fasterxml.jackson.databind.ser.std.BooleanSerializer.serialize
-  0.9%   1.8% com.fasterxml.jackson.databind.ser.std.ObjectArraySerializer.serializeContents
-  2.4%   4.8% <other>
+ 21.1%  21.6% com.fasterxml.jackson.databind.ser.BeanPropertyWriter.serializeAsField
+ 18.4%  18.9% java.lang.StringCoding$StringEncoder.encode
+ 13.8%  14.2% com.fasterxml.jackson.databind.ser.std.StringSerializer.serialize
+ 11.5%  11.9% sun.reflect.DelegatingMethodAccessorImpl.invoke
+  7.2%   7.4% java.util.Arrays.copyOf
+  4.4%   4.6% com.fasterxml.jackson.core.json.WriterBasedJsonGenerator._flushBuffer
+  4.2%   4.3% com.fasterxml.jackson.core.json.WriterBasedJsonGenerator.writeNumber
+  2.8%   2.9% org.apache.logging.log4j.core.layout.JsonLayout.toSerializable
+  2.8%   2.9% com.fasterxml.jackson.core.json.WriterBasedJsonGenerator.close
+  2.0%   2.1% com.fasterxml.jackson.core.json.WriterBasedJsonGenerator.writeRaw
+  9.0%   9.2% <other>
 
 ....[Thread state: WAITING].........................................................................
-  1.0% 100.0% jdk.internal.misc.Unsafe.park
+  2.7% 100.0% sun.misc.Unsafe.park
 
 
 
 # JMH version: 1.21
-# VM version: JDK 12, OpenJDK 64-Bit Server VM, 12+33
-# VM invoker: /home/vy/Software/share/java/jdk/12+33/bin/java
+# VM version: JDK 1.8.0_192-ea, Java HotSpot(TM) 64-Bit Server VM, 25.192-b04
+# VM invoker: /home/vy/Software/share/java/jdk/1.8.0_192/jre/bin/java
 # VM options: -XX:+TieredCompilation -XX:+AggressiveOpts -Dclassworlds.conf=/home/vy/Software/share/java/maven/latest/bin/m2.conf -Dmaven.home=/home/vy/Software/share/java/maven/latest -Dlibrary.jansi.path=/home/vy/Software/share/java/maven/latest/lib/jansi-native -Dmaven.multiModuleProjectDirectory=/home/vy/Projects/log4j2-logstash-layout
 # Warmup: 3 iterations, 20 s each
 # Measurement: 3 iterations, 30 s each
@@ -182,324 +172,622 @@ Stack profiler:
 # Benchmark mode: Throughput, ops/time
 # Benchmark: com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullDefaultJsonLayout
 
-# Run progress: 16.67% complete, ETA 00:25:50
+# Run progress: 10.00% complete, ETA 00:46:31
 # Fork: 1 of 2
-OpenJDK 64-Bit Server VM warning: Ignoring option AggressiveOpts; support was removed in 12.0
-# Warmup Iteration   1: 12.009 ops/s
-# Warmup Iteration   2: 13.542 ops/s
-# Warmup Iteration   3: 13.478 ops/s
-Iteration   1: 13.469 ops/s
-                 ·gc.alloc.rate:                1235.401 MB/sec
-                 ·gc.alloc.rate.norm:           97776939.654 B/op
-                 ·gc.churn.Eden_Space:          1247.826 MB/sec
-                 ·gc.churn.Eden_Space.norm:     98760329.126 B/op
-                 ·gc.churn.Survivor_Space:      0.074 MB/sec
-                 ·gc.churn.Survivor_Space.norm: 5849.422 B/op
-                 ·gc.count:                     572.000 counts
-                 ·gc.time:                      150.000 ms
+# Warmup Iteration   1: 7.711 ops/s
+# Warmup Iteration   2: 8.256 ops/s
+# Warmup Iteration   3: 8.327 ops/s
+Iteration   1: 8.344 ops/s
+                 ·gc.alloc.rate:                1834.836 MB/sec
+                 ·gc.alloc.rate.norm:           234421689.880 B/op
+                 ·gc.churn.Eden_Space:          1846.943 MB/sec
+                 ·gc.churn.Eden_Space.norm:     235968482.614 B/op
+                 ·gc.churn.Survivor_Space:      0.326 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 41682.135 B/op
+                 ·gc.count:                     847.000 counts
+                 ·gc.time:                      831.000 ms
                  ·stack:                        <delayed till summary>
 
-Iteration   2: 13.781 ops/s
-                 ·gc.alloc.rate:                1263.817 MB/sec
-                 ·gc.alloc.rate.norm:           97773726.628 B/op
-                 ·gc.churn.Eden_Space:          1275.018 MB/sec
-                 ·gc.churn.Eden_Space.norm:     98640293.121 B/op
-                 ·gc.churn.Survivor_Space:      0.080 MB/sec
-                 ·gc.churn.Survivor_Space.norm: 6204.715 B/op
-                 ·gc.count:                     584.000 counts
-                 ·gc.time:                      147.000 ms
+Iteration   2: 8.334 ops/s
+                 ·gc.alloc.rate:                1832.678 MB/sec
+                 ·gc.alloc.rate.norm:           234421488.765 B/op
+                 ·gc.churn.Eden_Space:          1842.593 MB/sec
+                 ·gc.churn.Eden_Space.norm:     235689805.291 B/op
+                 ·gc.churn.Survivor_Space:      0.300 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 38390.024 B/op
+                 ·gc.count:                     846.000 counts
+                 ·gc.time:                      818.000 ms
                  ·stack:                        <delayed till summary>
 
-Iteration   3: 13.664 ops/s
-                 ·gc.alloc.rate:                1253.124 MB/sec
-                 ·gc.alloc.rate.norm:           97774656.934 B/op
-                 ·gc.churn.Eden_Space:          1266.902 MB/sec
-                 ·gc.churn.Eden_Space.norm:     98849730.394 B/op
-                 ·gc.churn.Survivor_Space:      0.076 MB/sec
-                 ·gc.churn.Survivor_Space.norm: 5891.815 B/op
-                 ·gc.count:                     581.000 counts
-                 ·gc.time:                      150.000 ms
+Iteration   3: 8.484 ops/s
+                 ·gc.alloc.rate:                1865.545 MB/sec
+                 ·gc.alloc.rate.norm:           234421319.341 B/op
+                 ·gc.churn.Eden_Space:          1876.771 MB/sec
+                 ·gc.churn.Eden_Space.norm:     235831935.686 B/op
+                 ·gc.churn.Survivor_Space:      0.314 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 39433.914 B/op
+                 ·gc.count:                     860.000 counts
+                 ·gc.time:                      834.000 ms
                  ·stack:                        <delayed till summary>
 
 
-# Run progress: 25.00% complete, ETA 00:23:14
+# Run progress: 15.00% complete, ETA 00:43:56
 # Fork: 2 of 2
-OpenJDK 64-Bit Server VM warning: Ignoring option AggressiveOpts; support was removed in 12.0
-# Warmup Iteration   1: 11.642 ops/s
-# Warmup Iteration   2: 13.119 ops/s
-# Warmup Iteration   3: 12.821 ops/s
-Iteration   1: 12.736 ops/s
-                 ·gc.alloc.rate:                1168.144 MB/sec
-                 ·gc.alloc.rate.norm:           97784393.483 B/op
-                 ·gc.churn.Eden_Space:          1179.956 MB/sec
-                 ·gc.churn.Eden_Space.norm:     98773174.204 B/op
-                 ·gc.churn.Survivor_Space:      0.078 MB/sec
-                 ·gc.churn.Survivor_Space.norm: 6519.770 B/op
-                 ·gc.count:                     541.000 counts
-                 ·gc.time:                      143.000 ms
+# Warmup Iteration   1: 7.436 ops/s
+# Warmup Iteration   2: 8.114 ops/s
+# Warmup Iteration   3: 8.217 ops/s
+Iteration   1: 8.184 ops/s
+                 ·gc.alloc.rate:                1799.732 MB/sec
+                 ·gc.alloc.rate.norm:           234422375.740 B/op
+                 ·gc.churn.Eden_Space:          1811.324 MB/sec
+                 ·gc.churn.Eden_Space.norm:     235932264.065 B/op
+                 ·gc.churn.Survivor_Space:      0.297 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 38721.561 B/op
+                 ·gc.count:                     830.000 counts
+                 ·gc.time:                      814.000 ms
                  ·stack:                        <delayed till summary>
 
-Iteration   2: 13.126 ops/s
-                 ·gc.alloc.rate:                1203.838 MB/sec
-                 ·gc.alloc.rate.norm:           97779456.223 B/op
-                 ·gc.churn.Eden_Space:          1214.897 MB/sec
-                 ·gc.churn.Eden_Space.norm:     98677708.589 B/op
-                 ·gc.churn.Survivor_Space:      0.076 MB/sec
-                 ·gc.churn.Survivor_Space.norm: 6138.944 B/op
-                 ·gc.count:                     556.000 counts
-                 ·gc.time:                      144.000 ms
+Iteration   2: 8.396 ops/s
+                 ·gc.alloc.rate:                1846.247 MB/sec
+                 ·gc.alloc.rate.norm:           234421619.111 B/op
+                 ·gc.churn.Eden_Space:          1857.611 MB/sec
+                 ·gc.churn.Eden_Space.norm:     235864584.127 B/op
+                 ·gc.churn.Survivor_Space:      0.332 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 42168.921 B/op
+                 ·gc.count:                     850.000 counts
+                 ·gc.time:                      829.000 ms
                  ·stack:                        <delayed till summary>
 
-Iteration   3: 13.115 ops/s
-                 ·gc.alloc.rate:                1202.918 MB/sec
-                 ·gc.alloc.rate.norm:           97780279.249 B/op
-                 ·gc.churn.Eden_Space:          1216.148 MB/sec
-                 ·gc.churn.Eden_Space.norm:     98855657.198 B/op
-                 ·gc.churn.Survivor_Space:      0.075 MB/sec
-                 ·gc.churn.Survivor_Space.norm: 6097.929 B/op
-                 ·gc.count:                     557.000 counts
-                 ·gc.time:                      145.000 ms
+Iteration   3: 8.373 ops/s
+                 ·gc.alloc.rate:                1841.331 MB/sec
+                 ·gc.alloc.rate.norm:           234421771.841 B/op
+                 ·gc.churn.Eden_Space:          1852.664 MB/sec
+                 ·gc.churn.Eden_Space.norm:     235864584.127 B/op
+                 ·gc.churn.Survivor_Space:      0.316 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 40274.603 B/op
+                 ·gc.count:                     850.000 counts
+                 ·gc.time:                      836.000 ms
                  ·stack:                        <delayed till summary>
 
 
 
 Result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullDefaultJsonLayout":
-  13.315 ±(99.9%) 1.103 ops/s [Average]
-  (min, avg, max) = (12.736, 13.315, 13.781), stdev = 0.393
-  CI (99.9%): [12.212, 14.418] (assumes normal distribution)
+  8.353 ±(99.9%) 0.275 ops/s [Average]
+  (min, avg, max) = (8.184, 8.353, 8.484), stdev = 0.098
+  CI (99.9%): [8.077, 8.628] (assumes normal distribution)
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullDefaultJsonLayout:·gc.alloc.rate":
-  1221.207 ±(99.9%) 101.010 MB/sec [Average]
-  (min, avg, max) = (1168.144, 1221.207, 1263.817), stdev = 36.021
-  CI (99.9%): [1120.197, 1322.217] (assumes normal distribution)
+  1836.728 ±(99.9%) 60.546 MB/sec [Average]
+  (min, avg, max) = (1799.732, 1836.728, 1865.545), stdev = 21.591
+  CI (99.9%): [1776.182, 1897.274] (assumes normal distribution)
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullDefaultJsonLayout:·gc.alloc.rate.norm":
-  97778242.029 ±(99.9%) 11104.215 B/op [Average]
-  (min, avg, max) = (97773726.628, 97778242.029, 97784393.483), stdev = 3959.870
-  CI (99.9%): [97767137.814, 97789346.243] (assumes normal distribution)
+  234421710.780 ±(99.9%) 1016.691 B/op [Average]
+  (min, avg, max) = (234421319.341, 234421710.780, 234422375.740), stdev = 362.562
+  CI (99.9%): [234420694.089, 234422727.471] (assumes normal distribution)
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullDefaultJsonLayout:·gc.churn.Eden_Space":
-  1233.458 ±(99.9%) 101.562 MB/sec [Average]
-  (min, avg, max) = (1179.956, 1233.458, 1275.018), stdev = 36.218
-  CI (99.9%): [1131.896, 1335.020] (assumes normal distribution)
+  1847.984 ±(99.9%) 60.370 MB/sec [Average]
+  (min, avg, max) = (1811.324, 1847.984, 1876.771), stdev = 21.529
+  CI (99.9%): [1787.614, 1908.354] (assumes normal distribution)
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullDefaultJsonLayout:·gc.churn.Eden_Space.norm":
-  98759482.105 ±(99.9%) 245988.129 B/op [Average]
-  (min, avg, max) = (98640293.121, 98759482.105, 98855657.198), stdev = 87721.736
-  CI (99.9%): [98513493.976, 99005470.234] (assumes normal distribution)
+  235858609.318 ±(99.9%) 271223.984 B/op [Average]
+  (min, avg, max) = (235689805.291, 235858609.318, 235968482.614), stdev = 96721.085
+  CI (99.9%): [235587385.335, 236129833.302] (assumes normal distribution)
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullDefaultJsonLayout:·gc.churn.Survivor_Space":
-  0.076 ±(99.9%) 0.006 MB/sec [Average]
-  (min, avg, max) = (0.074, 0.076, 0.080), stdev = 0.002
-  CI (99.9%): [0.070, 0.083] (assumes normal distribution)
+  0.314 ±(99.9%) 0.039 MB/sec [Average]
+  (min, avg, max) = (0.297, 0.314, 0.332), stdev = 0.014
+  CI (99.9%): [0.276, 0.353] (assumes normal distribution)
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullDefaultJsonLayout:·gc.churn.Survivor_Space.norm":
-  6117.099 ±(99.9%) 678.902 B/op [Average]
-  (min, avg, max) = (5849.422, 6117.099, 6519.770), stdev = 242.103
-  CI (99.9%): [5438.198, 6796.001] (assumes normal distribution)
+  40111.860 ±(99.9%) 4358.866 B/op [Average]
+  (min, avg, max) = (38390.024, 40111.860, 42168.921), stdev = 1554.414
+  CI (99.9%): [35752.993, 44470.726] (assumes normal distribution)
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullDefaultJsonLayout:·gc.count":
-  3391.000 ±(99.9%) 0.001 counts [Sum]
-  (min, avg, max) = (541.000, 565.167, 584.000), stdev = 16.654
-  CI (99.9%): [3391.000, 3391.000] (assumes normal distribution)
+  5083.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (830.000, 847.167, 860.000), stdev = 9.766
+  CI (99.9%): [5083.000, 5083.000] (assumes normal distribution)
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullDefaultJsonLayout:·gc.time":
-  879.000 ±(99.9%) 0.001 ms [Sum]
-  (min, avg, max) = (143.000, 146.500, 150.000), stdev = 3.017
-  CI (99.9%): [879.000, 879.000] (assumes normal distribution)
+  4962.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (814.000, 827.000, 836.000), stdev = 8.944
+  CI (99.9%): [4962.000, 4962.000] (assumes normal distribution)
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullDefaultJsonLayout:·stack":
 Stack profiler:
 
 ....[Thread state distributions]....................................................................
- 50.0%         TIMED_WAITING
- 49.0%         RUNNABLE
-  1.0%         WAITING
-
-....[Thread state: TIMED_WAITING]...................................................................
- 50.0% 100.0% java.lang.Object.wait
+ 97.4%         RUNNABLE
+  2.6%         WAITING
 
 ....[Thread state: RUNNABLE]........................................................................
- 17.4%  35.5% com.fasterxml.jackson.databind.ser.std.StringSerializer.serialize
-  7.8%  16.0% jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke
-  6.9%  14.1% com.fasterxml.jackson.core.json.WriterBasedJsonGenerator._flushBuffer
-  6.7%  13.6% com.fasterxml.jackson.databind.ser.BeanPropertyWriter.serializeAsField
-  3.0%   6.0% com.fasterxml.jackson.core.json.WriterBasedJsonGenerator.writeRaw
-  2.6%   5.2% org.apache.logging.log4j.core.layout.AbstractLayout.encode
-  1.3%   2.6% com.fasterxml.jackson.core.json.WriterBasedJsonGenerator.close
-  0.8%   1.7% com.fasterxml.jackson.databind.ser.std.ObjectArraySerializer.serializeContents
-  0.7%   1.4% java.util.Arrays.copyOf
-  0.4%   0.9% com.fasterxml.jackson.core.util.DefaultPrettyPrinter.writeArrayValueSeparator
-  1.5%   3.0% <other>
+ 20.4%  20.9% com.fasterxml.jackson.databind.ser.BeanPropertyWriter.serializeAsField
+ 20.3%  20.8% java.lang.StringCoding$StringEncoder.encode
+ 12.9%  13.2% com.fasterxml.jackson.databind.ser.std.StringSerializer.serialize
+ 11.4%  11.7% sun.reflect.DelegatingMethodAccessorImpl.invoke
+  8.9%   9.1% java.util.Arrays.copyOf
+  5.0%   5.1% com.fasterxml.jackson.core.json.WriterBasedJsonGenerator._flushBuffer
+  3.5%   3.6% com.fasterxml.jackson.core.json.WriterBasedJsonGenerator.writeNumber
+  2.7%   2.7% com.fasterxml.jackson.core.json.WriterBasedJsonGenerator.close
+  2.4%   2.4% com.fasterxml.jackson.core.json.WriterBasedJsonGenerator._writeString
+  1.9%   2.0% com.fasterxml.jackson.core.json.WriterBasedJsonGenerator.writeRaw
+  8.1%   8.4% <other>
 
 ....[Thread state: WAITING].........................................................................
-  1.0% 100.0% jdk.internal.misc.Unsafe.park
+  2.6% 100.0% sun.misc.Unsafe.park
 
 
 
 # JMH version: 1.21
-# VM version: JDK 12, OpenJDK 64-Bit Server VM, 12+33
-# VM invoker: /home/vy/Software/share/java/jdk/12+33/bin/java
+# VM version: JDK 1.8.0_192-ea, Java HotSpot(TM) 64-Bit Server VM, 25.192-b04
+# VM invoker: /home/vy/Software/share/java/jdk/1.8.0_192/jre/bin/java
 # VM options: -XX:+TieredCompilation -XX:+AggressiveOpts -Dclassworlds.conf=/home/vy/Software/share/java/maven/latest/bin/m2.conf -Dmaven.home=/home/vy/Software/share/java/maven/latest -Dlibrary.jansi.path=/home/vy/Software/share/java/maven/latest/lib/jansi-native -Dmaven.multiModuleProjectDirectory=/home/vy/Projects/log4j2-logstash-layout
 # Warmup: 3 iterations, 20 s each
 # Measurement: 3 iterations, 30 s each
 # Timeout: 10 min per iteration
 # Threads: 1 thread, will synchronize iterations
 # Benchmark mode: Throughput, ops/time
-# Benchmark: com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout
+# Benchmark: com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullEcsLayout
 
-# Run progress: 33.33% complete, ETA 00:20:39
+# Run progress: 20.00% complete, ETA 00:41:20
 # Fork: 1 of 2
-OpenJDK 64-Bit Server VM warning: Ignoring option AggressiveOpts; support was removed in 12.0
-# Warmup Iteration   1: 58.948 ops/s
-# Warmup Iteration   2: 61.241 ops/s
-# Warmup Iteration   3: 59.552 ops/s
-Iteration   1: 60.229 ops/s
-                 ·gc.alloc.rate:            7.528 MB/sec
-                 ·gc.alloc.rate.norm:       133251.553 B/op
-                 ·gc.churn.Eden_Space:      6.555 MB/sec
-                 ·gc.churn.Eden_Space.norm: 116029.168 B/op
-                 ·gc.count:                 3.000 counts
-                 ·gc.time:                  7.000 ms
-                 ·stack:                    <delayed till summary>
-
-Iteration   2: 61.397 ops/s
-                 ·gc.alloc.rate:                7.641 MB/sec
-                 ·gc.alloc.rate.norm:           132698.787 B/op
-                 ·gc.churn.Eden_Space:          8.739 MB/sec
-                 ·gc.churn.Eden_Space.norm:     151767.579 B/op
-                 ·gc.churn.Survivor_Space:      ≈ 10⁻⁴ MB/sec
-                 ·gc.churn.Survivor_Space.norm: 0.747 B/op
-                 ·gc.count:                     4.000 counts
-                 ·gc.time:                      9.000 ms
+# Warmup Iteration   1: 15.187 ops/s
+# Warmup Iteration   2: 16.439 ops/s
+# Warmup Iteration   3: 16.536 ops/s
+Iteration   1: 16.290 ops/s
+                 ·gc.alloc.rate:                710.452 MB/sec
+                 ·gc.alloc.rate.norm:           46495593.096 B/op
+                 ·gc.churn.Eden_Space:          710.137 MB/sec
+                 ·gc.churn.Eden_Space.norm:     46474941.513 B/op
+                 ·gc.churn.Survivor_Space:      0.005 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 321.276 B/op
+                 ·gc.count:                     325.000 counts
+                 ·gc.time:                      288.000 ms
                  ·stack:                        <delayed till summary>
 
-Iteration   3: 61.630 ops/s
-                 ·gc.alloc.rate:                7.667 MB/sec
-                 ·gc.alloc.rate.norm:           132631.918 B/op
-                 ·gc.churn.Eden_Space:          6.555 MB/sec
-                 ·gc.churn.Eden_Space.norm:     113394.992 B/op
-                 ·gc.churn.Survivor_Space:      0.077 MB/sec
-                 ·gc.churn.Survivor_Space.norm: 1328.930 B/op
-                 ·gc.count:                     3.000 counts
-                 ·gc.time:                      6.000 ms
+Iteration   2: 16.574 ops/s
+                 ·gc.alloc.rate:                ≈ 0 MB/sec
+                 ·gc.alloc.rate.norm:           ≈ 0 B/op
+                 ·gc.churn.Eden_Space:          724.772 MB/sec
+                 ·gc.churn.Eden_Space.norm:     46617927.373 B/op
+                 ·gc.churn.Survivor_Space:      0.003 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 215.920 B/op
+                 ·gc.count:                     332.000 counts
+                 ·gc.time:                      291.000 ms
+                 ·stack:                        <delayed till summary>
+
+Iteration   3: 16.535 ops/s
+                 ·gc.alloc.rate:                721.161 MB/sec
+                 ·gc.alloc.rate.norm:           46495296.547 B/op
+                 ·gc.churn.Eden_Space:          722.336 MB/sec
+                 ·gc.churn.Eden_Space.norm:     46571041.996 B/op
+                 ·gc.churn.Survivor_Space:      0.004 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 281.803 B/op
+                 ·gc.count:                     331.000 counts
+                 ·gc.time:                      290.000 ms
                  ·stack:                        <delayed till summary>
 
 
-# Run progress: 41.67% complete, ETA 00:18:04
+# Run progress: 25.00% complete, ETA 00:38:44
 # Fork: 2 of 2
-OpenJDK 64-Bit Server VM warning: Ignoring option AggressiveOpts; support was removed in 12.0
-# Warmup Iteration   1: 57.645 ops/s
-# Warmup Iteration   2: 60.712 ops/s
-# Warmup Iteration   3: 58.004 ops/s
-Iteration   1: 60.149 ops/s
-                 ·gc.alloc.rate:            7.521 MB/sec
-                 ·gc.alloc.rate.norm:       133303.535 B/op
-                 ·gc.churn.Eden_Space:      6.557 MB/sec
-                 ·gc.churn.Eden_Space.norm: 116222.014 B/op
-                 ·gc.count:                 3.000 counts
-                 ·gc.time:                  7.000 ms
-                 ·stack:                    <delayed till summary>
+# Warmup Iteration   1: 15.401 ops/s
+# Warmup Iteration   2: 16.732 ops/s
+# Warmup Iteration   3: 16.634 ops/s
+Iteration   1: 16.497 ops/s
+                 ·gc.alloc.rate:                719.471 MB/sec
+                 ·gc.alloc.rate.norm:           46495316.784 B/op
+                 ·gc.churn.Eden_Space:          721.368 MB/sec
+                 ·gc.churn.Eden_Space.norm:     46617941.333 B/op
+                 ·gc.churn.Survivor_Space:      0.005 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 307.103 B/op
+                 ·gc.count:                     330.000 counts
+                 ·gc.time:                      280.000 ms
+                 ·stack:                        <delayed till summary>
 
-Iteration   2: 59.691 ops/s
-                 ·gc.alloc.rate:            7.482 MB/sec
-                 ·gc.alloc.rate.norm:       133638.196 B/op
-                 ·gc.churn.Eden_Space:      6.554 MB/sec
-                 ·gc.churn.Eden_Space.norm: 117065.143 B/op
-                 ·gc.count:                 3.000 counts
-                 ·gc.time:                  6.000 ms
-                 ·stack:                    <delayed till summary>
+Iteration   2: 16.556 ops/s
+                 ·gc.alloc.rate:                722.087 MB/sec
+                 ·gc.alloc.rate.norm:           46495219.686 B/op
+                 ·gc.churn.Eden_Space:          721.080 MB/sec
+                 ·gc.churn.Eden_Space.norm:     46430343.984 B/op
+                 ·gc.churn.Survivor_Space:      0.004 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 251.734 B/op
+                 ·gc.count:                     330.000 counts
+                 ·gc.time:                      275.000 ms
+                 ·stack:                        <delayed till summary>
 
-Iteration   3: 60.398 ops/s
-                 ·gc.alloc.rate:                7.549 MB/sec
-                 ·gc.alloc.rate.norm:           133240.022 B/op
-                 ·gc.churn.Eden_Space:          8.741 MB/sec
-                 ·gc.churn.Eden_Space.norm:     154278.901 B/op
-                 ·gc.churn.Survivor_Space:      0.077 MB/sec
-                 ·gc.churn.Survivor_Space.norm: 1359.713 B/op
-                 ·gc.count:                     4.000 counts
-                 ·gc.time:                      9.000 ms
+Iteration   3: 16.594 ops/s
+                 ·gc.alloc.rate:                723.720 MB/sec
+                 ·gc.alloc.rate.norm:           46495137.912 B/op
+                 ·gc.churn.Eden_Space:          725.631 MB/sec
+                 ·gc.churn.Eden_Space.norm:     46617939.888 B/op
+                 ·gc.churn.Survivor_Space:      0.005 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 298.811 B/op
+                 ·gc.count:                     332.000 counts
+                 ·gc.time:                      282.000 ms
                  ·stack:                        <delayed till summary>
 
 
 
-Result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout":
-  60.582 ±(99.9%) 2.136 ops/s [Average]
-  (min, avg, max) = (59.691, 60.582, 61.630), stdev = 0.762
-  CI (99.9%): [58.446, 62.719] (assumes normal distribution)
+Result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullEcsLayout":
+  16.508 ±(99.9%) 0.314 ops/s [Average]
+  (min, avg, max) = (16.290, 16.508, 16.594), stdev = 0.112
+  CI (99.9%): [16.194, 16.821] (assumes normal distribution)
 
-Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout:·gc.alloc.rate":
-  7.565 ±(99.9%) 0.205 MB/sec [Average]
-  (min, avg, max) = (7.482, 7.565, 7.667), stdev = 0.073
-  CI (99.9%): [7.359, 7.770] (assumes normal distribution)
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullEcsLayout:·gc.alloc.rate":
+  ≈ 0 MB/sec
 
-Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout:·gc.alloc.rate.norm":
-  133127.335 ±(99.9%) 1085.511 B/op [Average]
-  (min, avg, max) = (132631.918, 133127.335, 133638.196), stdev = 387.104
-  CI (99.9%): [132041.824, 134212.846] (assumes normal distribution)
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullEcsLayout:·gc.alloc.rate.norm":
+  ≈ 0 B/op
 
-Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout:·gc.churn.Eden_Space":
-  7.284 ±(99.9%) 3.163 MB/sec [Average]
-  (min, avg, max) = (6.554, 7.284, 8.741), stdev = 1.128
-  CI (99.9%): [4.120, 10.447] (assumes normal distribution)
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullEcsLayout:·gc.churn.Eden_Space":
+  720.887 ±(99.9%) 15.641 MB/sec [Average]
+  (min, avg, max) = (710.137, 720.887, 725.631), stdev = 5.578
+  CI (99.9%): [705.247, 736.528] (assumes normal distribution)
 
-Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout:·gc.churn.Eden_Space.norm":
-  128126.300 ±(99.9%) 54234.477 B/op [Average]
-  (min, avg, max) = (113394.992, 128126.300, 154278.901), stdev = 19340.537
-  CI (99.9%): [73891.823, 182360.777] (assumes normal distribution)
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullEcsLayout:·gc.churn.Eden_Space.norm":
+  46555022.681 ±(99.9%) 231540.669 B/op [Average]
+  (min, avg, max) = (46430343.984, 46555022.681, 46617941.333), stdev = 82569.633
+  CI (99.9%): [46323482.012, 46786563.350] (assumes normal distribution)
 
-Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout:·gc.churn.Survivor_Space":
-  0.026 ±(99.9%) 0.111 MB/sec [Average]
-  (min, avg, max) = (≈ 0, 0.026, 0.077), stdev = 0.040
-  CI (99.9%): [≈ 0, 0.137] (assumes normal distribution)
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullEcsLayout:·gc.churn.Survivor_Space":
+  0.004 ±(99.9%) 0.002 MB/sec [Average]
+  (min, avg, max) = (0.003, 0.004, 0.005), stdev = 0.001
+  CI (99.9%): [0.003, 0.006] (assumes normal distribution)
 
-Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout:·gc.churn.Survivor_Space.norm":
-  448.232 ±(99.9%) 1946.601 B/op [Average]
-  (min, avg, max) = (≈ 0, 448.232, 1359.713), stdev = 694.177
-  CI (99.9%): [≈ 0, 2394.832] (assumes normal distribution)
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullEcsLayout:·gc.churn.Survivor_Space.norm":
+  279.441 ±(99.9%) 110.035 B/op [Average]
+  (min, avg, max) = (215.920, 279.441, 321.276), stdev = 39.240
+  CI (99.9%): [169.406, 389.477] (assumes normal distribution)
 
-Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout:·gc.count":
-  20.000 ±(99.9%) 0.001 counts [Sum]
-  (min, avg, max) = (3.000, 3.333, 4.000), stdev = 0.516
-  CI (99.9%): [20.000, 20.000] (assumes normal distribution)
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullEcsLayout:·gc.count":
+  1980.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (325.000, 330.000, 332.000), stdev = 2.608
+  CI (99.9%): [1980.000, 1980.000] (assumes normal distribution)
 
-Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout:·gc.time":
-  44.000 ±(99.9%) 0.001 ms [Sum]
-  (min, avg, max) = (6.000, 7.333, 9.000), stdev = 1.366
-  CI (99.9%): [44.000, 44.000] (assumes normal distribution)
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullEcsLayout:·gc.time":
+  1706.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (275.000, 284.333, 291.000), stdev = 6.346
+  CI (99.9%): [1706.000, 1706.000] (assumes normal distribution)
 
-Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout:·stack":
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullEcsLayout:·stack":
 Stack profiler:
 
 ....[Thread state distributions]....................................................................
- 50.0%         TIMED_WAITING
- 49.1%         RUNNABLE
-  0.9%         WAITING
-
-....[Thread state: TIMED_WAITING]...................................................................
- 50.0% 100.0% java.lang.Object.wait
+ 97.2%         RUNNABLE
+  2.8%         WAITING
 
 ....[Thread state: RUNNABLE]........................................................................
- 22.4%  45.7% com.vlkan.log4j2.logstash.layout.resolver.StackTraceElementObjectResolver.resolve
-  9.6%  19.6% com.fasterxml.jackson.core.filter.TokenFilterContext._writePath
-  6.8%  13.8% com.fasterxml.jackson.core.filter.FilteringGeneratorDelegate.writeString
-  3.2%   6.6% com.fasterxml.jackson.core.filter.FilteringGeneratorDelegate.writeNumber
-  1.7%   3.5% com.fasterxml.jackson.core.filter.TokenFilterContext.writePath
-  0.7%   1.5% com.vlkan.log4j2.logstash.layout.resolver.TemplateResolvers$6.resolve
-  0.6%   1.2% com.vlkan.log4j2.logstash.layout.resolver.StackTraceElementObjectResolver$4.resolve
-  0.5%   1.0% com.vlkan.log4j2.logstash.layout.resolver.StackTraceObjectResolver.resolve
-  0.4%   0.9% com.vlkan.log4j2.logstash.layout.resolver.ContextStackResolver.resolve
-  0.3%   0.6% com.vlkan.log4j2.logstash.layout.LogstashLayout.encode
-  2.8%   5.6% <other>
+ 61.0%  62.7% co.elastic.logging.JsonUtils.quoteAsString
+ 10.5%  10.8% java.lang.String.valueOf
+  8.8%   9.0% java.io.PrintWriter.write
+  6.0%   6.2% sun.nio.cs.UTF_8.updatePositions
+  2.3%   2.4% java.lang.Throwable.getLocalizedMessage
+  1.7%   1.8% java.util.Arrays.copyOf
+  1.5%   1.5% java.security.AccessController.doPrivileged
+  1.4%   1.4% java.lang.AbstractStringBuilder.append
+  1.2%   1.3% java.io.PrintWriter.println
+  0.5%   0.5% java.util.Arrays.copyOfRange
+  2.3%   2.4% <other>
 
 ....[Thread state: WAITING].........................................................................
-  0.9% 100.0% jdk.internal.misc.Unsafe.park
+  2.8% 100.0% sun.misc.Unsafe.park
 
 
 
 # JMH version: 1.21
-# VM version: JDK 12, OpenJDK 64-Bit Server VM, 12+33
-# VM invoker: /home/vy/Software/share/java/jdk/12+33/bin/java
+# VM version: JDK 1.8.0_192-ea, Java HotSpot(TM) 64-Bit Server VM, 25.192-b04
+# VM invoker: /home/vy/Software/share/java/jdk/1.8.0_192/jre/bin/java
+# VM options: -XX:+TieredCompilation -XX:+AggressiveOpts -Dclassworlds.conf=/home/vy/Software/share/java/maven/latest/bin/m2.conf -Dmaven.home=/home/vy/Software/share/java/maven/latest -Dlibrary.jansi.path=/home/vy/Software/share/java/maven/latest/lib/jansi-native -Dmaven.multiModuleProjectDirectory=/home/vy/Projects/log4j2-logstash-layout
+# Warmup: 3 iterations, 20 s each
+# Measurement: 3 iterations, 30 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Throughput, ops/time
+# Benchmark: com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout4EcsLayout
+
+# Run progress: 30.00% complete, ETA 00:36:08
+# Fork: 1 of 2
+# Warmup Iteration   1: 39.098 ops/s
+# Warmup Iteration   2: 41.401 ops/s
+# Warmup Iteration   3: 41.792 ops/s
+Iteration   1: 41.840 ops/s
+                 ·gc.alloc.rate:                1400.220 MB/sec
+                 ·gc.alloc.rate.norm:           35686694.108 B/op
+                 ·gc.churn.Eden_Space:          1400.240 MB/sec
+                 ·gc.churn.Eden_Space.norm:     35687220.943 B/op
+                 ·gc.churn.Survivor_Space:      0.003 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 88.096 B/op
+                 ·gc.count:                     641.000 counts
+                 ·gc.time:                      601.000 ms
+                 ·stack:                        <delayed till summary>
+
+Iteration   2: 41.913 ops/s
+                 ·gc.alloc.rate:                ≈ 0 MB/sec
+                 ·gc.alloc.rate.norm:           ≈ 0 B/op
+                 ·gc.churn.Eden_Space:          1405.211 MB/sec
+                 ·gc.churn.Eden_Space.norm:     35741656.401 B/op
+                 ·gc.churn.Survivor_Space:      0.003 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 86.474 B/op
+                 ·gc.count:                     643.000 counts
+                 ·gc.time:                      598.000 ms
+                 ·stack:                        <delayed till summary>
+
+Iteration   3: 41.894 ops/s
+                 ·gc.alloc.rate:                1402.411 MB/sec
+                 ·gc.alloc.rate.norm:           35686623.930 B/op
+                 ·gc.churn.Eden_Space:          1404.573 MB/sec
+                 ·gc.churn.Eden_Space.norm:     35741656.407 B/op
+                 ·gc.churn.Survivor_Space:      0.003 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 76.095 B/op
+                 ·gc.count:                     643.000 counts
+                 ·gc.time:                      597.000 ms
+                 ·stack:                        <delayed till summary>
+
+
+# Run progress: 35.00% complete, ETA 00:33:32
+# Fork: 2 of 2
+# Warmup Iteration   1: 38.261 ops/s
+# Warmup Iteration   2: 41.133 ops/s
+# Warmup Iteration   3: 41.770 ops/s
+Iteration   1: 41.232 ops/s
+                 ·gc.alloc.rate:                1365.567 MB/sec
+                 ·gc.alloc.rate.norm:           35306676.679 B/op
+                 ·gc.churn.Eden_Space:          1380.692 MB/sec
+                 ·gc.churn.Eden_Space.norm:     35697744.963 B/op
+                 ·gc.churn.Survivor_Space:      0.004 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 92.511 B/op
+                 ·gc.count:                     632.000 counts
+                 ·gc.time:                      596.000 ms
+                 ·stack:                        <delayed till summary>
+
+Iteration   2: 41.745 ops/s
+                 ·gc.alloc.rate:                1397.580 MB/sec
+                 ·gc.alloc.rate.norm:           35690881.271 B/op
+                 ·gc.churn.Eden_Space:          1398.597 MB/sec
+                 ·gc.churn.Eden_Space.norm:     35716858.024 B/op
+                 ·gc.churn.Survivor_Space:      0.003 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 86.672 B/op
+                 ·gc.count:                     640.000 counts
+                 ·gc.time:                      594.000 ms
+                 ·stack:                        <delayed till summary>
+
+Iteration   3: 41.511 ops/s
+                 ·gc.alloc.rate:                ≈ 0 MB/sec
+                 ·gc.alloc.rate.norm:           ≈ 0 B/op
+                 ·gc.churn.Eden_Space:          1393.108 MB/sec
+                 ·gc.churn.Eden_Space.norm:     35776558.871 B/op
+                 ·gc.churn.Survivor_Space:      0.003 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 77.806 B/op
+                 ·gc.count:                     638.000 counts
+                 ·gc.time:                      589.000 ms
+                 ·stack:                        <delayed till summary>
+
+
+
+Result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout4EcsLayout":
+  41.689 ±(99.9%) 0.751 ops/s [Average]
+  (min, avg, max) = (41.232, 41.689, 41.913), stdev = 0.268
+  CI (99.9%): [40.938, 42.440] (assumes normal distribution)
+
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout4EcsLayout:·gc.alloc.rate":
+  ≈ 0 MB/sec
+
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout4EcsLayout:·gc.alloc.rate.norm":
+  ≈ 0 B/op
+
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout4EcsLayout:·gc.churn.Eden_Space":
+  1397.070 ±(99.9%) 25.666 MB/sec [Average]
+  (min, avg, max) = (1380.692, 1397.070, 1405.211), stdev = 9.153
+  CI (99.9%): [1371.404, 1422.737] (assumes normal distribution)
+
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout4EcsLayout:·gc.churn.Eden_Space.norm":
+  35726949.268 ±(99.9%) 92383.180 B/op [Average]
+  (min, avg, max) = (35687220.943, 35726949.268, 35776558.871), stdev = 32944.732
+  CI (99.9%): [35634566.087, 35819332.448] (assumes normal distribution)
+
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout4EcsLayout:·gc.churn.Survivor_Space":
+  0.003 ±(99.9%) 0.001 MB/sec [Average]
+  (min, avg, max) = (0.003, 0.003, 0.004), stdev = 0.001
+  CI (99.9%): [0.003, 0.004] (assumes normal distribution)
+
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout4EcsLayout:·gc.churn.Survivor_Space.norm":
+  84.609 ±(99.9%) 17.783 B/op [Average]
+  (min, avg, max) = (76.095, 84.609, 92.511), stdev = 6.342
+  CI (99.9%): [66.826, 102.392] (assumes normal distribution)
+
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout4EcsLayout:·gc.count":
+  3837.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (632.000, 639.500, 643.000), stdev = 4.135
+  CI (99.9%): [3837.000, 3837.000] (assumes normal distribution)
+
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout4EcsLayout:·gc.time":
+  3575.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (589.000, 595.833, 601.000), stdev = 4.070
+  CI (99.9%): [3575.000, 3575.000] (assumes normal distribution)
+
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout4EcsLayout:·stack":
+Stack profiler:
+
+....[Thread state distributions]....................................................................
+ 97.3%         RUNNABLE
+  2.7%         WAITING
+
+....[Thread state: RUNNABLE]........................................................................
+ 25.7%  26.4% java.lang.String.valueOf
+ 23.4%  24.0% com.fasterxml.jackson.core.json.UTF8JsonGenerator._writeStringSegment2
+ 16.5%  16.9% java.io.PrintWriter.write
+  5.6%   5.7% java.lang.Throwable.getLocalizedMessage
+  3.7%   3.8% java.io.PrintWriter.println
+  2.2%   2.2% com.vlkan.log4j2.logstash.layout.LogstashLayout.encode
+  2.1%   2.1% java.util.Arrays.copyOf
+  1.9%   1.9% com.vlkan.log4j2.logstash.layout.resolver.ContextDataResolver.resolveEntry
+  1.8%   1.8% com.vlkan.log4j2.logstash.layout.resolver.ContextDataResolver.resolveIndexedMap
+  1.4%   1.5% java.util.Arrays.copyOfRange
+ 13.1%  13.5% <other>
+
+....[Thread state: WAITING].........................................................................
+  2.7% 100.0% sun.misc.Unsafe.park
+
+
+
+# JMH version: 1.21
+# VM version: JDK 1.8.0_192-ea, Java HotSpot(TM) 64-Bit Server VM, 25.192-b04
+# VM invoker: /home/vy/Software/share/java/jdk/1.8.0_192/jre/bin/java
+# VM options: -XX:+TieredCompilation -XX:+AggressiveOpts -Dclassworlds.conf=/home/vy/Software/share/java/maven/latest/bin/m2.conf -Dmaven.home=/home/vy/Software/share/java/maven/latest -Dlibrary.jansi.path=/home/vy/Software/share/java/maven/latest/lib/jansi-native -Dmaven.multiModuleProjectDirectory=/home/vy/Projects/log4j2-logstash-layout
+# Warmup: 3 iterations, 20 s each
+# Measurement: 3 iterations, 30 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Throughput, ops/time
+# Benchmark: com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout4JsonLayout
+
+# Run progress: 40.00% complete, ETA 00:30:57
+# Fork: 1 of 2
+# Warmup Iteration   1: 67.795 ops/s
+# Warmup Iteration   2: 69.402 ops/s
+# Warmup Iteration   3: 69.328 ops/s
+Iteration   1: 68.151 ops/s
+                 ·gc.alloc.rate:            6.921 MB/sec
+                 ·gc.alloc.rate.norm:       108258.805 B/op
+                 ·gc.churn.Eden_Space:      6.558 MB/sec
+                 ·gc.churn.Eden_Space.norm: 102582.267 B/op
+                 ·gc.count:                 3.000 counts
+                 ·gc.time:                  4.000 ms
+                 ·stack:                    <delayed till summary>
+
+Iteration   2: 69.435 ops/s
+                 ·gc.alloc.rate:                ≈ 0 MB/sec
+                 ·gc.alloc.rate.norm:           ≈ 0 B/op
+                 ·gc.churn.Eden_Space:          6.556 MB/sec
+                 ·gc.churn.Eden_Space.norm:     100662.541 B/op
+                 ·gc.churn.Survivor_Space:      ≈ 10⁻⁵ MB/sec
+                 ·gc.churn.Survivor_Space.norm: 0.322 B/op
+                 ·gc.count:                     3.000 counts
+                 ·gc.time:                      4.000 ms
+                 ·stack:                        <delayed till summary>
+
+Iteration   3: 69.714 ops/s
+                 ·gc.alloc.rate:                7.076 MB/sec
+                 ·gc.alloc.rate.norm:           108205.587 B/op
+                 ·gc.churn.Eden_Space:          8.743 MB/sec
+                 ·gc.churn.Eden_Space.norm:     133703.465 B/op
+                 ·gc.churn.Survivor_Space:      0.002 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 31.897 B/op
+                 ·gc.count:                     4.000 counts
+                 ·gc.time:                      4.000 ms
+                 ·stack:                        <delayed till summary>
+
+
+# Run progress: 45.00% complete, ETA 00:28:22
+# Fork: 2 of 2
+# Warmup Iteration   1: 68.709 ops/s
+# Warmup Iteration   2: 70.782 ops/s
+# Warmup Iteration   3: 70.470 ops/s
+Iteration   1: 69.138 ops/s
+                 ·gc.alloc.rate:            7.017 MB/sec
+                 ·gc.alloc.rate.norm:       108203.963 B/op
+                 ·gc.churn.Eden_Space:      6.557 MB/sec
+                 ·gc.churn.Eden_Space.norm: 101099.150 B/op
+                 ·gc.count:                 3.000 counts
+                 ·gc.time:                  3.000 ms
+                 ·stack:                    <delayed till summary>
+
+Iteration   2: 70.755 ops/s
+                 ·gc.alloc.rate:                7.178 MB/sec
+                 ·gc.alloc.rate.norm:           108147.787 B/op
+                 ·gc.churn.Eden_Space:          8.744 MB/sec
+                 ·gc.churn.Eden_Space.norm:     131751.130 B/op
+                 ·gc.churn.Survivor_Space:      ≈ 10⁻⁵ MB/sec
+                 ·gc.churn.Survivor_Space.norm: 0.471 B/op
+                 ·gc.count:                     4.000 counts
+                 ·gc.time:                      5.000 ms
+                 ·stack:                        <delayed till summary>
+
+Iteration   3: 70.639 ops/s
+                 ·gc.alloc.rate:                7.167 MB/sec
+                 ·gc.alloc.rate.norm:           108154.777 B/op
+                 ·gc.churn.Eden_Space:          6.557 MB/sec
+                 ·gc.churn.Eden_Space.norm:     98953.177 B/op
+                 ·gc.churn.Survivor_Space:      0.002 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 32.449 B/op
+                 ·gc.count:                     3.000 counts
+                 ·gc.time:                      4.000 ms
+                 ·stack:                        <delayed till summary>
+
+
+
+Result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout4JsonLayout":
+  69.639 ±(99.9%) 2.735 ops/s [Average]
+  (min, avg, max) = (68.151, 69.639, 70.755), stdev = 0.975
+  CI (99.9%): [66.904, 72.374] (assumes normal distribution)
+
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout4JsonLayout:·gc.alloc.rate":
+  ≈ 0 MB/sec
+
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout4JsonLayout:·gc.alloc.rate.norm":
+  ≈ 0 B/op
+
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout4JsonLayout:·gc.churn.Eden_Space":
+  7.286 ±(99.9%) 3.167 MB/sec [Average]
+  (min, avg, max) = (6.556, 7.286, 8.744), stdev = 1.129
+  CI (99.9%): [4.119, 10.453] (assumes normal distribution)
+
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout4JsonLayout:·gc.churn.Eden_Space.norm":
+  111458.622 ±(99.9%) 46344.117 B/op [Average]
+  (min, avg, max) = (98953.177, 111458.622, 133703.465), stdev = 16526.758
+  CI (99.9%): [65114.505, 157802.738] (assumes normal distribution)
+
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout4JsonLayout:·gc.churn.Survivor_Space":
+  0.001 ±(99.9%) 0.003 MB/sec [Average]
+  (min, avg, max) = (≈ 0, 0.001, 0.002), stdev = 0.001
+  CI (99.9%): [≈ 0, 0.004] (assumes normal distribution)
+
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout4JsonLayout:·gc.churn.Survivor_Space.norm":
+  10.857 ±(99.9%) 46.307 B/op [Average]
+  (min, avg, max) = (≈ 0, 10.857, 32.449), stdev = 16.514
+  CI (99.9%): [≈ 0, 57.164] (assumes normal distribution)
+
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout4JsonLayout:·gc.count":
+  20.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (3.000, 3.333, 4.000), stdev = 0.516
+  CI (99.9%): [20.000, 20.000] (assumes normal distribution)
+
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout4JsonLayout:·gc.time":
+  24.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (3.000, 4.000, 5.000), stdev = 0.632
+  CI (99.9%): [24.000, 24.000] (assumes normal distribution)
+
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.fullLogstashLayout4JsonLayout:·stack":
+Stack profiler:
+
+....[Thread state distributions]....................................................................
+ 97.2%         RUNNABLE
+  2.8%         WAITING
+
+....[Thread state: RUNNABLE]........................................................................
+ 62.3%  64.1% com.vlkan.log4j2.logstash.layout.resolver.StackTraceElementObjectResolver.resolve
+  9.0%   9.2% com.vlkan.log4j2.logstash.layout.resolver.StackTraceElementObjectResolver.lambda$static$3
+  4.4%   4.5% com.vlkan.log4j2.logstash.layout.resolver.TemplateResolvers.lambda$ofObjectNode$5
+  3.4%   3.5% com.vlkan.log4j2.logstash.layout.resolver.ContextDataResolver.resolveEntry
+  3.1%   3.2% com.vlkan.log4j2.logstash.layout.LogstashLayout.encode
+  2.2%   2.2% com.vlkan.log4j2.logstash.layout.resolver.ContextStackResolver.resolve
+  1.9%   1.9% com.fasterxml.jackson.core.json.UTF8JsonGenerator.writeNumber
+  1.4%   1.4% java.lang.Class.getEnclosingMethod0
+  0.9%   0.9% com.vlkan.log4j2.logstash.layout.resolver.MessageResolver.resolve
+  0.8%   0.8% com.vlkan.log4j2.logstash.layout.resolver.StackTraceObjectResolver.resolve
+  7.9%   8.2% <other>
+
+....[Thread state: WAITING].........................................................................
+  2.8% 100.0% sun.misc.Unsafe.park
+
+
+
+# JMH version: 1.21
+# VM version: JDK 1.8.0_192-ea, Java HotSpot(TM) 64-Bit Server VM, 25.192-b04
+# VM invoker: /home/vy/Software/share/java/jdk/1.8.0_192/jre/bin/java
 # VM options: -XX:+TieredCompilation -XX:+AggressiveOpts -Dclassworlds.conf=/home/vy/Software/share/java/maven/latest/bin/m2.conf -Dmaven.home=/home/vy/Software/share/java/maven/latest -Dlibrary.jansi.path=/home/vy/Software/share/java/maven/latest/lib/jansi-native -Dmaven.multiModuleProjectDirectory=/home/vy/Projects/log4j2-logstash-layout
 # Warmup: 3 iterations, 20 s each
 # Measurement: 3 iterations, 30 s each
@@ -508,164 +796,158 @@ Stack profiler:
 # Benchmark mode: Throughput, ops/time
 # Benchmark: com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteCustomJsonLayout
 
-# Run progress: 50.00% complete, ETA 00:15:29
+# Run progress: 50.00% complete, ETA 00:25:47
 # Fork: 1 of 2
-OpenJDK 64-Bit Server VM warning: Ignoring option AggressiveOpts; support was removed in 12.0
-# Warmup Iteration   1: 423.992 ops/s
-# Warmup Iteration   2: 456.891 ops/s
-# Warmup Iteration   3: 449.984 ops/s
-Iteration   1: 462.153 ops/s
-                 ·gc.alloc.rate:                1152.587 MB/sec
-                 ·gc.alloc.rate.norm:           2658746.205 B/op
-                 ·gc.churn.Eden_Space:          1154.147 MB/sec
-                 ·gc.churn.Eden_Space.norm:     2662345.363 B/op
-                 ·gc.churn.Survivor_Space:      0.003 MB/sec
-                 ·gc.churn.Survivor_Space.norm: 7.398 B/op
-                 ·gc.count:                     528.000 counts
-                 ·gc.time:                      111.000 ms
-                 ·stack:                        <delayed till summary>
-
-Iteration   2: 457.429 ops/s
-                 ·gc.alloc.rate:                1140.781 MB/sec
-                 ·gc.alloc.rate.norm:           2658813.702 B/op
-                 ·gc.churn.Eden_Space:          1143.101 MB/sec
-                 ·gc.churn.Eden_Space.norm:     2664221.544 B/op
-                 ·gc.churn.Survivor_Space:      0.003 MB/sec
-                 ·gc.churn.Survivor_Space.norm: 6.991 B/op
-                 ·gc.count:                     523.000 counts
-                 ·gc.time:                      111.000 ms
-                 ·stack:                        <delayed till summary>
-
-Iteration   3: 464.666 ops/s
-                 ·gc.alloc.rate:                1158.833 MB/sec
-                 ·gc.alloc.rate.norm:           2658756.660 B/op
-                 ·gc.churn.Eden_Space:          1160.713 MB/sec
-                 ·gc.churn.Eden_Space.norm:     2663070.152 B/op
-                 ·gc.churn.Survivor_Space:      0.003 MB/sec
-                 ·gc.churn.Survivor_Space.norm: 7.088 B/op
-                 ·gc.count:                     531.000 counts
-                 ·gc.time:                      111.000 ms
-                 ·stack:                        <delayed till summary>
-
-
-# Run progress: 58.33% complete, ETA 00:12:54
-# Fork: 2 of 2
-OpenJDK 64-Bit Server VM warning: Ignoring option AggressiveOpts; support was removed in 12.0
-# Warmup Iteration   1: 405.486 ops/s
-# Warmup Iteration   2: 432.634 ops/s
-# Warmup Iteration   3: 451.169 ops/s
-Iteration   1: 456.097 ops/s
-                 ·gc.alloc.rate:                1151.194 MB/sec
-                 ·gc.alloc.rate.norm:           2690800.566 B/op
-                 ·gc.churn.Eden_Space:          1154.083 MB/sec
-                 ·gc.churn.Eden_Space.norm:     2697552.982 B/op
-                 ·gc.churn.Survivor_Space:      0.004 MB/sec
-                 ·gc.churn.Survivor_Space.norm: 9.098 B/op
-                 ·gc.count:                     528.000 counts
-                 ·gc.time:                      114.000 ms
-                 ·stack:                        <delayed till summary>
-
-Iteration   2: 476.307 ops/s
-                 ·gc.alloc.rate:                1201.996 MB/sec
-                 ·gc.alloc.rate.norm:           2690646.410 B/op
-                 ·gc.churn.Eden_Space:          1204.257 MB/sec
-                 ·gc.churn.Eden_Space.norm:     2695705.981 B/op
-                 ·gc.churn.Survivor_Space:      0.004 MB/sec
-                 ·gc.churn.Survivor_Space.norm: 9.569 B/op
-                 ·gc.count:                     551.000 counts
-                 ·gc.time:                      117.000 ms
-                 ·stack:                        <delayed till summary>
-
-Iteration   3: 471.990 ops/s
-                 ·gc.alloc.rate:                1191.247 MB/sec
-                 ·gc.alloc.rate.norm:           2690667.431 B/op
-                 ·gc.churn.Eden_Space:          1193.418 MB/sec
-                 ·gc.churn.Eden_Space.norm:     2695572.778 B/op
+# Warmup Iteration   1: 246.791 ops/s
+# Warmup Iteration   2: 258.303 ops/s
+# Warmup Iteration   3: 259.413 ops/s
+Iteration   1: 257.625 ops/s
+                 ·gc.alloc.rate:                1333.180 MB/sec
+                 ·gc.alloc.rate.norm:           5516811.404 B/op
+                 ·gc.churn.Eden_Space:          1333.507 MB/sec
+                 ·gc.churn.Eden_Space.norm:     5518164.942 B/op
                  ·gc.churn.Survivor_Space:      0.005 MB/sec
-                 ·gc.churn.Survivor_Space.norm: 11.270 B/op
-                 ·gc.count:                     546.000 counts
-                 ·gc.time:                      116.000 ms
+                 ·gc.churn.Survivor_Space.norm: 22.668 B/op
+                 ·gc.count:                     610.000 counts
+                 ·gc.time:                      571.000 ms
+                 ·stack:                        <delayed till summary>
+
+Iteration   2: 258.302 ops/s
+                 ·gc.alloc.rate:                1336.690 MB/sec
+                 ·gc.alloc.rate.norm:           5516806.682 B/op
+                 ·gc.churn.Eden_Space:          1337.768 MB/sec
+                 ·gc.churn.Eden_Space.norm:     5521257.362 B/op
+                 ·gc.churn.Survivor_Space:      0.007 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 27.076 B/op
+                 ·gc.count:                     612.000 counts
+                 ·gc.time:                      562.000 ms
+                 ·stack:                        <delayed till summary>
+
+Iteration   3: 251.283 ops/s
+                 ·gc.alloc.rate:                1300.378 MB/sec
+                 ·gc.alloc.rate.norm:           5516833.485 B/op
+                 ·gc.churn.Eden_Space:          1303.036 MB/sec
+                 ·gc.churn.Eden_Space.norm:     5528111.839 B/op
+                 ·gc.churn.Survivor_Space:      0.006 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 25.034 B/op
+                 ·gc.count:                     596.000 counts
+                 ·gc.time:                      561.000 ms
+                 ·stack:                        <delayed till summary>
+
+
+# Run progress: 55.00% complete, ETA 00:23:12
+# Fork: 2 of 2
+# Warmup Iteration   1: 216.947 ops/s
+# Warmup Iteration   2: 243.702 ops/s
+# Warmup Iteration   3: 241.199 ops/s
+Iteration   1: 234.540 ops/s
+                 ·gc.alloc.rate:                1208.640 MB/sec
+                 ·gc.alloc.rate.norm:           5493724.952 B/op
+                 ·gc.churn.Eden_Space:          1210.802 MB/sec
+                 ·gc.churn.Eden_Space.norm:     5503552.700 B/op
+                 ·gc.churn.Survivor_Space:      0.006 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 26.421 B/op
+                 ·gc.count:                     554.000 counts
+                 ·gc.time:                      566.000 ms
+                 ·stack:                        <delayed till summary>
+
+Iteration   2: 215.281 ops/s
+                 ·gc.alloc.rate:                1109.426 MB/sec
+                 ·gc.alloc.rate.norm:           5493834.950 B/op
+                 ·gc.churn.Eden_Space:          1110.448 MB/sec
+                 ·gc.churn.Eden_Space.norm:     5498896.308 B/op
+                 ·gc.churn.Survivor_Space:      0.005 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 26.265 B/op
+                 ·gc.count:                     508.000 counts
+                 ·gc.time:                      568.000 ms
+                 ·stack:                        <delayed till summary>
+
+Iteration   3: 230.910 ops/s
+                 ·gc.alloc.rate:                1189.949 MB/sec
+                 ·gc.alloc.rate.norm:           5493739.760 B/op
+                 ·gc.churn.Eden_Space:          1191.498 MB/sec
+                 ·gc.churn.Eden_Space.norm:     5500889.930 B/op
+                 ·gc.churn.Survivor_Space:      0.005 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 22.799 B/op
+                 ·gc.count:                     545.000 counts
+                 ·gc.time:                      564.000 ms
                  ·stack:                        <delayed till summary>
 
 
 
 Result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteCustomJsonLayout":
-  464.774 ±(99.9%) 22.475 ops/s [Average]
-  (min, avg, max) = (456.097, 464.774, 476.307), stdev = 8.015
-  CI (99.9%): [442.298, 487.249] (assumes normal distribution)
+  241.324 ±(99.9%) 48.341 ops/s [Average]
+  (min, avg, max) = (215.281, 241.324, 258.302), stdev = 17.239
+  CI (99.9%): [192.982, 289.665] (assumes normal distribution)
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteCustomJsonLayout:·gc.alloc.rate":
-  1166.106 ±(99.9%) 68.912 MB/sec [Average]
-  (min, avg, max) = (1140.781, 1166.106, 1201.996), stdev = 24.575
-  CI (99.9%): [1097.194, 1235.018] (assumes normal distribution)
+  1246.377 ±(99.9%) 256.920 MB/sec [Average]
+  (min, avg, max) = (1109.426, 1246.377, 1336.690), stdev = 91.620
+  CI (99.9%): [989.458, 1503.297] (assumes normal distribution)
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteCustomJsonLayout:·gc.alloc.rate.norm":
-  2674738.496 ±(99.9%) 49046.088 B/op [Average]
-  (min, avg, max) = (2658746.205, 2674738.496, 2690800.566), stdev = 17490.308
-  CI (99.9%): [2625692.407, 2723784.584] (assumes normal distribution)
+  5505291.872 ±(99.9%) 35404.016 B/op [Average]
+  (min, avg, max) = (5493724.952, 5505291.872, 5516833.485), stdev = 12625.413
+  CI (99.9%): [5469887.856, 5540695.888] (assumes normal distribution)
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteCustomJsonLayout:·gc.churn.Eden_Space":
-  1168.286 ±(99.9%) 68.903 MB/sec [Average]
-  (min, avg, max) = (1143.101, 1168.286, 1204.257), stdev = 24.572
-  CI (99.9%): [1099.383, 1237.190] (assumes normal distribution)
+  1247.843 ±(99.9%) 256.688 MB/sec [Average]
+  (min, avg, max) = (1110.448, 1247.843, 1337.768), stdev = 91.537
+  CI (99.9%): [991.155, 1504.531] (assumes normal distribution)
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteCustomJsonLayout:·gc.churn.Eden_Space.norm":
-  2679744.800 ±(99.9%) 50850.527 B/op [Average]
-  (min, avg, max) = (2662345.363, 2679744.800, 2697552.982), stdev = 18133.788
-  CI (99.9%): [2628894.273, 2730595.327] (assumes normal distribution)
+  5511812.180 ±(99.9%) 34334.566 B/op [Average]
+  (min, avg, max) = (5498896.308, 5511812.180, 5528111.839), stdev = 12244.037
+  CI (99.9%): [5477477.614, 5546146.747] (assumes normal distribution)
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteCustomJsonLayout:·gc.churn.Survivor_Space":
-  0.004 ±(99.9%) 0.002 MB/sec [Average]
-  (min, avg, max) = (0.003, 0.004, 0.005), stdev = 0.001
-  CI (99.9%): [0.002, 0.006] (assumes normal distribution)
+  0.006 ±(99.9%) 0.002 MB/sec [Average]
+  (min, avg, max) = (0.005, 0.006, 0.007), stdev = 0.001
+  CI (99.9%): [0.004, 0.007] (assumes normal distribution)
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteCustomJsonLayout:·gc.churn.Survivor_Space.norm":
-  8.569 ±(99.9%) 4.796 B/op [Average]
-  (min, avg, max) = (6.991, 8.569, 11.270), stdev = 1.710
-  CI (99.9%): [3.773, 13.365] (assumes normal distribution)
+  25.044 ±(99.9%) 5.350 B/op [Average]
+  (min, avg, max) = (22.668, 25.044, 27.076), stdev = 1.908
+  CI (99.9%): [19.694, 30.394] (assumes normal distribution)
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteCustomJsonLayout:·gc.count":
-  3207.000 ±(99.9%) 0.001 counts [Sum]
-  (min, avg, max) = (523.000, 534.500, 551.000), stdev = 11.256
-  CI (99.9%): [3207.000, 3207.000] (assumes normal distribution)
+  3425.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (508.000, 570.833, 612.000), stdev = 41.859
+  CI (99.9%): [3425.000, 3425.000] (assumes normal distribution)
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteCustomJsonLayout:·gc.time":
-  680.000 ±(99.9%) 0.001 ms [Sum]
-  (min, avg, max) = (111.000, 113.333, 117.000), stdev = 2.733
-  CI (99.9%): [680.000, 680.000] (assumes normal distribution)
+  3392.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (561.000, 565.333, 571.000), stdev = 3.777
+  CI (99.9%): [3392.000, 3392.000] (assumes normal distribution)
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteCustomJsonLayout:·stack":
 Stack profiler:
 
 ....[Thread state distributions]....................................................................
- 50.0%         TIMED_WAITING
- 49.0%         RUNNABLE
-  1.0%         WAITING
-
-....[Thread state: TIMED_WAITING]...................................................................
- 50.0% 100.0% java.lang.Object.wait
+ 97.2%         RUNNABLE
+  2.8%         WAITING
 
 ....[Thread state: RUNNABLE]........................................................................
- 10.5%  21.3% jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke
-  7.0%  14.2% com.fasterxml.jackson.databind.ser.std.StringSerializer.serialize
-  5.6%  11.3% com.fasterxml.jackson.databind.ser.BeanPropertyWriter.serializeAsField
-  5.0%  10.1% org.apache.logging.log4j.core.layout.JsonLayout.toSerializable
-  4.3%   8.7% com.fasterxml.jackson.databind.ObjectWriter.writeValue
-  3.6%   7.3% com.fasterxml.jackson.core.json.WriterBasedJsonGenerator.writeFieldName
-  3.1%   6.4% com.fasterxml.jackson.core.json.JsonWriteContext.createChildObjectContext
-  2.0%   4.0% java.util.HashMap.putVal
-  1.5%   3.0% java.util.HashMap.getNode
-  1.3%   2.6% com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.benchmark
-  5.4%  10.9% <other>
+ 20.1%  20.7% sun.reflect.DelegatingMethodAccessorImpl.invoke
+ 20.1%  20.7% java.lang.StringCoding$StringEncoder.encode
+ 13.4%  13.8% com.fasterxml.jackson.databind.ser.std.StringSerializer.serialize
+ 10.8%  11.1% com.fasterxml.jackson.databind.ser.BeanPropertyWriter.serializeAsField
+  5.0%   5.1% java.util.HashMap.putVal
+  4.1%   4.2% java.util.HashMap.getNode
+  3.6%   3.7% org.apache.logging.log4j.core.layout.JsonLayout.toSerializable
+  2.9%   3.0% org.apache.logging.log4j.core.jackson.MessageSerializer.serialize
+  2.1%   2.2% java.util.Arrays.copyOf
+  2.1%   2.2% com.fasterxml.jackson.core.json.JsonWriteContext.createChildObjectContext
+ 13.1%  13.5% <other>
 
 ....[Thread state: WAITING].........................................................................
-  1.0% 100.0% jdk.internal.misc.Unsafe.park
+  2.8% 100.0% sun.misc.Unsafe.park
 
 
 
 # JMH version: 1.21
-# VM version: JDK 12, OpenJDK 64-Bit Server VM, 12+33
-# VM invoker: /home/vy/Software/share/java/jdk/12+33/bin/java
+# VM version: JDK 1.8.0_192-ea, Java HotSpot(TM) 64-Bit Server VM, 25.192-b04
+# VM invoker: /home/vy/Software/share/java/jdk/1.8.0_192/jre/bin/java
 # VM options: -XX:+TieredCompilation -XX:+AggressiveOpts -Dclassworlds.conf=/home/vy/Software/share/java/maven/latest/bin/m2.conf -Dmaven.home=/home/vy/Software/share/java/maven/latest -Dlibrary.jansi.path=/home/vy/Software/share/java/maven/latest/lib/jansi-native -Dmaven.multiModuleProjectDirectory=/home/vy/Projects/log4j2-logstash-layout
 # Warmup: 3 iterations, 20 s each
 # Measurement: 3 iterations, 30 s each
@@ -674,300 +956,494 @@ Stack profiler:
 # Benchmark mode: Throughput, ops/time
 # Benchmark: com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteDefaultJsonLayout
 
-# Run progress: 66.67% complete, ETA 00:10:19
+# Run progress: 60.00% complete, ETA 00:20:37
 # Fork: 1 of 2
-OpenJDK 64-Bit Server VM warning: Ignoring option AggressiveOpts; support was removed in 12.0
-# Warmup Iteration   1: 481.973 ops/s
-# Warmup Iteration   2: 514.806 ops/s
-# Warmup Iteration   3: 496.186 ops/s
-Iteration   1: 491.196 ops/s
-                 ·gc.alloc.rate:                1098.569 MB/sec
-                 ·gc.alloc.rate.norm:           2384298.989 B/op
-                 ·gc.churn.Eden_Space:          1099.540 MB/sec
-                 ·gc.churn.Eden_Space.norm:     2386405.603 B/op
-                 ·gc.churn.Survivor_Space:      0.002 MB/sec
-                 ·gc.churn.Survivor_Space.norm: 4.488 B/op
-                 ·gc.count:                     503.000 counts
-                 ·gc.time:                      105.000 ms
+# Warmup Iteration   1: 246.087 ops/s
+# Warmup Iteration   2: 274.179 ops/s
+# Warmup Iteration   3: 275.136 ops/s
+Iteration   1: 294.590 ops/s
+                 ·gc.alloc.rate:                ≈ 0 MB/sec
+                 ·gc.alloc.rate.norm:           ≈ 0 B/op
+                 ·gc.churn.Eden_Space:          1411.911 MB/sec
+                 ·gc.churn.Eden_Space.norm:     5109465.481 B/op
+                 ·gc.churn.Survivor_Space:      0.006 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 21.703 B/op
+                 ·gc.count:                     646.000 counts
+                 ·gc.time:                      631.000 ms
                  ·stack:                        <delayed till summary>
 
-Iteration   2: 514.516 ops/s
-                 ·gc.alloc.rate:                1150.541 MB/sec
-                 ·gc.alloc.rate.norm:           2384164.459 B/op
-                 ·gc.churn.Eden_Space:          1153.902 MB/sec
-                 ·gc.churn.Eden_Space.norm:     2391128.004 B/op
-                 ·gc.churn.Survivor_Space:      0.003 MB/sec
-                 ·gc.churn.Survivor_Space.norm: 5.959 B/op
-                 ·gc.count:                     528.000 counts
-                 ·gc.time:                      109.000 ms
+Iteration   2: 282.097 ops/s
+                 ·gc.alloc.rate:                1349.891 MB/sec
+                 ·gc.alloc.rate.norm:           5101344.123 B/op
+                 ·gc.churn.Eden_Space:          1350.890 MB/sec
+                 ·gc.churn.Eden_Space.norm:     5105118.865 B/op
+                 ·gc.churn.Survivor_Space:      0.006 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 20.801 B/op
+                 ·gc.count:                     618.000 counts
+                 ·gc.time:                      613.000 ms
                  ·stack:                        <delayed till summary>
 
-Iteration   3: 520.839 ops/s
-                 ·gc.alloc.rate:                1164.765 MB/sec
-                 ·gc.alloc.rate.norm:           2384114.633 B/op
-                 ·gc.churn.Eden_Space:          1165.068 MB/sec
-                 ·gc.churn.Eden_Space.norm:     2384736.172 B/op
-                 ·gc.churn.Survivor_Space:      0.003 MB/sec
-                 ·gc.churn.Survivor_Space.norm: 6.116 B/op
-                 ·gc.count:                     533.000 counts
-                 ·gc.time:                      110.000 ms
+Iteration   3: 282.887 ops/s
+                 ·gc.alloc.rate:                1353.679 MB/sec
+                 ·gc.alloc.rate.norm:           5101342.806 B/op
+                 ·gc.churn.Eden_Space:          1355.223 MB/sec
+                 ·gc.churn.Eden_Space.norm:     5107160.392 B/op
+                 ·gc.churn.Survivor_Space:      0.005 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 20.173 B/op
+                 ·gc.count:                     620.000 counts
+                 ·gc.time:                      617.000 ms
                  ·stack:                        <delayed till summary>
 
 
-# Run progress: 75.00% complete, ETA 00:07:44
+# Run progress: 65.00% complete, ETA 00:18:02
 # Fork: 2 of 2
-OpenJDK 64-Bit Server VM warning: Ignoring option AggressiveOpts; support was removed in 12.0
-# Warmup Iteration   1: 508.649 ops/s
-# Warmup Iteration   2: 539.578 ops/s
-# Warmup Iteration   3: 522.106 ops/s
-Iteration   1: 526.915 ops/s
-                 ·gc.alloc.rate:                1178.349 MB/sec
-                 ·gc.alloc.rate.norm:           2384079.738 B/op
-                 ·gc.churn.Eden_Space:          1180.333 MB/sec
-                 ·gc.churn.Eden_Space.norm:     2388093.210 B/op
-                 ·gc.churn.Survivor_Space:      0.003 MB/sec
-                 ·gc.churn.Survivor_Space.norm: 5.710 B/op
-                 ·gc.count:                     540.000 counts
-                 ·gc.time:                      110.000 ms
+# Warmup Iteration   1: 256.598 ops/s
+# Warmup Iteration   2: 286.657 ops/s
+# Warmup Iteration   3: 254.122 ops/s
+Iteration   1: 266.981 ops/s
+                 ·gc.alloc.rate:                1277.558 MB/sec
+                 ·gc.alloc.rate.norm:           5101398.193 B/op
+                 ·gc.churn.Eden_Space:          1278.966 MB/sec
+                 ·gc.churn.Eden_Space.norm:     5107021.239 B/op
+                 ·gc.churn.Survivor_Space:      0.005 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 21.260 B/op
+                 ·gc.count:                     585.000 counts
+                 ·gc.time:                      573.000 ms
                  ·stack:                        <delayed till summary>
 
-Iteration   2: 522.537 ops/s
-                 ·gc.alloc.rate:                1168.566 MB/sec
-                 ·gc.alloc.rate.norm:           2384126.891 B/op
-                 ·gc.churn.Eden_Space:          1169.509 MB/sec
-                 ·gc.churn.Eden_Space.norm:     2386051.108 B/op
-                 ·gc.churn.Survivor_Space:      0.003 MB/sec
-                 ·gc.churn.Survivor_Space.norm: 5.279 B/op
-                 ·gc.count:                     535.000 counts
-                 ·gc.time:                      113.000 ms
+Iteration   2: 274.364 ops/s
+                 ·gc.alloc.rate:                1312.880 MB/sec
+                 ·gc.alloc.rate.norm:           5101371.423 B/op
+                 ·gc.churn.Eden_Space:          1314.027 MB/sec
+                 ·gc.churn.Eden_Space.norm:     5105828.176 B/op
+                 ·gc.churn.Survivor_Space:      0.005 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 21.029 B/op
+                 ·gc.count:                     601.000 counts
+                 ·gc.time:                      580.000 ms
                  ·stack:                        <delayed till summary>
 
-Iteration   3: 517.756 ops/s
-                 ·gc.alloc.rate:                1157.885 MB/sec
-                 ·gc.alloc.rate.norm:           2384153.009 B/op
-                 ·gc.churn.Eden_Space:          1160.655 MB/sec
-                 ·gc.churn.Eden_Space.norm:     2389855.730 B/op
-                 ·gc.churn.Survivor_Space:      0.003 MB/sec
-                 ·gc.churn.Survivor_Space.norm: 6.313 B/op
-                 ·gc.count:                     531.000 counts
-                 ·gc.time:                      110.000 ms
+Iteration   3: 281.277 ops/s
+                 ·gc.alloc.rate:                1345.961 MB/sec
+                 ·gc.alloc.rate.norm:           5101342.835 B/op
+                 ·gc.churn.Eden_Space:          1346.735 MB/sec
+                 ·gc.churn.Eden_Space.norm:     5104274.888 B/op
+                 ·gc.churn.Survivor_Space:      0.006 MB/sec
+                 ·gc.churn.Survivor_Space.norm: 22.787 B/op
+                 ·gc.count:                     616.000 counts
+                 ·gc.time:                      579.000 ms
                  ·stack:                        <delayed till summary>
 
 
 
 Result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteDefaultJsonLayout":
-  515.626 ±(99.9%) 35.580 ops/s [Average]
-  (min, avg, max) = (491.196, 515.626, 526.915), stdev = 12.688
-  CI (99.9%): [480.046, 551.207] (assumes normal distribution)
+  280.366 ±(99.9%) 25.934 ops/s [Average]
+  (min, avg, max) = (266.981, 280.366, 294.590), stdev = 9.248
+  CI (99.9%): [254.431, 306.300] (assumes normal distribution)
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteDefaultJsonLayout:·gc.alloc.rate":
-  1153.113 ±(99.9%) 79.471 MB/sec [Average]
-  (min, avg, max) = (1098.569, 1153.113, 1178.349), stdev = 28.340
-  CI (99.9%): [1073.641, 1232.584] (assumes normal distribution)
+  ≈ 0 MB/sec
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteDefaultJsonLayout:·gc.alloc.rate.norm":
-  2384156.286 ±(99.9%) 213.193 B/op [Average]
-  (min, avg, max) = (2384079.738, 2384156.286, 2384298.989), stdev = 76.027
-  CI (99.9%): [2383943.093, 2384369.480] (assumes normal distribution)
+  ≈ 0 B/op
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteDefaultJsonLayout:·gc.churn.Eden_Space":
-  1154.835 ±(99.9%) 79.932 MB/sec [Average]
-  (min, avg, max) = (1099.540, 1154.835, 1180.333), stdev = 28.504
-  CI (99.9%): [1074.903, 1234.766] (assumes normal distribution)
+  1342.959 ±(99.9%) 124.867 MB/sec [Average]
+  (min, avg, max) = (1278.966, 1342.959, 1411.911), stdev = 44.529
+  CI (99.9%): [1218.091, 1467.826] (assumes normal distribution)
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteDefaultJsonLayout:·gc.churn.Eden_Space.norm":
-  2387711.638 ±(99.9%) 6837.935 B/op [Average]
-  (min, avg, max) = (2384736.172, 2387711.638, 2391128.004), stdev = 2438.474
-  CI (99.9%): [2380873.703, 2394549.573] (assumes normal distribution)
+  5106478.174 ±(99.9%) 5141.541 B/op [Average]
+  (min, avg, max) = (5104274.888, 5106478.174, 5109465.481), stdev = 1833.523
+  CI (99.9%): [5101336.632, 5111619.715] (assumes normal distribution)
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteDefaultJsonLayout:·gc.churn.Survivor_Space":
-  0.003 ±(99.9%) 0.001 MB/sec [Average]
-  (min, avg, max) = (0.002, 0.003, 0.003), stdev = 0.001
-  CI (99.9%): [0.002, 0.004] (assumes normal distribution)
+  0.006 ±(99.9%) 0.001 MB/sec [Average]
+  (min, avg, max) = (0.005, 0.006, 0.006), stdev = 0.001
+  CI (99.9%): [0.005, 0.006] (assumes normal distribution)
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteDefaultJsonLayout:·gc.churn.Survivor_Space.norm":
-  5.644 ±(99.9%) 1.878 B/op [Average]
-  (min, avg, max) = (4.488, 5.644, 6.313), stdev = 0.670
-  CI (99.9%): [3.766, 7.523] (assumes normal distribution)
+  21.292 ±(99.9%) 2.497 B/op [Average]
+  (min, avg, max) = (20.173, 21.292, 22.787), stdev = 0.891
+  CI (99.9%): [18.795, 23.790] (assumes normal distribution)
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteDefaultJsonLayout:·gc.count":
-  3170.000 ±(99.9%) 0.001 counts [Sum]
-  (min, avg, max) = (503.000, 528.333, 540.000), stdev = 13.049
-  CI (99.9%): [3170.000, 3170.000] (assumes normal distribution)
+  3686.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (585.000, 614.333, 646.000), stdev = 20.442
+  CI (99.9%): [3686.000, 3686.000] (assumes normal distribution)
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteDefaultJsonLayout:·gc.time":
-  657.000 ±(99.9%) 0.001 ms [Sum]
-  (min, avg, max) = (105.000, 109.500, 113.000), stdev = 2.588
-  CI (99.9%): [657.000, 657.000] (assumes normal distribution)
+  3593.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (573.000, 598.833, 631.000), stdev = 24.417
+  CI (99.9%): [3593.000, 3593.000] (assumes normal distribution)
 
 Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteDefaultJsonLayout:·stack":
 Stack profiler:
 
 ....[Thread state distributions]....................................................................
- 50.0%         TIMED_WAITING
- 49.0%         RUNNABLE
-  1.0%         WAITING
-
-....[Thread state: TIMED_WAITING]...................................................................
- 50.0% 100.0% java.lang.Object.wait
+ 97.2%         RUNNABLE
+  2.8%         WAITING
 
 ....[Thread state: RUNNABLE]........................................................................
-  9.4%  19.1% com.fasterxml.jackson.databind.ser.BeanPropertyWriter.serializeAsField
-  8.6%  17.6% jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke
-  4.3%   8.7% org.apache.logging.log4j.core.util.StringBuilderWriter.write
-  4.2%   8.6% com.fasterxml.jackson.core.json.WriterBasedJsonGenerator.writeFieldName
-  4.2%   8.6% com.fasterxml.jackson.core.json.WriterBasedJsonGenerator.close
-  2.9%   5.9% com.fasterxml.jackson.databind.ser.std.StringSerializer.serialize
-  2.2%   4.4% com.fasterxml.jackson.databind.ser.std.BeanSerializerBase.serializeFieldsFiltered
-  1.6%   3.2% com.fasterxml.jackson.core.json.JsonWriteContext.createChildObjectContext
-  1.4%   2.9% java.util.HashMap.getNode
-  1.3%   2.6% org.apache.logging.log4j.core.jackson.MessageSerializer.serialize
-  9.0%  18.4% <other>
+ 24.4%  25.1% java.lang.StringCoding$StringEncoder.encode
+ 16.1%  16.5% sun.reflect.DelegatingMethodAccessorImpl.invoke
+ 13.2%  13.6% com.fasterxml.jackson.databind.ser.BeanPropertyWriter.serializeAsField
+ 12.2%  12.5% com.fasterxml.jackson.databind.ser.std.StringSerializer.serialize
+  4.5%   4.6% java.util.HashMap.getNode
+  2.9%   3.0% org.apache.logging.log4j.core.jackson.MessageSerializer.serialize
+  2.7%   2.8% com.fasterxml.jackson.core.json.JsonWriteContext.createChildObjectContext
+  2.5%   2.5% java.util.Arrays.copyOf
+  2.0%   2.1% java.lang.AbstractStringBuilder.ensureCapacityInternal
+  1.7%   1.8% com.fasterxml.jackson.core.JsonFactory._getBufferRecycler
+ 15.0%  15.5% <other>
 
 ....[Thread state: WAITING].........................................................................
-  1.0% 100.0% jdk.internal.misc.Unsafe.park
+  2.8% 100.0% sun.misc.Unsafe.park
 
 
 
 # JMH version: 1.21
-# VM version: JDK 12, OpenJDK 64-Bit Server VM, 12+33
-# VM invoker: /home/vy/Software/share/java/jdk/12+33/bin/java
+# VM version: JDK 1.8.0_192-ea, Java HotSpot(TM) 64-Bit Server VM, 25.192-b04
+# VM invoker: /home/vy/Software/share/java/jdk/1.8.0_192/jre/bin/java
 # VM options: -XX:+TieredCompilation -XX:+AggressiveOpts -Dclassworlds.conf=/home/vy/Software/share/java/maven/latest/bin/m2.conf -Dmaven.home=/home/vy/Software/share/java/maven/latest -Dlibrary.jansi.path=/home/vy/Software/share/java/maven/latest/lib/jansi-native -Dmaven.multiModuleProjectDirectory=/home/vy/Projects/log4j2-logstash-layout
 # Warmup: 3 iterations, 20 s each
 # Measurement: 3 iterations, 30 s each
 # Timeout: 10 min per iteration
 # Threads: 1 thread, will synchronize iterations
 # Benchmark mode: Throughput, ops/time
-# Benchmark: com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteLogstashLayout
+# Benchmark: com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteEcsLayout
 
-# Run progress: 83.33% complete, ETA 00:05:09
+# Run progress: 70.00% complete, ETA 00:15:27
 # Fork: 1 of 2
-OpenJDK 64-Bit Server VM warning: Ignoring option AggressiveOpts; support was removed in 12.0
-# Warmup Iteration   1: 740.448 ops/s
-# Warmup Iteration   2: 785.170 ops/s
-# Warmup Iteration   3: 713.651 ops/s
-Iteration   1: 781.184 ops/s
-                 ·gc.alloc.rate:            1.507 MB/sec
-                 ·gc.alloc.rate.norm:       2056.793 B/op
-                 ·gc.churn.Eden_Space:      2.186 MB/sec
-                 ·gc.churn.Eden_Space.norm: 2982.848 B/op
-                 ·gc.count:                 1.000 counts
-                 ·gc.time:                  1.000 ms
-                 ·stack:                    <delayed till summary>
-
-Iteration   2: 774.009 ops/s
-                 ·gc.alloc.rate:      1.507 MB/sec
-                 ·gc.alloc.rate.norm: 2076.364 B/op
+# Warmup Iteration   1: 558.226 ops/s
+# Warmup Iteration   2: 571.308 ops/s
+# Warmup Iteration   3: 564.498 ops/s
+Iteration   1: 568.156 ops/s
+                 ·gc.alloc.rate:      ≈ 0 MB/sec
+                 ·gc.alloc.rate.norm: ≈ 0 B/op
                  ·gc.count:           ≈ 0 counts
                  ·stack:              <delayed till summary>
 
-Iteration   3: 777.889 ops/s
-                 ·gc.alloc.rate:            1.495 MB/sec
-                 ·gc.alloc.rate.norm:       2048.493 B/op
-                 ·gc.churn.Eden_Space:      2.186 MB/sec
-                 ·gc.churn.Eden_Space.norm: 2995.755 B/op
-                 ·gc.count:                 1.000 counts
-                 ·gc.time:                  1.000 ms
-                 ·stack:                    <delayed till summary>
+Iteration   2: 577.396 ops/s
+                 ·gc.alloc.rate:      0.244 MB/sec
+                 ·gc.alloc.rate.norm: 450.823 B/op
+                 ·gc.count:           ≈ 0 counts
+                 ·stack:              <delayed till summary>
+
+Iteration   3: 562.953 ops/s
+                 ·gc.alloc.rate:      0.243 MB/sec
+                 ·gc.alloc.rate.norm: 460.929 B/op
+                 ·gc.count:           ≈ 0 counts
+                 ·stack:              <delayed till summary>
 
 
-# Run progress: 91.67% complete, ETA 00:02:34
+# Run progress: 75.00% complete, ETA 00:12:53
 # Fork: 2 of 2
-OpenJDK 64-Bit Server VM warning: Ignoring option AggressiveOpts; support was removed in 12.0
-# Warmup Iteration   1: 768.306 ops/s
-# Warmup Iteration   2: 788.905 ops/s
-# Warmup Iteration   3: 773.750 ops/s
-Iteration   1: 793.597 ops/s
-                 ·gc.alloc.rate:            1.495 MB/sec
-                 ·gc.alloc.rate.norm:       2008.509 B/op
-                 ·gc.churn.Eden_Space:      2.186 MB/sec
-                 ·gc.churn.Eden_Space.norm: 2936.748 B/op
-                 ·gc.count:                 1.000 counts
-                 ·gc.time:                  1.000 ms
-                 ·stack:                    <delayed till summary>
-
-Iteration   2: 774.207 ops/s
-                 ·gc.alloc.rate:      1.491 MB/sec
-                 ·gc.alloc.rate.norm: 2053.290 B/op
+# Warmup Iteration   1: 577.029 ops/s
+# Warmup Iteration   2: 599.709 ops/s
+# Warmup Iteration   3: 595.704 ops/s
+Iteration   1: 589.819 ops/s
+                 ·gc.alloc.rate:      0.243 MB/sec
+                 ·gc.alloc.rate.norm: 438.792 B/op
                  ·gc.count:           ≈ 0 counts
                  ·stack:              <delayed till summary>
 
-Iteration   3: 766.661 ops/s
-                 ·gc.alloc.rate:            1.486 MB/sec
-                 ·gc.alloc.rate.norm:       2066.257 B/op
-                 ·gc.churn.Eden_Space:      2.186 MB/sec
-                 ·gc.churn.Eden_Space.norm: 3039.508 B/op
-                 ·gc.count:                 1.000 counts
-                 ·gc.time:                  1.000 ms
-                 ·stack:                    <delayed till summary>
+Iteration   2: 601.749 ops/s
+                 ·gc.alloc.rate:      ≈ 0 MB/sec
+                 ·gc.alloc.rate.norm: ≈ 0 B/op
+                 ·gc.count:           ≈ 0 counts
+                 ·stack:              <delayed till summary>
+
+Iteration   3: 603.469 ops/s
+                 ·gc.alloc.rate:      0.245 MB/sec
+                 ·gc.alloc.rate.norm: 431.935 B/op
+                 ·gc.count:           ≈ 0 counts
+                 ·stack:              <delayed till summary>
 
 
 
-Result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteLogstashLayout":
-  777.925 ±(99.9%) 25.463 ops/s [Average]
-  (min, avg, max) = (766.661, 777.925, 793.597), stdev = 9.080
-  CI (99.9%): [752.462, 803.388] (assumes normal distribution)
+Result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteEcsLayout":
+  583.924 ±(99.9%) 48.008 ops/s [Average]
+  (min, avg, max) = (562.953, 583.924, 603.469), stdev = 17.120
+  CI (99.9%): [535.916, 631.932] (assumes normal distribution)
 
-Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteLogstashLayout:·gc.alloc.rate":
-  1.497 ±(99.9%) 0.024 MB/sec [Average]
-  (min, avg, max) = (1.486, 1.497, 1.507), stdev = 0.009
-  CI (99.9%): [1.473, 1.521] (assumes normal distribution)
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteEcsLayout:·gc.alloc.rate":
+  ≈ 0 MB/sec
 
-Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteLogstashLayout:·gc.alloc.rate.norm":
-  2051.618 ±(99.9%) 65.457 B/op [Average]
-  (min, avg, max) = (2008.509, 2051.618, 2076.364), stdev = 23.343
-  CI (99.9%): [1986.160, 2117.075] (assumes normal distribution)
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteEcsLayout:·gc.alloc.rate.norm":
+  ≈ 0 B/op
 
-Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteLogstashLayout:·gc.churn.Eden_Space":
-  1.457 ±(99.9%) 3.165 MB/sec [Average]
-  (min, avg, max) = (≈ 0, 1.457, 2.186), stdev = 1.129
-  CI (99.9%): [≈ 0, 4.623] (assumes normal distribution)
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteEcsLayout:·gc.count":
+  ≈ 0 counts
 
-Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteLogstashLayout:·gc.churn.Eden_Space.norm":
-  1992.477 ±(99.9%) 4328.860 B/op [Average]
-  (min, avg, max) = (≈ 0, 1992.477, 3039.508), stdev = 1543.713
-  CI (99.9%): [≈ 0, 6321.337] (assumes normal distribution)
-
-Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteLogstashLayout:·gc.count":
-  4.000 ±(99.9%) 0.001 counts [Sum]
-  (min, avg, max) = (≈ 0, 0.667, 1.000), stdev = 0.516
-  CI (99.9%): [4.000, 4.000] (assumes normal distribution)
-
-Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteLogstashLayout:·gc.time":
-  4.000 ±(99.9%) 0.001 ms [Sum]
-  (min, avg, max) = (≈ 0, 0.667, 1.000), stdev = 0.516
-  CI (99.9%): [4.000, 4.000] (assumes normal distribution)
-
-Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteLogstashLayout:·stack":
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteEcsLayout:·stack":
 Stack profiler:
 
 ....[Thread state distributions]....................................................................
- 50.0%         TIMED_WAITING
- 49.1%         RUNNABLE
-  0.9%         WAITING
-
-....[Thread state: TIMED_WAITING]...................................................................
- 50.0% 100.0% java.lang.Object.wait
+ 97.2%         RUNNABLE
+  2.8%         WAITING
 
 ....[Thread state: RUNNABLE]........................................................................
- 11.5%  23.4% com.fasterxml.jackson.core.filter.FilteringGeneratorDelegate.writeString
-  9.1%  18.5% com.vlkan.log4j2.logstash.layout.resolver.TemplateResolvers$6.resolve
-  6.8%  13.9% com.fasterxml.jackson.core.filter.FilteringGeneratorDelegate.writeNumber
-  6.2%  12.6% com.vlkan.log4j2.logstash.layout.resolver.ThreadResolver.resolve
-  6.0%  12.3% com.vlkan.log4j2.logstash.layout.resolver.ThreadResolver$1.resolve
-  3.2%   6.5% com.vlkan.log4j2.logstash.layout.resolver.ExceptionResolver.resolve
-  2.0%   4.1% com.fasterxml.jackson.core.filter.FilteringGeneratorDelegate.writeBoolean
-  1.9%   3.8% com.vlkan.log4j2.logstash.layout.LogstashLayout.encode
-  1.3%   2.6% com.vlkan.log4j2.logstash.layout.resolver.LoggerResolver.access$000
-  0.9%   1.7% com.fasterxml.jackson.core.json.UTF8JsonGenerator.writeStartObject
-  0.2%   0.5% <other>
+ 40.3%  41.4% co.elastic.logging.TimestampSerializer.serializeEpochTimestampAsIsoDateTime
+ 24.6%  25.3% co.elastic.logging.EcsJsonSerializer.serializeThreadName
+ 15.6%  16.0% sun.nio.cs.UTF_8$Encoder.encodeLoop
+  4.8%   5.0% co.elastic.logging.JsonUtils.quoteAsString
+  3.5%   3.6% co.elastic.logging.EcsJsonSerializer.serializeLogLevel
+  3.1%   3.1% co.elastic.logging.EcsJsonSerializer.serializeLoggerName
+  3.0%   3.1% org.apache.logging.log4j.message.SimpleMessage.charAt
+  1.2%   1.3% co.elastic.logging.log4j2.EcsLayout.encode
+  0.5%   0.6% co.elastic.logging.log4j2.EcsLayout.toText
+  0.3%   0.4% co.elastic.logging.log4j2.EcsLayout.serializeSimpleMessage
+  0.2%   0.2% <other>
 
 ....[Thread state: WAITING].........................................................................
-  0.9% 100.0% jdk.internal.misc.Unsafe.park
+  2.8% 100.0% sun.misc.Unsafe.park
 
 
 
-# Run complete. Total time: 00:30:57
+# JMH version: 1.21
+# VM version: JDK 1.8.0_192-ea, Java HotSpot(TM) 64-Bit Server VM, 25.192-b04
+# VM invoker: /home/vy/Software/share/java/jdk/1.8.0_192/jre/bin/java
+# VM options: -XX:+TieredCompilation -XX:+AggressiveOpts -Dclassworlds.conf=/home/vy/Software/share/java/maven/latest/bin/m2.conf -Dmaven.home=/home/vy/Software/share/java/maven/latest -Dlibrary.jansi.path=/home/vy/Software/share/java/maven/latest/lib/jansi-native -Dmaven.multiModuleProjectDirectory=/home/vy/Projects/log4j2-logstash-layout
+# Warmup: 3 iterations, 20 s each
+# Measurement: 3 iterations, 30 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Throughput, ops/time
+# Benchmark: com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteLogstashLayout4EcsLayout
+
+# Run progress: 80.00% complete, ETA 00:10:18
+# Fork: 1 of 2
+# Warmup Iteration   1: 781.994 ops/s
+# Warmup Iteration   2: 808.505 ops/s
+# Warmup Iteration   3: 800.615 ops/s
+Iteration   1: 793.310 ops/s
+                 ·gc.alloc.rate:            3.380 MB/sec
+                 ·gc.alloc.rate.norm:       4541.519 B/op
+                 ·gc.churn.Eden_Space:      2.186 MB/sec
+                 ·gc.churn.Eden_Space.norm: 2937.612 B/op
+                 ·gc.count:                 1.000 counts
+                 ·gc.time:                  1.000 ms
+                 ·stack:                    <delayed till summary>
+
+Iteration   2: 813.346 ops/s
+                 ·gc.alloc.rate:                3.461 MB/sec
+                 ·gc.alloc.rate.norm:           4536.259 B/op
+                 ·gc.churn.Eden_Space:          4.371 MB/sec
+                 ·gc.churn.Eden_Space.norm:     5729.366 B/op
+                 ·gc.churn.Survivor_Space:      ≈ 10⁻⁴ MB/sec
+                 ·gc.churn.Survivor_Space.norm: 0.066 B/op
+                 ·gc.count:                     2.000 counts
+                 ·gc.time:                      2.000 ms
+                 ·stack:                        <delayed till summary>
+
+Iteration   3: 790.103 ops/s
+                 ·gc.alloc.rate:            3.368 MB/sec
+                 ·gc.alloc.rate.norm:       4545.008 B/op
+                 ·gc.churn.Eden_Space:      2.185 MB/sec
+                 ·gc.churn.Eden_Space.norm: 2948.761 B/op
+                 ·gc.count:                 1.000 counts
+                 ·gc.time:                  2.000 ms
+                 ·stack:                    <delayed till summary>
+
+
+# Run progress: 85.00% complete, ETA 00:07:43
+# Fork: 2 of 2
+# Warmup Iteration   1: 770.255 ops/s
+# Warmup Iteration   2: 783.382 ops/s
+# Warmup Iteration   3: 793.821 ops/s
+Iteration   1: 761.188 ops/s
+                 ·gc.alloc.rate:            ≈ 0 MB/sec
+                 ·gc.alloc.rate.norm:       ≈ 0 B/op
+                 ·gc.churn.Eden_Space:      2.186 MB/sec
+                 ·gc.churn.Eden_Space.norm: 3061.599 B/op
+                 ·gc.count:                 1.000 counts
+                 ·gc.time:                  1.000 ms
+                 ·stack:                    <delayed till summary>
+
+Iteration   2: 794.491 ops/s
+                 ·gc.alloc.rate:                ≈ 0 MB/sec
+                 ·gc.alloc.rate.norm:           ≈ 0 B/op
+                 ·gc.churn.Eden_Space:          4.372 MB/sec
+                 ·gc.churn.Eden_Space.norm:     5866.352 B/op
+                 ·gc.churn.Survivor_Space:      ≈ 10⁻⁴ MB/sec
+                 ·gc.churn.Survivor_Space.norm: 0.078 B/op
+                 ·gc.count:                     2.000 counts
+                 ·gc.time:                      3.000 ms
+                 ·stack:                        <delayed till summary>
+
+Iteration   3: 791.021 ops/s
+                 ·gc.alloc.rate:            3.372 MB/sec
+                 ·gc.alloc.rate.norm:       4544.512 B/op
+                 ·gc.churn.Eden_Space:      2.186 MB/sec
+                 ·gc.churn.Eden_Space.norm: 2946.152 B/op
+                 ·gc.count:                 1.000 counts
+                 ·gc.time:                  1.000 ms
+                 ·stack:                    <delayed till summary>
+
+
+
+Result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteLogstashLayout4EcsLayout":
+  790.577 ±(99.9%) 47.013 ops/s [Average]
+  (min, avg, max) = (761.188, 790.577, 813.346), stdev = 16.765
+  CI (99.9%): [743.564, 837.589] (assumes normal distribution)
+
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteLogstashLayout4EcsLayout:·gc.alloc.rate":
+  ≈ 0 MB/sec
+
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteLogstashLayout4EcsLayout:·gc.alloc.rate.norm":
+  ≈ 0 B/op
+
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteLogstashLayout4EcsLayout:·gc.churn.Eden_Space":
+  2.914 ±(99.9%) 3.165 MB/sec [Average]
+  (min, avg, max) = (2.185, 2.914, 4.372), stdev = 1.129
+  CI (99.9%): [≈ 0, 6.079] (assumes normal distribution)
+
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteLogstashLayout4EcsLayout:·gc.churn.Eden_Space.norm":
+  3914.973 ±(99.9%) 4093.645 B/op [Average]
+  (min, avg, max) = (2937.612, 3914.973, 5866.352), stdev = 1459.833
+  CI (99.9%): [≈ 0, 8008.618] (assumes normal distribution)
+
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteLogstashLayout4EcsLayout:·gc.churn.Survivor_Space":
+  ≈ 10⁻⁵ MB/sec
+
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteLogstashLayout4EcsLayout:·gc.churn.Survivor_Space.norm":
+  0.024 ±(99.9%) 0.105 B/op [Average]
+  (min, avg, max) = (≈ 0, 0.024, 0.078), stdev = 0.037
+  CI (99.9%): [≈ 0, 0.129] (assumes normal distribution)
+
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteLogstashLayout4EcsLayout:·gc.count":
+  8.000 ±(99.9%) 0.001 counts [Sum]
+  (min, avg, max) = (1.000, 1.333, 2.000), stdev = 0.516
+  CI (99.9%): [8.000, 8.000] (assumes normal distribution)
+
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteLogstashLayout4EcsLayout:·gc.time":
+  10.000 ±(99.9%) 0.001 ms [Sum]
+  (min, avg, max) = (1.000, 1.667, 3.000), stdev = 0.816
+  CI (99.9%): [10.000, 10.000] (assumes normal distribution)
+
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteLogstashLayout4EcsLayout:·stack":
+Stack profiler:
+
+....[Thread state distributions]....................................................................
+ 97.2%         RUNNABLE
+  2.8%         WAITING
+
+....[Thread state: RUNNABLE]........................................................................
+ 26.3%  27.1% com.vlkan.log4j2.logstash.layout.resolver.TemplateResolvers.lambda$ofObjectNode$5
+ 17.1%  17.6% com.vlkan.log4j2.logstash.layout.resolver.ExceptionResolver.resolve
+ 13.5%  13.9% com.vlkan.log4j2.logstash.layout.resolver.TimestampResolver$1.resolve
+ 10.2%  10.5% com.vlkan.log4j2.logstash.layout.resolver.ThreadResolver$$Lambda$16/676145800.resolve
+ 10.2%  10.5% com.vlkan.log4j2.logstash.layout.resolver.ThreadResolver$$Lambda$16/30087870.resolve
+  8.2%   8.4% com.vlkan.log4j2.logstash.layout.LogstashLayout.encode
+  7.0%   7.2% com.vlkan.log4j2.logstash.layout.resolver.MessageResolver.resolve
+  3.7%   3.8% com.vlkan.log4j2.logstash.layout.resolver.LoggerResolver.lambda$createNameResolver$0
+  0.2%   0.2% com.vlkan.log4j2.logstash.layout.resolver.TemplateResolvers$$Lambda$10/1295920974.resolve
+  0.2%   0.2% com.vlkan.log4j2.logstash.layout.resolver.TemplateResolvers$$Lambda$10/1617063344.resolve
+  0.5%   0.6% <other>
+
+....[Thread state: WAITING].........................................................................
+  2.8% 100.0% sun.misc.Unsafe.park
+
+
+
+# JMH version: 1.21
+# VM version: JDK 1.8.0_192-ea, Java HotSpot(TM) 64-Bit Server VM, 25.192-b04
+# VM invoker: /home/vy/Software/share/java/jdk/1.8.0_192/jre/bin/java
+# VM options: -XX:+TieredCompilation -XX:+AggressiveOpts -Dclassworlds.conf=/home/vy/Software/share/java/maven/latest/bin/m2.conf -Dmaven.home=/home/vy/Software/share/java/maven/latest -Dlibrary.jansi.path=/home/vy/Software/share/java/maven/latest/lib/jansi-native -Dmaven.multiModuleProjectDirectory=/home/vy/Projects/log4j2-logstash-layout
+# Warmup: 3 iterations, 20 s each
+# Measurement: 3 iterations, 30 s each
+# Timeout: 10 min per iteration
+# Threads: 1 thread, will synchronize iterations
+# Benchmark mode: Throughput, ops/time
+# Benchmark: com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteLogstashLayout4JsonLayout
+
+# Run progress: 90.00% complete, ETA 00:05:09
+# Fork: 1 of 2
+# Warmup Iteration   1: 549.198 ops/s
+# Warmup Iteration   2: 559.028 ops/s
+# Warmup Iteration   3: 556.493 ops/s
+Iteration   1: 547.211 ops/s
+                 ·gc.alloc.rate:      ≈ 0 MB/sec
+                 ·gc.alloc.rate.norm: ≈ 0 B/op
+                 ·gc.count:           ≈ 0 counts
+                 ·stack:              <delayed till summary>
+
+Iteration   2: 559.355 ops/s
+                 ·gc.alloc.rate:      0.256 MB/sec
+                 ·gc.alloc.rate.norm: 488.370 B/op
+                 ·gc.count:           ≈ 0 counts
+                 ·stack:              <delayed till summary>
+
+Iteration   3: 561.196 ops/s
+                 ·gc.alloc.rate:      0.255 MB/sec
+                 ·gc.alloc.rate.norm: 485.279 B/op
+                 ·gc.count:           ≈ 0 counts
+                 ·stack:              <delayed till summary>
+
+
+# Run progress: 95.00% complete, ETA 00:02:34
+# Fork: 2 of 2
+# Warmup Iteration   1: 549.050 ops/s
+# Warmup Iteration   2: 555.781 ops/s
+# Warmup Iteration   3: 555.893 ops/s
+Iteration   1: 548.564 ops/s
+                 ·gc.alloc.rate:      0.254 MB/sec
+                 ·gc.alloc.rate.norm: 492.731 B/op
+                 ·gc.count:           ≈ 0 counts
+                 ·stack:              <delayed till summary>
+
+Iteration   2: 560.260 ops/s
+                 ·gc.alloc.rate:      0.257 MB/sec
+                 ·gc.alloc.rate.norm: 488.103 B/op
+                 ·gc.count:           ≈ 0 counts
+                 ·stack:              <delayed till summary>
+
+Iteration   3: 564.456 ops/s
+                 ·gc.alloc.rate:      0.256 MB/sec
+                 ·gc.alloc.rate.norm: 482.955 B/op
+                 ·gc.count:           ≈ 0 counts
+                 ·stack:              <delayed till summary>
+
+
+
+Result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteLogstashLayout4JsonLayout":
+  556.840 ±(99.9%) 20.073 ops/s [Average]
+  (min, avg, max) = (547.211, 556.840, 564.456), stdev = 7.158
+  CI (99.9%): [536.767, 576.913] (assumes normal distribution)
+
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteLogstashLayout4JsonLayout:·gc.alloc.rate":
+  ≈ 0 MB/sec
+
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteLogstashLayout4JsonLayout:·gc.alloc.rate.norm":
+  ≈ 0 B/op
+
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteLogstashLayout4JsonLayout:·gc.count":
+  ≈ 0 counts
+
+Secondary result "com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.liteLogstashLayout4JsonLayout:·stack":
+Stack profiler:
+
+....[Thread state distributions]....................................................................
+ 97.2%         RUNNABLE
+  2.8%         WAITING
+
+....[Thread state: RUNNABLE]........................................................................
+ 48.5%  49.9% com.vlkan.log4j2.logstash.layout.resolver.TemplateResolvers.lambda$ofObjectNode$5
+ 15.1%  15.5% com.vlkan.log4j2.logstash.layout.resolver.ExceptionResolver.resolve
+ 13.0%  13.4% com.vlkan.log4j2.logstash.layout.resolver.ThreadResolver$$Lambda$16/659444527.resolve
+  8.0%   8.2% com.vlkan.log4j2.logstash.layout.resolver.ThreadResolver.resolve
+  4.8%   4.9% com.vlkan.log4j2.logstash.layout.resolver.MessageResolver.resolve
+  3.6%   3.7% com.vlkan.log4j2.logstash.layout.LogstashLayoutBenchmark.benchmark
+  3.5%   3.6% com.vlkan.log4j2.logstash.layout.LogstashLayout.encode
+  0.8%   0.8% com.vlkan.log4j2.logstash.layout.resolver.TemplateResolvers$$Lambda$10/1516276385.resolve
+  0.0%   0.0% com.vlkan.log4j2.logstash.layout.generated.LogstashLayoutBenchmark_liteLogstashLayout4JsonLayout_jmhTest.liteLogstashLayout4JsonLayout_thrpt_jmhStub
+
+....[Thread state: WAITING].........................................................................
+  2.8% 100.0% sun.misc.Unsafe.park
+
+
+
+# Run complete. Total time: 00:51:31
 
 REMEMBER: The numbers below are just data. To gain reusable insights, you need to follow up on
 why the numbers are the way they are. Use profilers (see -prof, -lprof), design factorial
@@ -975,70 +1451,102 @@ experiments, perform baseline and negative tests that provide experimental contr
 the benchmarking environment is safe on JVM/OS/HW level, ask for reviews from the domain experts.
 Do not assume the numbers tell you what you want them to tell.
 
-Benchmark                                                                     Mode  Cnt         Score        Error   Units
-LogstashLayoutBenchmark.fullCustomJsonLayout                                 thrpt    6        12.398 ±      1.012   ops/s
-LogstashLayoutBenchmark.fullCustomJsonLayout:·gc.alloc.rate                  thrpt    6      1138.559 ±     92.818  MB/sec
-LogstashLayoutBenchmark.fullCustomJsonLayout:·gc.alloc.rate.norm             thrpt    6  97899419.280 ±  13288.101    B/op
-LogstashLayoutBenchmark.fullCustomJsonLayout:·gc.churn.Eden_Space            thrpt    6      1149.453 ±     92.953  MB/sec
-LogstashLayoutBenchmark.fullCustomJsonLayout:·gc.churn.Eden_Space.norm       thrpt    6  98836794.041 ± 191519.611    B/op
-LogstashLayoutBenchmark.fullCustomJsonLayout:·gc.churn.Survivor_Space        thrpt    6         0.083 ±      0.010  MB/sec
-LogstashLayoutBenchmark.fullCustomJsonLayout:·gc.churn.Survivor_Space.norm   thrpt    6      7170.654 ±    380.011    B/op
-LogstashLayoutBenchmark.fullCustomJsonLayout:·gc.count                       thrpt    6      3159.000               counts
-LogstashLayoutBenchmark.fullCustomJsonLayout:·gc.time                        thrpt    6       859.000                   ms
-LogstashLayoutBenchmark.fullCustomJsonLayout:·stack                          thrpt                NaN                  ---
-LogstashLayoutBenchmark.fullDefaultJsonLayout                                thrpt    6        13.315 ±      1.103   ops/s
-LogstashLayoutBenchmark.fullDefaultJsonLayout:·gc.alloc.rate                 thrpt    6      1221.207 ±    101.010  MB/sec
-LogstashLayoutBenchmark.fullDefaultJsonLayout:·gc.alloc.rate.norm            thrpt    6  97778242.029 ±  11104.215    B/op
-LogstashLayoutBenchmark.fullDefaultJsonLayout:·gc.churn.Eden_Space           thrpt    6      1233.458 ±    101.562  MB/sec
-LogstashLayoutBenchmark.fullDefaultJsonLayout:·gc.churn.Eden_Space.norm      thrpt    6  98759482.105 ± 245988.129    B/op
-LogstashLayoutBenchmark.fullDefaultJsonLayout:·gc.churn.Survivor_Space       thrpt    6         0.076 ±      0.006  MB/sec
-LogstashLayoutBenchmark.fullDefaultJsonLayout:·gc.churn.Survivor_Space.norm  thrpt    6      6117.099 ±    678.902    B/op
-LogstashLayoutBenchmark.fullDefaultJsonLayout:·gc.count                      thrpt    6      3391.000               counts
-LogstashLayoutBenchmark.fullDefaultJsonLayout:·gc.time                       thrpt    6       879.000                   ms
-LogstashLayoutBenchmark.fullDefaultJsonLayout:·stack                         thrpt                NaN                  ---
-LogstashLayoutBenchmark.fullLogstashLayout                                   thrpt    6        60.582 ±      2.136   ops/s
-LogstashLayoutBenchmark.fullLogstashLayout:·gc.alloc.rate                    thrpt    6         7.565 ±      0.205  MB/sec
-LogstashLayoutBenchmark.fullLogstashLayout:·gc.alloc.rate.norm               thrpt    6    133127.335 ±   1085.511    B/op
-LogstashLayoutBenchmark.fullLogstashLayout:·gc.churn.Eden_Space              thrpt    6         7.284 ±      3.163  MB/sec
-LogstashLayoutBenchmark.fullLogstashLayout:·gc.churn.Eden_Space.norm         thrpt    6    128126.300 ±  54234.477    B/op
-LogstashLayoutBenchmark.fullLogstashLayout:·gc.churn.Survivor_Space          thrpt    6         0.026 ±      0.111  MB/sec
-LogstashLayoutBenchmark.fullLogstashLayout:·gc.churn.Survivor_Space.norm     thrpt    6       448.232 ±   1946.601    B/op
-LogstashLayoutBenchmark.fullLogstashLayout:·gc.count                         thrpt    6        20.000               counts
-LogstashLayoutBenchmark.fullLogstashLayout:·gc.time                          thrpt    6        44.000                   ms
-LogstashLayoutBenchmark.fullLogstashLayout:·stack                            thrpt                NaN                  ---
-LogstashLayoutBenchmark.liteCustomJsonLayout                                 thrpt    6       464.774 ±     22.475   ops/s
-LogstashLayoutBenchmark.liteCustomJsonLayout:·gc.alloc.rate                  thrpt    6      1166.106 ±     68.912  MB/sec
-LogstashLayoutBenchmark.liteCustomJsonLayout:·gc.alloc.rate.norm             thrpt    6   2674738.496 ±  49046.088    B/op
-LogstashLayoutBenchmark.liteCustomJsonLayout:·gc.churn.Eden_Space            thrpt    6      1168.286 ±     68.903  MB/sec
-LogstashLayoutBenchmark.liteCustomJsonLayout:·gc.churn.Eden_Space.norm       thrpt    6   2679744.800 ±  50850.527    B/op
-LogstashLayoutBenchmark.liteCustomJsonLayout:·gc.churn.Survivor_Space        thrpt    6         0.004 ±      0.002  MB/sec
-LogstashLayoutBenchmark.liteCustomJsonLayout:·gc.churn.Survivor_Space.norm   thrpt    6         8.569 ±      4.796    B/op
-LogstashLayoutBenchmark.liteCustomJsonLayout:·gc.count                       thrpt    6      3207.000               counts
-LogstashLayoutBenchmark.liteCustomJsonLayout:·gc.time                        thrpt    6       680.000                   ms
-LogstashLayoutBenchmark.liteCustomJsonLayout:·stack                          thrpt                NaN                  ---
-LogstashLayoutBenchmark.liteDefaultJsonLayout                                thrpt    6       515.626 ±     35.580   ops/s
-LogstashLayoutBenchmark.liteDefaultJsonLayout:·gc.alloc.rate                 thrpt    6      1153.113 ±     79.471  MB/sec
-LogstashLayoutBenchmark.liteDefaultJsonLayout:·gc.alloc.rate.norm            thrpt    6   2384156.286 ±    213.193    B/op
-LogstashLayoutBenchmark.liteDefaultJsonLayout:·gc.churn.Eden_Space           thrpt    6      1154.835 ±     79.932  MB/sec
-LogstashLayoutBenchmark.liteDefaultJsonLayout:·gc.churn.Eden_Space.norm      thrpt    6   2387711.638 ±   6837.935    B/op
-LogstashLayoutBenchmark.liteDefaultJsonLayout:·gc.churn.Survivor_Space       thrpt    6         0.003 ±      0.001  MB/sec
-LogstashLayoutBenchmark.liteDefaultJsonLayout:·gc.churn.Survivor_Space.norm  thrpt    6         5.644 ±      1.878    B/op
-LogstashLayoutBenchmark.liteDefaultJsonLayout:·gc.count                      thrpt    6      3170.000               counts
-LogstashLayoutBenchmark.liteDefaultJsonLayout:·gc.time                       thrpt    6       657.000                   ms
-LogstashLayoutBenchmark.liteDefaultJsonLayout:·stack                         thrpt                NaN                  ---
-LogstashLayoutBenchmark.liteLogstashLayout                                   thrpt    6       777.925 ±     25.463   ops/s
-LogstashLayoutBenchmark.liteLogstashLayout:·gc.alloc.rate                    thrpt    6         1.497 ±      0.024  MB/sec
-LogstashLayoutBenchmark.liteLogstashLayout:·gc.alloc.rate.norm               thrpt    6      2051.618 ±     65.457    B/op
-LogstashLayoutBenchmark.liteLogstashLayout:·gc.churn.Eden_Space              thrpt    6         1.457 ±      3.165  MB/sec
-LogstashLayoutBenchmark.liteLogstashLayout:·gc.churn.Eden_Space.norm         thrpt    6      1992.477 ±   4328.860    B/op
-LogstashLayoutBenchmark.liteLogstashLayout:·gc.count                         thrpt    6         4.000               counts
-LogstashLayoutBenchmark.liteLogstashLayout:·gc.time                          thrpt    6         4.000                   ms
-LogstashLayoutBenchmark.liteLogstashLayout:·stack                            thrpt                NaN                  ---
+Benchmark                                                                             Mode  Cnt          Score                 Error   Units
+LogstashLayoutBenchmark.fullCustomJsonLayout                                         thrpt    6          8.059 ±               1.066   ops/s
+LogstashLayoutBenchmark.fullCustomJsonLayout:·gc.alloc.rate                          thrpt    6            ≈ 0                        MB/sec
+LogstashLayoutBenchmark.fullCustomJsonLayout:·gc.alloc.rate.norm                     thrpt    6            ≈ 0                          B/op
+LogstashLayoutBenchmark.fullCustomJsonLayout:·gc.churn.Eden_Space                    thrpt    6       1786.592 ±             237.185  MB/sec
+LogstashLayoutBenchmark.fullCustomJsonLayout:·gc.churn.Eden_Space.norm               thrpt    6  236326274.024 ±          536851.517    B/op
+LogstashLayoutBenchmark.fullCustomJsonLayout:·gc.churn.Survivor_Space                thrpt    6          0.369 ±               0.048  MB/sec
+LogstashLayoutBenchmark.fullCustomJsonLayout:·gc.churn.Survivor_Space.norm           thrpt    6      48794.356 ±            3967.244    B/op
+LogstashLayoutBenchmark.fullCustomJsonLayout:·gc.count                               thrpt    6       4914.000                        counts
+LogstashLayoutBenchmark.fullCustomJsonLayout:·gc.time                                thrpt    6       4924.000                            ms
+LogstashLayoutBenchmark.fullCustomJsonLayout:·stack                                  thrpt                 NaN                           ---
+LogstashLayoutBenchmark.fullDefaultJsonLayout                                        thrpt    6          8.353 ±               0.275   ops/s
+LogstashLayoutBenchmark.fullDefaultJsonLayout:·gc.alloc.rate                         thrpt    6       1836.728 ±              60.546  MB/sec
+LogstashLayoutBenchmark.fullDefaultJsonLayout:·gc.alloc.rate.norm                    thrpt    6  234421710.780 ±            1016.691    B/op
+LogstashLayoutBenchmark.fullDefaultJsonLayout:·gc.churn.Eden_Space                   thrpt    6       1847.984 ±              60.370  MB/sec
+LogstashLayoutBenchmark.fullDefaultJsonLayout:·gc.churn.Eden_Space.norm              thrpt    6  235858609.318 ±          271223.984    B/op
+LogstashLayoutBenchmark.fullDefaultJsonLayout:·gc.churn.Survivor_Space               thrpt    6          0.314 ±               0.039  MB/sec
+LogstashLayoutBenchmark.fullDefaultJsonLayout:·gc.churn.Survivor_Space.norm          thrpt    6      40111.860 ±            4358.866    B/op
+LogstashLayoutBenchmark.fullDefaultJsonLayout:·gc.count                              thrpt    6       5083.000                        counts
+LogstashLayoutBenchmark.fullDefaultJsonLayout:·gc.time                               thrpt    6       4962.000                            ms
+LogstashLayoutBenchmark.fullDefaultJsonLayout:·stack                                 thrpt                 NaN                           ---
+LogstashLayoutBenchmark.fullEcsLayout                                                thrpt    6         16.508 ±               0.314   ops/s
+LogstashLayoutBenchmark.fullEcsLayout:·gc.alloc.rate                                 thrpt    6            ≈ 0                        MB/sec
+LogstashLayoutBenchmark.fullEcsLayout:·gc.alloc.rate.norm                            thrpt    6            ≈ 0                          B/op
+LogstashLayoutBenchmark.fullEcsLayout:·gc.churn.Eden_Space                           thrpt    6        720.887 ±              15.641  MB/sec
+LogstashLayoutBenchmark.fullEcsLayout:·gc.churn.Eden_Space.norm                      thrpt    6   46555022.681 ±          231540.669    B/op
+LogstashLayoutBenchmark.fullEcsLayout:·gc.churn.Survivor_Space                       thrpt    6          0.004 ±               0.002  MB/sec
+LogstashLayoutBenchmark.fullEcsLayout:·gc.churn.Survivor_Space.norm                  thrpt    6        279.441 ±             110.035    B/op
+LogstashLayoutBenchmark.fullEcsLayout:·gc.count                                      thrpt    6       1980.000                        counts
+LogstashLayoutBenchmark.fullEcsLayout:·gc.time                                       thrpt    6       1706.000                            ms
+LogstashLayoutBenchmark.fullEcsLayout:·stack                                         thrpt                 NaN                           ---
+LogstashLayoutBenchmark.fullLogstashLayout4EcsLayout                                 thrpt    6         41.689 ±               0.751   ops/s
+LogstashLayoutBenchmark.fullLogstashLayout4EcsLayout:·gc.alloc.rate                  thrpt    6            ≈ 0                        MB/sec
+LogstashLayoutBenchmark.fullLogstashLayout4EcsLayout:·gc.alloc.rate.norm             thrpt    6            ≈ 0                          B/op
+LogstashLayoutBenchmark.fullLogstashLayout4EcsLayout:·gc.churn.Eden_Space            thrpt    6       1397.070 ±              25.666  MB/sec
+LogstashLayoutBenchmark.fullLogstashLayout4EcsLayout:·gc.churn.Eden_Space.norm       thrpt    6   35726949.268 ±           92383.180    B/op
+LogstashLayoutBenchmark.fullLogstashLayout4EcsLayout:·gc.churn.Survivor_Space        thrpt    6          0.003 ±               0.001  MB/sec
+LogstashLayoutBenchmark.fullLogstashLayout4EcsLayout:·gc.churn.Survivor_Space.norm   thrpt    6         84.609 ±              17.783    B/op
+LogstashLayoutBenchmark.fullLogstashLayout4EcsLayout:·gc.count                       thrpt    6       3837.000                        counts
+LogstashLayoutBenchmark.fullLogstashLayout4EcsLayout:·gc.time                        thrpt    6       3575.000                            ms
+LogstashLayoutBenchmark.fullLogstashLayout4EcsLayout:·stack                          thrpt                 NaN                           ---
+LogstashLayoutBenchmark.fullLogstashLayout4JsonLayout                                thrpt    6         69.639 ±               2.735   ops/s
+LogstashLayoutBenchmark.fullLogstashLayout4JsonLayout:·gc.alloc.rate                 thrpt    6            ≈ 0                        MB/sec
+LogstashLayoutBenchmark.fullLogstashLayout4JsonLayout:·gc.alloc.rate.norm            thrpt    6            ≈ 0                          B/op
+LogstashLayoutBenchmark.fullLogstashLayout4JsonLayout:·gc.churn.Eden_Space           thrpt    6          7.286 ±               3.167  MB/sec
+LogstashLayoutBenchmark.fullLogstashLayout4JsonLayout:·gc.churn.Eden_Space.norm      thrpt    6     111458.622 ±           46344.117    B/op
+LogstashLayoutBenchmark.fullLogstashLayout4JsonLayout:·gc.churn.Survivor_Space       thrpt    6          0.001 ±               0.003  MB/sec
+LogstashLayoutBenchmark.fullLogstashLayout4JsonLayout:·gc.churn.Survivor_Space.norm  thrpt    6         10.857 ±              46.307    B/op
+LogstashLayoutBenchmark.fullLogstashLayout4JsonLayout:·gc.count                      thrpt    6         20.000                        counts
+LogstashLayoutBenchmark.fullLogstashLayout4JsonLayout:·gc.time                       thrpt    6         24.000                            ms
+LogstashLayoutBenchmark.fullLogstashLayout4JsonLayout:·stack                         thrpt                 NaN                           ---
+LogstashLayoutBenchmark.liteCustomJsonLayout                                         thrpt    6        241.324 ±              48.341   ops/s
+LogstashLayoutBenchmark.liteCustomJsonLayout:·gc.alloc.rate                          thrpt    6       1246.377 ±             256.920  MB/sec
+LogstashLayoutBenchmark.liteCustomJsonLayout:·gc.alloc.rate.norm                     thrpt    6    5505291.872 ±           35404.016    B/op
+LogstashLayoutBenchmark.liteCustomJsonLayout:·gc.churn.Eden_Space                    thrpt    6       1247.843 ±             256.688  MB/sec
+LogstashLayoutBenchmark.liteCustomJsonLayout:·gc.churn.Eden_Space.norm               thrpt    6    5511812.180 ±           34334.566    B/op
+LogstashLayoutBenchmark.liteCustomJsonLayout:·gc.churn.Survivor_Space                thrpt    6          0.006 ±               0.002  MB/sec
+LogstashLayoutBenchmark.liteCustomJsonLayout:·gc.churn.Survivor_Space.norm           thrpt    6         25.044 ±               5.350    B/op
+LogstashLayoutBenchmark.liteCustomJsonLayout:·gc.count                               thrpt    6       3425.000                        counts
+LogstashLayoutBenchmark.liteCustomJsonLayout:·gc.time                                thrpt    6       3392.000                            ms
+LogstashLayoutBenchmark.liteCustomJsonLayout:·stack                                  thrpt                 NaN                           ---
+LogstashLayoutBenchmark.liteDefaultJsonLayout                                        thrpt    6        280.366 ±              25.934   ops/s
+LogstashLayoutBenchmark.liteDefaultJsonLayout:·gc.alloc.rate                         thrpt    6            ≈ 0                        MB/sec
+LogstashLayoutBenchmark.liteDefaultJsonLayout:·gc.alloc.rate.norm                    thrpt    6            ≈ 0                          B/op
+LogstashLayoutBenchmark.liteDefaultJsonLayout:·gc.churn.Eden_Space                   thrpt    6       1342.959 ±             124.867  MB/sec
+LogstashLayoutBenchmark.liteDefaultJsonLayout:·gc.churn.Eden_Space.norm              thrpt    6    5106478.174 ±            5141.541    B/op
+LogstashLayoutBenchmark.liteDefaultJsonLayout:·gc.churn.Survivor_Space               thrpt    6          0.006 ±               0.001  MB/sec
+LogstashLayoutBenchmark.liteDefaultJsonLayout:·gc.churn.Survivor_Space.norm          thrpt    6         21.292 ±               2.497    B/op
+LogstashLayoutBenchmark.liteDefaultJsonLayout:·gc.count                              thrpt    6       3686.000                        counts
+LogstashLayoutBenchmark.liteDefaultJsonLayout:·gc.time                               thrpt    6       3593.000                            ms
+LogstashLayoutBenchmark.liteDefaultJsonLayout:·stack                                 thrpt                 NaN                           ---
+LogstashLayoutBenchmark.liteEcsLayout                                                thrpt    6        583.924 ±              48.008   ops/s
+LogstashLayoutBenchmark.liteEcsLayout:·gc.alloc.rate                                 thrpt    6            ≈ 0                        MB/sec
+LogstashLayoutBenchmark.liteEcsLayout:·gc.alloc.rate.norm                            thrpt    6            ≈ 0                          B/op
+LogstashLayoutBenchmark.liteEcsLayout:·gc.count                                      thrpt    6            ≈ 0                        counts
+LogstashLayoutBenchmark.liteEcsLayout:·stack                                         thrpt                 NaN                           ---
+LogstashLayoutBenchmark.liteLogstashLayout4EcsLayout                                 thrpt    6        790.577 ±              47.013   ops/s
+LogstashLayoutBenchmark.liteLogstashLayout4EcsLayout:·gc.alloc.rate                  thrpt    6            ≈ 0                        MB/sec
+LogstashLayoutBenchmark.liteLogstashLayout4EcsLayout:·gc.alloc.rate.norm             thrpt    6            ≈ 0                          B/op
+LogstashLayoutBenchmark.liteLogstashLayout4EcsLayout:·gc.churn.Eden_Space            thrpt    6          2.914 ±               3.165  MB/sec
+LogstashLayoutBenchmark.liteLogstashLayout4EcsLayout:·gc.churn.Eden_Space.norm       thrpt    6       3914.973 ±            4093.645    B/op
+LogstashLayoutBenchmark.liteLogstashLayout4EcsLayout:·gc.churn.Survivor_Space        thrpt    6         ≈ 10⁻⁵                        MB/sec
+LogstashLayoutBenchmark.liteLogstashLayout4EcsLayout:·gc.churn.Survivor_Space.norm   thrpt    6          0.024 ±               0.105    B/op
+LogstashLayoutBenchmark.liteLogstashLayout4EcsLayout:·gc.count                       thrpt    6          8.000                        counts
+LogstashLayoutBenchmark.liteLogstashLayout4EcsLayout:·gc.time                        thrpt    6         10.000                            ms
+LogstashLayoutBenchmark.liteLogstashLayout4EcsLayout:·stack                          thrpt                 NaN                           ---
+LogstashLayoutBenchmark.liteLogstashLayout4JsonLayout                                thrpt    6        556.840 ±              20.073   ops/s
+LogstashLayoutBenchmark.liteLogstashLayout4JsonLayout:·gc.alloc.rate                 thrpt    6            ≈ 0                        MB/sec
+LogstashLayoutBenchmark.liteLogstashLayout4JsonLayout:·gc.alloc.rate.norm            thrpt    6            ≈ 0                          B/op
+LogstashLayoutBenchmark.liteLogstashLayout4JsonLayout:·gc.count                      thrpt    6            ≈ 0                        counts
+LogstashLayoutBenchmark.liteLogstashLayout4JsonLayout:·stack                         thrpt                 NaN                           ---
 
 Benchmark result is saved to /home/vy/Projects/log4j2-logstash-layout/layout-benchmark/results.json
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time:  30:59 min
-[INFO] Finished at: 2019-04-25T10:26:34+02:00
+[INFO] Total time:  51:33 min
+[INFO] Finished at: 2019-10-04T13:05:10+02:00
 [INFO] ------------------------------------------------------------------------

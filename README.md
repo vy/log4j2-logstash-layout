@@ -20,6 +20,7 @@ the following additional features:
 # Table of Contents
 
 - [Usage](#usage)
+- [Predefined Templates](#templates)
 - [FAT JAR](#fat-jar)
 - [Appender Support](#appender-support)
 - [Performance](#performance)
@@ -263,6 +264,18 @@ lookups too.
 See [`layout-demo`](layout-demo) directory for a sample application
 demonstrating the usage of `LogstashLayout`.
 
+<a name="templates"></a>
+
+# Predefined Templates
+
+`log4j2-logstash-layout` artifact contains the following predefined templates:
+
+- [`LogstashJsonEventLayoutV1.json`](layout/src/main/resources/LogstashJsonEventLayoutV1.json)
+  described in [log4j-jsonevent-layout](https://github.com/logstash/log4j-jsonevent-layout)
+
+- [`EcsLayout.json`](layout/src/main/resources/EcsLayout.json) described by
+  [the Elastic Common Schema (ECS) specification](https://www.elastic.co/guide/en/ecs/current/ecs-reference.html)
+
 <a name="fat-jar"></a>
 
 # Fat JAR
@@ -294,9 +307,12 @@ is aligned with your appender of preference.
 
 # Performance
 
-The source code ships a `LogstashLayout`-vs-[`JSONLayout`](https://logging.apache.org/log4j/2.0/manual/layouts.html#JSONLayout)
-(the one shipped by default in Log4j 2) [JMH](https://openjdk.java.net/projects/code-tools/jmh/)
-benchmark assessing the rendering performance of both plugins. There two
+The source code contains a benchmark comparing `LogstashLayout` performance with
+[`JsonLayout`](https://logging.apache.org/log4j/2.0/manual/layouts.html#JSONLayout)
+(shipped by default in Log4j 2) and
+[`EcsLayout`](https://github.com/elastic/java-ecs-logging/tree/master/log4j2-ecs-layout)
+(shipped by Elastic). There [JMH](https://openjdk.java.net/projects/code-tools/jmh/)
+is used to assess the rendering performance of these layouts. In the tests,
 different `LogEvent` profiles are employed:
 
 - **full**: `LogEvent` contains MDC, NDC, and an exception.
@@ -306,18 +322,23 @@ To give an idea, we ran the benchmark with the following settings:
 
 - **CPU:** Intel i7 2.70GHz (x86-64, confined `java` process to a single core
   using [`taskset -c 0`](http://www.man7.org/linux/man-pages/man1/taskset.1.html))
-- **JVM:** Java HotSpot 1.8.0_161 (`-XX:+TieredCompilation`, `-XX:+AggressiveOpts`)
-- **OS:** Xubuntu 18.04.1 (4.15.0-34-generic, x86-64)
-- **`LogstashLayout:`** used default settings with the following exceptions:
+- **JVM:** Java HotSpot 1.8.0_192 (`-XX:+TieredCompilation`, `-XX:+AggressiveOpts`)
+- **OS:** Xubuntu 18.04.3 (4.15.0-54-generic, x86-64)
+- **`LogstashLayout4{Ecs,Json}Layout`** used default settings with the following exceptions:
+  - **`emptyPropertyExclusionEnabled`:** `false`
   - **`stackTraceEnabled`:** `true`
-- **`JSONLayout`:** used in two different flavors
+  - **`maxByteCount`:** 4096
+- **`JsonLayout`** used in two different flavors:
   - **`DefaultJsonLayout`:** default settings
   - **`CustomJsonLayout`:** default settings with an additional `"@version": 1`
     field (this forces instantiation of a wrapper class to obtain the necessary
     Jackson view)
+- **`EcsLayout`** used with the following configurations:
+  - **`serviceName`:** `benchmark`
+  - **`additionalFields`:** `new KeyValuePair[0]`
 
-The results are as follows. (See [`layout-benchmark`](layout-benchmark)
-directory for the full report.)
+The figures for serializing 1,000 `LogEvent`s at each operation are as follows.
+(See [`layout-benchmark`](layout-benchmark) directory for the full report.)
 
 <div id="results">
     <table>
@@ -325,45 +346,69 @@ directory for the full report.)
             <tr>
                 <th>Benchmark</th>
                 <th colspan="2">ops/sec<sup>*</sup></th>
-                <th>MB/sec<sup>*</sup></th>
+                <th>B/op<sup>*</sup></th>
             </tr>
         </thead>
         <tbody>
-            <tr data-benchmark="liteLogstashLayout">
-                <td class="benchmark">liteLogstashLayout</td>
-                <td class="op_rate">793,597</td>
-                <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉ (100%)</td>
-                <td class="gc_rate">1.5</td>
+            <tr data-benchmark="liteLogstashLayout4EcsLayout">
+                <td class="benchmark">liteLogstashLayout4EcsLayout</td>
+                <td class="op_rate">813,346</td>
+                <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉&nbsp;(100%)</td>
+                <td class="gc_rate">4,545.0</td>
+            </tr>
+            <tr data-benchmark="liteEcsLayout">
+                <td class="benchmark">liteEcsLayout</td>
+                <td class="op_rate">603,469</td>
+                <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉&nbsp;(74%)</td>
+                <td class="gc_rate">460.9</td>
+            </tr>
+            <tr data-benchmark="liteLogstashLayout4JsonLayout">
+                <td class="benchmark">liteLogstashLayout4JsonLayout</td>
+                <td class="op_rate">564,456</td>
+                <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉▉▉▉▉&nbsp;(69%)</td>
+                <td class="gc_rate">492.7</td>
             </tr>
             <tr data-benchmark="liteDefaultJsonLayout">
                 <td class="benchmark">liteDefaultJsonLayout</td>
-                <td class="op_rate">526,915</td>
-                <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉▉▉▉ (66%)</td>
-                <td class="gc_rate">1,178.3</td>
+                <td class="op_rate">294,590</td>
+                <td class="op_rate_bar">▉▉▉▉▉▉▉&nbsp;(36%)</td>
+                <td class="gc_rate">5,101,398.2</td>
             </tr>
             <tr data-benchmark="liteCustomJsonLayout">
                 <td class="benchmark">liteCustomJsonLayout</td>
-                <td class="op_rate">476,307</td>
-                <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉▉▉ (60%)</td>
-                <td class="gc_rate">1,202.0</td>
+                <td class="op_rate">258,302</td>
+                <td class="op_rate_bar">▉▉▉▉▉▉▉&nbsp;(32%)</td>
+                <td class="gc_rate">5,516,833.5</td>
             </tr>
-            <tr data-benchmark="fullLogstashLayout">
-                <td class="benchmark">fullLogstashLayout</td>
-                <td class="op_rate">61,630</td>
-                <td class="op_rate_bar">▉▉ (8%)</td>
-                <td class="gc_rate">7.7</td>
+            <tr data-benchmark="fullLogstashLayout4JsonLayout">
+                <td class="benchmark">fullLogstashLayout4JsonLayout</td>
+                <td class="op_rate">70,755</td>
+                <td class="op_rate_bar">▉▉&nbsp;(9%)</td>
+                <td class="gc_rate">108,258.8</td>
+            </tr>
+            <tr data-benchmark="fullLogstashLayout4EcsLayout">
+                <td class="benchmark">fullLogstashLayout4EcsLayout</td>
+                <td class="op_rate">41,913</td>
+                <td class="op_rate_bar">▉&nbsp;(5%)</td>
+                <td class="gc_rate">35,690,881.3</td>
+            </tr>
+            <tr data-benchmark="fullEcsLayout">
+                <td class="benchmark">fullEcsLayout</td>
+                <td class="op_rate">16,594</td>
+                <td class="op_rate_bar">▉&nbsp;(2%)</td>
+                <td class="gc_rate">46,495,593.1</td>
             </tr>
             <tr data-benchmark="fullDefaultJsonLayout">
                 <td class="benchmark">fullDefaultJsonLayout</td>
-                <td class="op_rate">13,781</td>
-                <td class="op_rate_bar">▉ (2%)</td>
-                <td class="gc_rate">1,263.8</td>
+                <td class="op_rate">8,484</td>
+                <td class="op_rate_bar">▉&nbsp;(1%)</td>
+                <td class="gc_rate">234,422,375.7</td>
             </tr>
             <tr data-benchmark="fullCustomJsonLayout">
                 <td class="benchmark">fullCustomJsonLayout</td>
-                <td class="op_rate">12,783</td>
-                <td class="op_rate_bar">▉ (2%)</td>
-                <td class="gc_rate">1,173.9</td>
+                <td class="op_rate">8,456</td>
+                <td class="op_rate_bar">▉&nbsp;(1%)</td>
+                <td class="gc_rate">234,624,867.7</td>
             </tr>
         </tbody>
     </table>
@@ -375,7 +420,7 @@ directory for the full report.)
 Let us try to answer some common questions:
 
 - **How come `log4j2-logstash-layout` can yield superior performance compared
-  to Log4j 2 `JSONLayout`?** Log4j 2 `JSONLayout` employs a single Jackson view
+  to Log4j 2 `JsonLayout`?** Log4j 2 `JsonLayout` employs a single Jackson view
   to generate JSON, XML, and YAML outputs. For this purpose, it uses Jackson
   `ObjectMapper`, which needs to walk over the class fields via reflection and
   perform heavy branching and intermediate object instantiation. On the
@@ -385,20 +430,9 @@ Let us try to answer some common questions:
 
 - **Why is `log4j2-logstash-layout` is not totally garbage-free?**
 
-  - Reusing Jackson `JsonGenerator`s necessitate state reset when it gets
-    corrupted. Though that is [easier said than done](https://groups.google.com/d/msg/jackson-user/vsJST_drx04/rFSF5jSyBQAJ),
-    prone to [bugs](https://github.com/vy/log4j2-logstash-layout/issues/27),
-    and does not bring much performance improvement. Hence we instantiate a
-    new `JsonGenerator` for each serialization to be on the safe (but still
-    fast) side.
-
   - Since `Throwable#getStackTrace()` clones the original
     `StackTraceElement[]`, accesses to (and hence rendering) stack traces can
     never be garbage-free.
-
-  - Rendering stack traces to text (that is, `exception[rootCause]StackTrace:text`)
-    allocates a new `ByteArrayOutputStream`-backed `PrintStream` (used by
-    `Throwable#printStackTrace()`) each time.
 
   - Rendering of context data (that is, MDC) field values is garbage-free if
     the value is either `null`, or of type `String`, `Short`, `Integer`,
