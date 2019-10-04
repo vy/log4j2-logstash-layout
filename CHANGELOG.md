@@ -1,5 +1,15 @@
 ### (2019-09-??) v0.21
 
+- Add feature comparison matrix.
+
+- Update benchmarks.
+
+- Add ECS layout. (#39)
+
+- Add `char[]` caching for serializing stack traces.
+
+- Add serialization context caching.
+
 - Add `eventTemplateAdditionalFields` parameter. (#43)
 
 - Cache and reuse the most recently formatted timestamp. (#42)
