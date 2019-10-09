@@ -237,10 +237,11 @@ public class LogstashLayoutTest {
     }
 
     @Test
-    public void test_log4j_deferred_runtime_resolver_map_message() throws Exception {
+    public void test_log4j_deferred_runtime_resolver_for_MapMessage() throws Exception {
 
         // Create the event template.
         ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
+        eventTemplateRootNode.put("mapValue3", "${json:message:json}");
         eventTemplateRootNode.put("mapValue1", "${map:key1}");
         eventTemplateRootNode.put("mapValue2", "${map:key2}");
         eventTemplateRootNode.put("nestedLookupEmptyValue", "${map:noExist:-${map:noExist2:-${map:noExist3:-}}}");
@@ -249,16 +250,14 @@ public class LogstashLayoutTest {
 
         // Create the layout.
         BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
-        String timeZoneId = TimeZone.getTimeZone("Europe/Malta").getID();
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
                 .setConfiguration(configuration)
                 .setEventTemplate(eventTemplate)
-                .setTimeZoneId(timeZoneId)
                 .build();
 
         // Create the log event with a MapMessage.
-        MapMessage mapMessage = new MapMessage().with("key1", "val1").with("key2", "val2");
+        MapMessage mapMessage = new MapMessage().with("key1", "val1").with("key2", "val2").with("key3", Collections.singletonMap("foo", "bar"));
         LogEvent logEvent = Log4jLogEvent
                 .newBuilder()
                 .setLoggerName(LogstashLayoutTest.class.getSimpleName())
@@ -277,6 +276,43 @@ public class LogstashLayoutTest {
 
     }
 
+    @Test
+    public void test_MapMessage_serialization() throws Exception {
+
+        // Create the event template.
+        ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
+        eventTemplateRootNode.put("message", "${json:message:json}");
+        String eventTemplate = eventTemplateRootNode.toString();
+
+        // Create the layout.
+        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        LogstashLayout layout = LogstashLayout
+                .newBuilder()
+                .setConfiguration(configuration)
+                .setEventTemplate(eventTemplate)
+                .build();
+
+        // Create the log event with a MapMessage.
+        MapMessage mapMessage = new MapMessage()
+                .with("key1", "val1")
+                .with("key2", 0xDEADBEEF)
+                .with("key3", Collections.singletonMap("key3.1", "val3.1"));
+        LogEvent logEvent = Log4jLogEvent
+                .newBuilder()
+                .setLoggerName(LogstashLayoutTest.class.getSimpleName())
+                .setLevel(Level.INFO)
+                .setMessage(mapMessage)
+                .setTimeMillis(System.currentTimeMillis())
+                .build();
+
+        // Check the serialized event.
+        String serializedLogEvent = layout.toSerializable(logEvent);
+        JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
+        assertThat(point(rootNode, "message", "key1").asText()).isEqualTo("val1");
+        assertThat(point(rootNode, "message", "key2").asLong()).isEqualTo(0xDEADBEEF);
+        assertThat(point(rootNode, "message", "key3", "key3.1").asText()).isEqualTo("val3.1");
+
+    }
 
     @Test
     public void test_property_injection() throws Exception {

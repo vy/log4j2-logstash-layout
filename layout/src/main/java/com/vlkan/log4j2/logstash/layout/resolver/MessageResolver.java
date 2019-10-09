@@ -1,14 +1,12 @@
 package com.vlkan.log4j2.logstash.layout.resolver;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.vlkan.log4j2.logstash.layout.util.JsonGenerators;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.core.LogEvent;
-import org.apache.logging.log4j.message.Message;
-import org.apache.logging.log4j.message.MultiformatMessage;
-import org.apache.logging.log4j.message.ObjectMessage;
-import org.apache.logging.log4j.message.SimpleMessage;
+import org.apache.logging.log4j.message.*;
+import org.apache.logging.log4j.util.TriConsumer;
 
 import java.io.IOException;
 
@@ -106,6 +104,18 @@ class MessageResolver implements EventResolver {
         }
         MultiformatMessage multiformatMessage = (MultiformatMessage) message;
 
+        // As described in LOG4J2-2703, MapMessage#getFormattedMessage() is
+        // incorrectly formatting Object's. Hence, we will temporarily work
+        // around the problem by serializing it ourselves rather than using the
+        // default provided formatter.
+
+        // Override the provided MapMessage formatter.
+        if (context.isMapMessageFormatterIgnored() && message instanceof MapMessage) {
+            MapMessage mapMessage = (MapMessage) message;
+            writeMapMessage(jsonGenerator, mapMessage);
+            return true;
+        }
+
         // Check formatter's JSON support.
         boolean jsonSupported = false;
         String[] formats = multiformatMessage.getFormats();
@@ -134,6 +144,22 @@ class MessageResolver implements EventResolver {
         return true;
 
     }
+
+    private static void writeMapMessage(JsonGenerator jsonGenerator, MapMessage mapMessage) throws IOException {
+        jsonGenerator.writeStartObject();
+        mapMessage.forEach(MAP_MESSAGE_ENTRY_WRITER, jsonGenerator);
+        jsonGenerator.writeEndObject();
+    }
+
+    private static TriConsumer<String, Object, JsonGenerator> MAP_MESSAGE_ENTRY_WRITER =
+            (key, value, jsonGenerator) -> {
+                try {
+                    jsonGenerator.writeFieldName(key);
+                    JsonGenerators.writeObject(jsonGenerator, value);
+                } catch (IOException error) {
+                    throw new RuntimeException("MapMessage entry serialization failure", error);
+                }
+            };
 
     private static JsonNode readMessageJson(EventResolverContext context, String messageJson) {
         try {

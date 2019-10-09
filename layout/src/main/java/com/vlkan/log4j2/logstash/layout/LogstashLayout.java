@@ -84,6 +84,7 @@ public class LogstashLayout implements Layout<String> {
                 .setMdcKeyPattern(builder.mdcKeyPattern)
                 .setNdcPattern(builder.ndcPattern)
                 .setAdditionalFields(builder.eventTemplateAdditionalFields.pairs)
+                .setMapMessageFormatterIgnored(builder.mapMessageFormatterIgnored)
                 .build();
         this.eventResolver = TemplateResolvers.ofTemplate(resolverContext, eventTemplate);
 
@@ -286,6 +287,9 @@ public class LogstashLayout implements Layout<String> {
         @PluginBuilderAttribute
         private String objectMapperFactoryMethod = "com.fasterxml.jackson.databind.ObjectMapper.new";
 
+        @PluginBuilderAttribute
+        private boolean mapMessageFormatterIgnored = true;
+
         private Builder() {
             // Do nothing.
         }
@@ -467,6 +471,15 @@ public class LogstashLayout implements Layout<String> {
 
         public Builder setObjectMapperFactoryMethod(String objectMapperFactoryMethod) {
             this.objectMapperFactoryMethod = objectMapperFactoryMethod;
+            return this;
+        }
+
+        public boolean isMapMessageFormatterIgnored() {
+            return mapMessageFormatterIgnored;
+        }
+
+        public Builder setMapMessageFormatterIgnored(boolean mapMessageFormatterIgnored) {
+            this.mapMessageFormatterIgnored = mapMessageFormatterIgnored;
             return this;
         }
 

@@ -35,7 +35,9 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
 
     private final KeyValuePair[] additionalFields;
 
-    public EventResolverContext(Builder builder) {
+    private final boolean mapMessageFormatterIgnored;
+
+    private EventResolverContext(Builder builder) {
         this.objectMapper = builder.objectMapper;
         this.substitutor = builder.substitutor;
         this.writerPool = builder.writerPool;
@@ -49,6 +51,7 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
         this.mdcKeyPattern = builder.mdcKeyPattern == null ? null : Pattern.compile(builder.mdcKeyPattern);
         this.ndcPattern = builder.ndcPattern == null ? null : Pattern.compile(builder.ndcPattern);
         this.additionalFields = builder.additionalFields;
+        this.mapMessageFormatterIgnored = builder.mapMessageFormatterIgnored;
     }
 
     @Override
@@ -108,6 +111,10 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
         return additionalFields;
     }
 
+    boolean isMapMessageFormatterIgnored() {
+        return mapMessageFormatterIgnored;
+    }
+
     public static Builder newBuilder() {
         return new Builder();
     }
@@ -135,6 +142,8 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
         private String ndcPattern;
 
         private KeyValuePair[] additionalFields;
+
+        private boolean mapMessageFormatterIgnored;
 
         private Builder() {
             // Do nothing.
@@ -192,6 +201,11 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
 
         public Builder setAdditionalFields(KeyValuePair[] additionalFields) {
             this.additionalFields = additionalFields;
+            return this;
+        }
+
+        public Builder setMapMessageFormatterIgnored(boolean mapMessageFormatterIgnored) {
+            this.mapMessageFormatterIgnored = mapMessageFormatterIgnored;
             return this;
         }
 

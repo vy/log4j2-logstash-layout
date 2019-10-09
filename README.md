@@ -138,6 +138,7 @@ This generates an output as follows:
 | `maxSerializationContextPoolSize` | int | number of cached serialization contexts, i.e., `JsonGenerator`, `byte[]` of size `maxByteCount`, etc. (defaults to 50) |
 | `maxWriterPoolSize`<sup>§</sup> | int | number of cached `Writer`s backed by `char[]` of size `maxStringLength` or `maxByteCount` (defaults to 50) |
 | `objectMapperFactoryMethod` | String | custom object mapper factory method (defaults to `com.fasterxml.jackson.databind.ObjectMapper.new`) |
+| `mapMessageFormatterIgnored` | boolean | as a temporary work around for [LOG4J2-2703](https://issues.apache.org/jira/browse/LOG4J2-2703), serialize `MapMessage`s using Jackson rather than `MapMessage#getFormattedMessage()` (defaults to `true`) |
 
 <sup>†</sup> One can configure additional event template fields as follows:
 
