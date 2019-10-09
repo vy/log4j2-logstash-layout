@@ -466,6 +466,7 @@ Let us try to answer some common questions:
 - [bakomchik](https://github.com/bakomchik)
 - [chrissydee](https://github.com/chrissydee)
 - [Eric Schwartz](https://github.com/emschwar)
+- [Johann Schmitz](https://github.com/ercpe)
 - [Jonathan Guéhenneux](https://github.com/Achaaab)
 - [justinsaliba](https://github.com/justinsaliba)
 - [Michael K. Edwards](https://github.com/mkedwards)
