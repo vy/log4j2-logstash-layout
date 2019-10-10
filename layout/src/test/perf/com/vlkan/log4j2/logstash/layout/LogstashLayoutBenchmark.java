@@ -5,7 +5,6 @@ import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.layout.ByteBufferDestination;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.profile.GCProfiler;
-import org.openjdk.jmh.profile.StackProfiler;
 import org.openjdk.jmh.results.format.ResultFormatType;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.options.ChainedOptionsBuilder;
@@ -30,7 +29,6 @@ public class LogstashLayoutBenchmark {
                 .warmupTime(TimeValue.seconds(20))
                 .measurementIterations(3)
                 .measurementTime(TimeValue.seconds(30))
-                .addProfiler(StackProfiler.class)
                 .addProfiler(GCProfiler.class);
         enableJsonOutput(optionsBuilder);
         Options options = optionsBuilder
