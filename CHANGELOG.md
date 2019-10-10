@@ -1,4 +1,4 @@
-### (2019-09-??) v0.21
+### (2019-10-15) v0.21
 
 - Add feature comparison matrix.
 
@@ -20,7 +20,7 @@
 
 - Support `ObjectMessage` in `${json:message:json}` directive. (#36)
 
-### (2019-08-09) v0.20
+### (2019-08-09) v0.20 \[failed due to Sonatype mishap]
 
 - Use UTF-8 while serializing stack traces.
 
