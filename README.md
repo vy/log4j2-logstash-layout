@@ -129,18 +129,18 @@ This generates an output as follows:
 | `ndcPattern` | String | regex to filter NDC items |
 | `eventTemplate` | String | inline JSON template for rendering `LogEvent`s (has priority over `eventTemplateUri`) |
 | `eventTemplateUri` | String | JSON template for rendering `LogEvent`s (defaults to [`classpath:LogstashJsonEventLayoutV1.json`](layout/src/main/resources/LogstashJsonEventLayoutV1.json)) |
-| `eventTemplateAdditionalFields`<sup>†</sup> | KeyValuePair | additional key-value pairs appended to the root of the event template |
+| `eventTemplateAdditionalFields`<sup>1</sup> | KeyValuePair | additional key-value pairs appended to the root of the event template |
 | `stackTraceElementTemplate` | String | inline JSON template for rendering `StackTraceElement`s (has priority over `stackTraceElementTemplateUri`) |
 | `stackTraceElementTemplateUri` | String | JSON template for rendering `StackTraceElement`s (defaults to [`classpath:Log4j2StackTraceElementLayout.json`](layout/src/main/resources/Log4j2StackTraceElementLayout.json)) |
 | `lineSeparator` | String | used to separate log outputs (defaults to `System.lineSeparator()`) |
 | `maxByteCount` | int | used to cap the internal `byte[]` buffer used for serialization (defaults to 512 KiB) |
-| `maxStringLength`<sup>‡</sup> | int | truncate string values longer than the specified limit (defaults to 0) |
+| `maxStringLength`<sup>2</sup> | int | truncate string values longer than the specified limit (defaults to 0) |
 | `maxSerializationContextPoolSize` | int | number of cached serialization contexts, i.e., `JsonGenerator`, `byte[]` of size `maxByteCount`, etc. (defaults to 50) |
-| `maxWriterPoolSize`<sup>§</sup> | int | number of cached `Writer`s backed by `char[]` of size `maxStringLength` or `maxByteCount` (defaults to 50) |
+| `maxWriterPoolSize`<sup>3</sup> | int | number of cached `Writer`s backed by `char[]` of size `maxStringLength` or `maxByteCount` (defaults to 50) |
 | `objectMapperFactoryMethod` | String | custom object mapper factory method (defaults to `com.fasterxml.jackson.databind.ObjectMapper.new`) |
 | `mapMessageFormatterIgnored` | boolean | as a temporary work around for [LOG4J2-2703](https://issues.apache.org/jira/browse/LOG4J2-2703), serialize `MapMessage`s using Jackson rather than `MapMessage#getFormattedMessage()` (defaults to `true`) |
 
-<sup>†</sup> One can configure additional event template fields as follows:
+<sup>1</sup> One can configure additional event template fields as follows:
 
 ```xml
 <LogstashLayout ...>
@@ -151,7 +151,7 @@ This generates an output as follows:
 </LogstashLayout>
 ```
 
-<sup>‡</sup> Note that string value truncation via `maxStringLength` can take
+<sup>2</sup> Note that string value truncation via `maxStringLength` can take
 place both in object keys and values, and this operation does not leave any
 trace behind. `maxStringLength` is intended as a soft protection against bogus
 input and one should always rely on `maxByteCount` for a hard limit.
@@ -161,7 +161,7 @@ while formatting the `LogEvent`s. By default, `LogstashLayout` ships
 [`LogstashJsonEventLayoutV1.json`](layout/src/main/resources/LogstashJsonEventLayoutV1.json)
 providing [the official Logstash `JSONEventLayoutV1`](https://github.com/logstash/log4j-jsonevent-layout).
 
-<sup>§</sup> `maxWriterPoolSize` is only used while serializing stack traces
+<sup>3</sup> `maxWriterPoolSize` is only used while serializing stack traces
 into text, that is, for `stackTrace:text` directive.
 
 ```json
@@ -286,12 +286,21 @@ Below is a feature comparison matrix between `LogstashLayout` and alternatives.
 
 | Feature | `LogstashLayout` | `JsonLayout` | `EcsLayout` |
 |---------|------------------|--------------|-------------|
+| Java version | 8 | 7<sup>4</sup> | 6 |
 | Dependencies | Jackson | Jackson | None |
 | Full schema customization? | ✓ | ✕ | ✕ |
 | Timestamp customization? | ✓ | ✕ | ✕ |
 | (Almost) garbage-free? | ✓ | ✕ | ✓ |
-| Custom typed `Message` serialization? | ✓ | ✕ | ✕ |
+| Custom typed `Message` serialization? | ✓ | ✕ | ✓<sup>5</sup> |
 | Custom typed `MDC` value serialization? | ✓ | ✕ | ✕ |
+| Rendering stack traces as array? | ✓ | ✓ | ✓ |
+| Enabling/Disabling JSON pretty print? | ✓ | ✓ | ✕ |
+| Additional fields? | ✓ | ✓ | ✓ |
+
+<sup>4</sup> Log4j 2.4 and greater requires Java 7, versions 2.0-alpha1 to 2.3
+required Java 6.
+
+<sup>5</sup> Only for `ObjectMessage`s and if Jackson is in the classpath.
 
 <a name="fat-jar"></a>
 
@@ -362,8 +371,8 @@ The figures for serializing 1,000 `LogEvent`s at each operation are as follows.
         <thead>
             <tr>
                 <th>Benchmark</th>
-                <th colspan="2">ops/sec<sup>*</sup></th>
-                <th>B/op<sup>*</sup></th>
+                <th colspan="2">ops/sec<sup>6</sup></th>
+                <th>B/op<sup>6</sup></th>
             </tr>
         </thead>
         <tbody>
@@ -430,7 +439,7 @@ The figures for serializing 1,000 `LogEvent`s at each operation are as follows.
         </tbody>
     </table>
     <p id="footnotes">
-        <sup>*</sup> 99<sup>th</sup> percentile
+        <sup>6</sup> 99<sup>th</sup> percentile
     </p>
 </div>
 
