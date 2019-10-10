@@ -2,7 +2,6 @@
   "@timestamp": "${json:timestamp}",
   "log.level": "${json:level}",
   "message": "${json:message}",
-  "service.name": "benchmark",
   "process.thread.name": "${json:thread:name}",
   "log.logger": "${json:logger:name}",
   "labels": "${json:mdc}",

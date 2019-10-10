@@ -57,12 +57,18 @@ public class LogstashLayoutBenchmarkState {
     }
 
     private static LogstashLayout createLogstashLayout4EcsLayout() {
+        LogstashLayout.EventTemplateAdditionalFields additionalFields = LogstashLayout
+                .EventTemplateAdditionalFields
+                .newBuilder()
+                .setPairs(new KeyValuePair[]{new KeyValuePair("service.name", "benchmark")})
+                .build();
         return LogstashLayout
                 .newBuilder()
                 .setConfiguration(CONFIGURATION)
                 .setEventTemplateUri("classpath:EcsLayout.json")
                 .setEmptyPropertyExclusionEnabled(false)
                 .setStackTraceEnabled(true)
+                .setEventTemplateAdditionalFields(additionalFields)
                 .setMaxByteCount(4096)
                 .build();
     }
@@ -85,7 +91,6 @@ public class LogstashLayoutBenchmarkState {
                 .newBuilder()
                 .setConfiguration(CONFIGURATION)
                 .setServiceName("benchmark")
-                .setAdditionalFields(new KeyValuePair[0])
                 .build();
     }
 
