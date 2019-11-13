@@ -71,7 +71,7 @@
         <assertj-core.version>3.13.2</assertj-core.version>
         <commons-lang3.version>3.9</commons-lang3.version>
         <ecs-layout.version>0.1.1</ecs-layout.version>
-        <jackson.version>2.9.10</jackson.version>
+        <jackson.version>2.9.10.1</jackson.version>
         <jmh.version>1.21</jmh.version>
         <junit.version>4.13-beta-3</junit.version>
         <log4j2.version>2.12.1</log4j2.version>
