@@ -19,6 +19,7 @@ import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 import org.apache.logging.log4j.core.impl.Log4jLogEvent;
 import org.apache.logging.log4j.core.layout.ByteBufferDestination;
 import org.apache.logging.log4j.core.lookup.MainMapLookup;
+import org.apache.logging.log4j.core.time.MutableInstant;
 import org.apache.logging.log4j.core.util.KeyValuePair;
 import org.apache.logging.log4j.message.MapMessage;
 import org.apache.logging.log4j.message.ObjectMessage;
@@ -26,6 +27,7 @@ import org.apache.logging.log4j.message.SimpleMessage;
 import org.apache.logging.log4j.message.StringMapMessage;
 import org.apache.logging.log4j.util.SortedArrayStringMap;
 import org.apache.logging.log4j.util.StringMap;
+import org.assertj.core.data.Percentage;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -35,7 +37,12 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 import static com.vlkan.log4j2.logstash.layout.ObjectMapperFixture.OBJECT_MAPPER;
@@ -1166,6 +1173,47 @@ public class LogstashLayoutTest {
         assertThat(point(rootNode, "level").asText()).isEqualTo(level.name());
         assertThat(point(rootNode, additionalField1.getKey()).asText()).isEqualTo(message.getFormattedMessage());
         assertThat(point(rootNode, additionalField2.getKey()).asText()).isEqualTo(additionalField2.getValue());
+
+    }
+
+    @Test
+    public void test_timestamp_divisor() throws IOException {
+
+        // Create the log event.
+        SimpleMessage message = new SimpleMessage("Hello, World!");
+        Level level = Level.ERROR;
+        MutableInstant instant = new MutableInstant();
+        long instantEpochSecond = 1_577_393_196L;
+        int instantEpochSecondNano = 123_456_789;
+        instant.initFromEpochSecond(instantEpochSecond, instantEpochSecondNano);
+        LogEvent logEvent = Log4jLogEvent
+                .newBuilder()
+                .setLoggerName(LogstashLayoutTest.class.getSimpleName())
+                .setLevel(level)
+                .setMessage(message)
+                .setInstant(instant)
+                .build();
+
+        // Create the event template.
+        ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
+        eventTemplateRootNode.put("epochSeconds", "${json:timestamp:divisor=1e9}");
+        String eventTemplate = eventTemplateRootNode.toString();
+
+        // Create the layout.
+        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        LogstashLayout layout = LogstashLayout
+                .newBuilder()
+                .setConfiguration(configuration)
+                .setEventTemplate(eventTemplate)
+                .build();
+
+        // Check the serialized event.
+        String serializedLogEvent = layout.toSerializable(logEvent);
+        JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
+        double expectedTimestamp = instantEpochSecond + instantEpochSecondNano / 1e9;
+        assertThat(point(rootNode, "epochSeconds").asDouble())
+                .isCloseTo(expectedTimestamp, Percentage.withPercentage(0.01D));
+
 
     }
 

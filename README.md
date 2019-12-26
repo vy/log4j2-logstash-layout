@@ -238,6 +238,7 @@ while rendering the JSON output.
 | `thread:name` | `logEvent.getThreadName()` |
 | `thread:priority` | `logEvent.getThreadPriority()` |
 | `timestamp` | `logEvent.getTimeMillis()` formatted using `dateTimeFormatPattern` and `timeZoneId` |
+| `timestamp:divisor=<divisor>` | epoch nanoseconds derived from `logEvent.getInstant()` divided by provided `divisor` (of type `double`) |
 | `timestamp:millis` | `logEvent.getTimeMillis()` |
 | `timestamp:nanos` | `logEvent.getNanoTime()` |
 

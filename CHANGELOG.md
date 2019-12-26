@@ -1,3 +1,7 @@
+### (????-??-??) v0.22
+
+- Add `timestamp:divisor=<divisor>` resolver. (#48)
+
 ### (2019-10-15) v0.21
 
 - Add feature comparison matrix.

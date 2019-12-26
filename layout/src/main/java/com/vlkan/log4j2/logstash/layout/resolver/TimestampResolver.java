@@ -2,9 +2,12 @@ package com.vlkan.log4j2.logstash.layout.resolver;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.time.Instant;
 import org.apache.logging.log4j.core.util.datetime.FastDateFormat;
 
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 class TimestampResolver implements EventResolver {
 
@@ -25,14 +28,36 @@ class TimestampResolver implements EventResolver {
     }
 
     private static EventResolver createInternalResolver(EventResolverContext context, String key) {
-        if (key == null) {
+
+        // Parse key.
+        String correctedKey = key != null ? key : "";
+        Matcher matcher = Pattern.compile("^(millis|nanos|divisor=(.+))?$").matcher(correctedKey);
+        if (!matcher.matches()) {
+            throw new IllegalArgumentException("unknown key: " + key);
+        }
+
+        // Fallback to date-time formatting if key is empty.
+        String operator = matcher.group(1);
+        if (operator == null) {
             return createFormatResolver(context);
         }
-        switch (key) {
+
+        // Fallback to millis/nanos, if key is satisfied.
+        switch (operator) {
             case "millis": return MILLIS_RESOLVER;
             case "nanos": return NANOS_RESOLVER;
         }
-        throw new IllegalArgumentException("unknown key: " + key);
+
+        // Otherwise, read the divisor.
+        String divisorString = matcher.group(2);
+        double divisor;
+        try {
+            divisor = Double.parseDouble(divisorString);
+        } catch (NumberFormatException error) {
+            throw new IllegalArgumentException("invalid divisor: " + divisorString, error);
+        }
+        return createDivisorResolver(divisor);
+
     }
 
     private static EventResolver createFormatResolver(EventResolverContext context) {
@@ -58,6 +83,20 @@ class TimestampResolver implements EventResolver {
                 jsonGenerator.writeString(timestamp);
             }
 
+        };
+    }
+
+    private static EventResolver createDivisorResolver(double divisor) {
+        return (logEvent, jsonGenerator) -> {
+            Instant logEventInstant = logEvent.getInstant();
+            double quotient =
+                    // According to Herbie[1], transforming ((x * 1e9) + y) / z
+                    // equation to 1e9 * (x / z) + y / z reduces the average
+                    // error error from 0.7 to 0.3, yay!
+                    // [1] http://herbie.uwplse.org
+                    1e9 * (logEventInstant.getEpochSecond() / divisor) +
+                            logEventInstant.getNanoOfSecond() / divisor;
+            jsonGenerator.writeNumber(quotient);
         };
     }
 
