@@ -19,6 +19,7 @@ import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 import org.apache.logging.log4j.core.impl.Log4jLogEvent;
 import org.apache.logging.log4j.core.layout.ByteBufferDestination;
 import org.apache.logging.log4j.core.lookup.MainMapLookup;
+import org.apache.logging.log4j.core.net.Severity;
 import org.apache.logging.log4j.core.time.MutableInstant;
 import org.apache.logging.log4j.core.util.KeyValuePair;
 import org.apache.logging.log4j.message.MapMessage;
@@ -1214,6 +1215,47 @@ public class LogstashLayoutTest {
         assertThat(point(rootNode, "epochSeconds").asDouble())
                 .isCloseTo(expectedTimestamp, Percentage.withPercentage(0.01D));
 
+
+    }
+
+    @Test
+    public void test_level_severity() throws IOException {
+
+        // Create the event template.
+        ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
+        eventTemplateRootNode.put("severity", "${json:level:severity}");
+        eventTemplateRootNode.put("severityCode", "${json:level:severity:code}");
+        String eventTemplate = eventTemplateRootNode.toString();
+
+        // Create the layout.
+        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        LogstashLayout layout = LogstashLayout
+                .newBuilder()
+                .setConfiguration(configuration)
+                .setEventTemplate(eventTemplate)
+                .build();
+
+        for (Level level : Level.values()) {
+
+            // Create the log event.
+            SimpleMessage message = new SimpleMessage("Hello, World!");
+            LogEvent logEvent = Log4jLogEvent
+                    .newBuilder()
+                    .setLoggerName(LogstashLayoutTest.class.getSimpleName())
+                    .setLevel(level)
+                    .setMessage(message)
+                    .build();
+
+            // Check the serialized event.
+            String serializedLogEvent = layout.toSerializable(logEvent);
+            JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
+            Severity expectedSeverity = Severity.getSeverity(level);
+            String expectedSeverityName = expectedSeverity.name();
+            int expectedSeverityCode = expectedSeverity.getCode();
+            assertThat(point(rootNode, "severity").asText()).isEqualTo(expectedSeverityName);
+            assertThat(point(rootNode, "severityCode").asInt()).isEqualTo(expectedSeverityCode);
+
+        }
 
     }
 

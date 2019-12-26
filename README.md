@@ -220,6 +220,8 @@ while rendering the JSON output.
 | `exceptionRootCause:message` | the innermost `exception:message` in causal chain |
 | `exceptionRootCause:stackTrace[:text]` | the innermost `exception:stackTrace[:text]` in causal chain |
 | `level` | `logEvent.getLevel()` |
+| `level:severity` | [Syslog severity](https://en.wikipedia.org/wiki/Syslog#Severity_levels) keyword of `logEvent.getLevel()` |
+| `level:severity:code` | [Syslog severity](https://en.wikipedia.org/wiki/Syslog#Severity_levels) code of `logEvent.getLevel()` |
 | `logger:fqcn` | `logEvent.getLoggerFqcn()` |
 | `logger:name` | `logEvent.getLoggerName()` |
 | `main:<key>` | performs [Main Argument Lookup](https://logging.apache.org/log4j/2.0/manual/lookups.html#AppMainArgsLookup) for the given `key` |

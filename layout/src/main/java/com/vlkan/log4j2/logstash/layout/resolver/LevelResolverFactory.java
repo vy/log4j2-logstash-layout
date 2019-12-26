@@ -17,7 +17,7 @@ class LevelResolverFactory implements EventResolverFactory<LevelResolver> {
 
     @Override
     public LevelResolver create(EventResolverContext context, String key) {
-        return LevelResolver.getInstance();
+        return new LevelResolver(key);
     }
 
 }

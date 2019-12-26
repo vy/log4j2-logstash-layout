@@ -1,5 +1,7 @@
 ### (????-??-??) v0.22
 
+- Add `level:severity` and `level:severity:code` resolvers. (#48)
+
 - Add `timestamp:divisor=<divisor>` resolver. (#48)
 
 ### (2019-10-15) v0.21
