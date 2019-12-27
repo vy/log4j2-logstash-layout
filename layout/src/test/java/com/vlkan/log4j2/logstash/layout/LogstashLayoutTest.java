@@ -1197,7 +1197,14 @@ public class LogstashLayoutTest {
 
         // Create the event template.
         ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
-        eventTemplateRootNode.put("epochSeconds", "${json:timestamp:divisor=1e9}");
+        String epochSecsFieldName = "epochSecs";
+        String epochMicrosFieldName = "epochMicros";
+        String epochMillisFieldName = "epochMillis";
+        String epochNanosFieldName = "epochNanos";
+        eventTemplateRootNode.put(epochSecsFieldName, "${json:timestamp:divisor=1e9}");
+        eventTemplateRootNode.put(epochMicrosFieldName, "${json:timestamp:divisor=1e6}");
+        eventTemplateRootNode.put(epochMillisFieldName, "${json:timestamp:divisor=1e3}");
+        eventTemplateRootNode.put(epochNanosFieldName, "${json:timestamp:divisor=1e0}");
         String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
@@ -1211,10 +1218,18 @@ public class LogstashLayoutTest {
         // Check the serialized event.
         String serializedLogEvent = layout.toSerializable(logEvent);
         JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
-        double expectedTimestamp = instantEpochSecond + instantEpochSecondNano / 1e9;
-        assertThat(point(rootNode, "epochSeconds").asDouble())
-                .isCloseTo(expectedTimestamp, Percentage.withPercentage(0.01D));
-
+        double expectedEpochSecs = instantEpochSecond * 1e0 + instantEpochSecondNano / 1e9;
+        double expectedEpochMicros = instantEpochSecond * 1e3 + instantEpochSecondNano / 1e6;
+        double expectedEpochMillis = instantEpochSecond * 1e6 + instantEpochSecondNano / 1e3;
+        double expectedEpochNanos = instantEpochSecond * 1e9 + instantEpochSecondNano / 1e0;
+        assertThat(point(rootNode, epochSecsFieldName).asDouble())
+                .isCloseTo(expectedEpochSecs, Percentage.withPercentage(0.01D));
+        assertThat(point(rootNode, epochMicrosFieldName).asDouble())
+                .isCloseTo(expectedEpochMicros, Percentage.withPercentage(0.01D));
+        assertThat(point(rootNode, epochMillisFieldName).asDouble())
+                .isCloseTo(expectedEpochMillis, Percentage.withPercentage(0.01D));
+        assertThat(point(rootNode, epochNanosFieldName).asDouble())
+                .isCloseTo(expectedEpochNanos, Percentage.withPercentage(0.01D));
 
     }
 

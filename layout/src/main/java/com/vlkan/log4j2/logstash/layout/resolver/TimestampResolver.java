@@ -56,6 +56,9 @@ class TimestampResolver implements EventResolver {
         } catch (NumberFormatException error) {
             throw new IllegalArgumentException("invalid divisor: " + divisorString, error);
         }
+        if (Double.compare(0D, divisor) == 0) {
+            throw new IllegalArgumentException("invalid divisor: " + divisorString);
+        }
         return createDivisorResolver(divisor);
 
     }
@@ -87,17 +90,44 @@ class TimestampResolver implements EventResolver {
     }
 
     private static EventResolver createDivisorResolver(double divisor) {
-        return (logEvent, jsonGenerator) -> {
-            Instant logEventInstant = logEvent.getInstant();
-            double quotient =
-                    // According to Herbie[1], transforming ((x * 1e9) + y) / z
-                    // equation to 1e9 * (x / z) + y / z reduces the average
-                    // error error from 0.7 to 0.3, yay!
-                    // [1] http://herbie.uwplse.org
-                    1e9 * (logEventInstant.getEpochSecond() / divisor) +
-                            logEventInstant.getNanoOfSecond() / divisor;
-            jsonGenerator.writeNumber(quotient);
-        };
+        if (Double.compare(1e9D, divisor) == 0) {
+            return (logEvent, jsonGenerator) -> {
+                Instant logEventInstant = logEvent.getInstant();
+                String encodedNumber = "" +
+                        logEventInstant.getEpochSecond() +
+                        '.' +
+                        logEventInstant.getNanoOfSecond();
+                jsonGenerator.writeNumber(encodedNumber);
+            };
+        } else if (Double.compare(1e6D, divisor) == 0) {
+            return (logEvent, jsonGenerator) -> {
+                Instant logEventInstant = logEvent.getInstant();
+                String encodedNumber = "" +
+                        logEventInstant.getEpochMillisecond() +
+                        '.' +
+                        logEventInstant.getNanoOfMillisecond();
+                jsonGenerator.writeNumber(encodedNumber);
+            };
+        } else if (Double.compare(1e0D, divisor) == 0) {
+            return (logEvent, jsonGenerator) -> {
+                Instant logEventInstant = logEvent.getInstant();
+                long epochNanos = Math.multiplyExact(1_000_000_000L, logEventInstant.getEpochSecond());
+                long number = Math.addExact(epochNanos, logEventInstant.getNanoOfSecond());
+                jsonGenerator.writeNumber(number);
+            };
+        } else {
+            return (logEvent, jsonGenerator) -> {
+                Instant logEventInstant = logEvent.getInstant();
+                double quotient =
+                        // According to Herbie[1], transforming ((x * 1e9) + y) / z
+                        // equation to 1e9 * (x / z) + y / z reduces the average
+                        // error error from 0.7 to 0.3, yay!
+                        // [1] http://herbie.uwplse.org
+                        1e9F * (logEventInstant.getEpochSecond() / divisor) +
+                                logEventInstant.getNanoOfSecond() / divisor;
+                jsonGenerator.writeNumber(quotient);
+            };
+        }
     }
 
     static String getName() {
