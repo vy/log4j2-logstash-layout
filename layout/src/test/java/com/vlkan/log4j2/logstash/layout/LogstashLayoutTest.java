@@ -1259,4 +1259,45 @@ public class LogstashLayoutTest {
 
     }
 
+    @Test
+    public void test_exception_resolvers_against_no_exceptions() throws IOException {
+
+        // Create the log event.
+        SimpleMessage message = new SimpleMessage("Hello, World!");
+        LogEvent logEvent = Log4jLogEvent
+                .newBuilder()
+                .setLoggerName(LogstashLayoutTest.class.getSimpleName())
+                .setMessage(message)
+                .build();
+
+        // Create the event template.
+        ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
+        eventTemplateRootNode.put("exceptionStackTrace", "${json:exception:stackTrace}");
+        eventTemplateRootNode.put("exceptionStackTraceText", "${json:exception:stackTrace:text}");
+        eventTemplateRootNode.put("exceptionRootCauseStackTrace", "${json:exceptionRootCause:stackTrace}");
+        eventTemplateRootNode.put("exceptionRootCauseStackTraceText", "${json:exceptionRootCause:stackTrace:text}");
+        eventTemplateRootNode.put("requiredFieldTriggeringError", true);
+        String eventTemplate = eventTemplateRootNode.toString();
+
+        // Create the layout.
+        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        LogstashLayout layout = LogstashLayout
+                .newBuilder()
+                .setConfiguration(configuration)
+                .setEventTemplate(eventTemplate)
+                .setEmptyPropertyExclusionEnabled(false)
+                .setStackTraceEnabled(true)
+                .build();
+
+        // Check the serialized event.
+        String serializedLogEvent = layout.toSerializable(logEvent);
+        JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
+        assertThat(point(rootNode, "exceptionStackTrace").isNull()).isTrue();
+        assertThat(point(rootNode, "exceptionStackTraceText").isNull()).isTrue();
+        assertThat(point(rootNode, "exceptionRootCauseStackTrace").isNull()).isTrue();
+        assertThat(point(rootNode, "exceptionRootCauseStackTraceText").isNull()).isTrue();
+        assertThat(point(rootNode, "requiredFieldTriggeringError").asBoolean()).isTrue();
+
+    }
+
 }

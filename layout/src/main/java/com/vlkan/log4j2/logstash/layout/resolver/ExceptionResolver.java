@@ -45,7 +45,9 @@ class ExceptionResolver implements EventResolver {
                     StackTraceTextResolver stackTraceTextResolver = new StackTraceTextResolver(context.getWriterPool());
                     return (logEvent, jsonGenerator) -> {
                         Throwable exception = logEvent.getThrown();
-                        if (exception != null) {
+                        if (exception == null) {
+                            jsonGenerator.writeNull();
+                        } else {
                             stackTraceTextResolver.resolve(exception, jsonGenerator);
                         }
                     };
@@ -55,7 +57,9 @@ class ExceptionResolver implements EventResolver {
                 EventResolver createStackTraceObjectResolver(EventResolverContext context) {
                     return (logEvent, jsonGenerator) -> {
                         Throwable exception = logEvent.getThrown();
-                        if (exception != null) {
+                        if (exception == null) {
+                            jsonGenerator.writeNull();
+                        } else {
                             context.getStackTraceObjectResolver().resolve(exception, jsonGenerator);
                         }
                     };
