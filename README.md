@@ -275,11 +275,19 @@ demonstrating the usage of `LogstashLayout`.
 
 `log4j2-logstash-layout` artifact contains the following predefined templates:
 
+- [`EcsLayout.json`](layout/src/main/resources/EcsLayout.json) described by
+  [the Elastic Common Schema (ECS) specification](https://www.elastic.co/guide/en/ecs/current/ecs-reference.html)
+
 - [`LogstashJsonEventLayoutV1.json`](layout/src/main/resources/LogstashJsonEventLayoutV1.json)
   described in [log4j-jsonevent-layout](https://github.com/logstash/log4j-jsonevent-layout)
 
-- [`EcsLayout.json`](layout/src/main/resources/EcsLayout.json) described by
-  [the Elastic Common Schema (ECS) specification](https://www.elastic.co/guide/en/ecs/current/ecs-reference.html)
+- [`GelfLayout.json`](layout/src/main/resources/GelfLayout.json) described by
+  [the Graylog Extended Log Format (GELF) payload specification](https://docs.graylog.org/en/3.1/pages/gelf.html#gelf-payload-specification)
+  with additional `_thread` and `_logger`fields similar to
+  [`GelfLayout` of Log4j 2](https://logging.apache.org/log4j/2.0/manual/layouts.html#GELFLayout)
+  (Here it is advised to override the obligatory `host` field with a user
+  provided constant via `eventTemplateAdditionalFields` to avoid `hostName`
+  property lookup at runtime, which incurs an extra cost.)
 
 <a name="features"></a>
 

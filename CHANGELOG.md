@@ -3,6 +3,8 @@
 - Fix `JsonGenerator` state corruption in `ExceptionResolver` if
   `LogEvent#getThrown()` is `null`.
 
+- Add `GelfLayout.json` template.
+
 - Add `level:severity` and `level:severity:code` resolvers. (#48)
 
 - Add `timestamp:divisor=<divisor>` resolver. (#48)
