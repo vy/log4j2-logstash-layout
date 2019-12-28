@@ -25,6 +25,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -133,7 +134,21 @@ public class LogstashLayout implements Layout<String> {
 
     private static FastDateFormat readDateFormat(Builder builder) {
         TimeZone timeZone = TimeZone.getTimeZone(builder.timeZoneId);
-        return FastDateFormat.getInstance(builder.dateTimeFormatPattern, timeZone);
+        Locale locale = readLocale(builder.locale);
+        return FastDateFormat.getInstance(builder.dateTimeFormatPattern, timeZone, locale);
+    }
+
+    private static Locale readLocale(String locale) {
+        if (locale == null) {
+            return Locale.getDefault();
+        }
+        String[] localeFields = locale.split("_", 3);
+        switch (localeFields.length) {
+            case 1: return new Locale(localeFields[0]);
+            case 2: return new Locale(localeFields[0], localeFields[1]);
+            case 3: return new Locale(localeFields[0], localeFields[1], localeFields[2]);
+        }
+        throw new IllegalArgumentException("invalid locale: " + locale);
     }
 
     // Exposed for tests.
@@ -249,6 +264,9 @@ public class LogstashLayout implements Layout<String> {
         private String timeZoneId = TimeZone.getDefault().getID();
 
         @PluginBuilderAttribute
+        private String locale = null;
+
+        @PluginBuilderAttribute
         private String eventTemplate = null;
 
         @PluginBuilderAttribute
@@ -354,6 +372,15 @@ public class LogstashLayout implements Layout<String> {
 
         public Builder setTimeZoneId(String timeZoneId) {
             this.timeZoneId = timeZoneId;
+            return this;
+        }
+
+        public String getLocale() {
+            return locale;
+        }
+
+        public Builder setLocale(String locale) {
+            this.locale = locale;
             return this;
         }
 

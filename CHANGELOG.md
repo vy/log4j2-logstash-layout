@@ -1,5 +1,7 @@
 ### (????-??-??) v0.22
 
+- Add `locale` configuration.
+
 - Fix `JsonGenerator` state corruption in `ExceptionResolver` if
   `LogEvent#getThrown()` is `null`.
 

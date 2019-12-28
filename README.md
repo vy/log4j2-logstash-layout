@@ -125,6 +125,7 @@ This generates an output as follows:
 | `emptyPropertyExclusionEnabled` | boolean | exclude empty and null properties (defaults to `true`) |
 | `dateTimeFormatPattern` | String | timestamp formatter pattern (defaults to `yyyy-MM-dd'T'HH:mm:ss.SSSZZZ`) |
 | `timeZoneId` | String | time zone id (defaults to `TimeZone.getDefault().getID()`) |
+| `locale` | String | locale in one of the following forms: `<language>`, `<language>_<country>`, or `<language>_<country>_<variant>` (defaults to `Locale.getDefault()`) |
 | `mdcKeyPattern` | String | regex to filter MDC keys (does not apply to direct `mdc:key` access) |
 | `ndcPattern` | String | regex to filter NDC items |
 | `eventTemplate` | String | inline JSON template for rendering `LogEvent`s (has priority over `eventTemplateUri`) |
