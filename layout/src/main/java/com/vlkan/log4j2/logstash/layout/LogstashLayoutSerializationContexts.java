@@ -10,11 +10,11 @@ import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.core.util.JsonGeneratorDelegate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vlkan.log4j2.logstash.layout.util.ByteBufferOutputStream;
-import org.apache.logging.log4j.util.Supplier;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringReader;
+import java.util.function.Supplier;
 
 enum LogstashLayoutSerializationContexts {;
 
