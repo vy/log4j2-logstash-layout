@@ -6,16 +6,24 @@ import com.vlkan.log4j2.logstash.layout.resolver.EventResolverContext;
 import com.vlkan.log4j2.logstash.layout.resolver.StackTraceElementObjectResolverContext;
 import com.vlkan.log4j2.logstash.layout.resolver.TemplateResolver;
 import com.vlkan.log4j2.logstash.layout.resolver.TemplateResolvers;
-import com.vlkan.log4j2.logstash.layout.util.*;
+import com.vlkan.log4j2.logstash.layout.util.AutoCloseables;
+import com.vlkan.log4j2.logstash.layout.util.ByteBufferDestinations;
+import com.vlkan.log4j2.logstash.layout.util.ByteBufferOutputStream;
+import com.vlkan.log4j2.logstash.layout.util.Uris;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.Node;
-import org.apache.logging.log4j.core.config.plugins.*;
+import org.apache.logging.log4j.core.config.plugins.Plugin;
+import org.apache.logging.log4j.core.config.plugins.PluginBuilderAttribute;
+import org.apache.logging.log4j.core.config.plugins.PluginBuilderFactory;
+import org.apache.logging.log4j.core.config.plugins.PluginConfiguration;
+import org.apache.logging.log4j.core.config.plugins.PluginElement;
 import org.apache.logging.log4j.core.layout.ByteBufferDestination;
 import org.apache.logging.log4j.core.lookup.StrSubstitutor;
+import org.apache.logging.log4j.core.util.Constants;
 import org.apache.logging.log4j.core.util.KeyValuePair;
 import org.apache.logging.log4j.core.util.datetime.FastDateFormat;
 
@@ -28,6 +36,7 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.function.Supplier;
 
 @Plugin(name = "LogstashLayout",
         category = Node.CATEGORY,
@@ -45,60 +54,23 @@ public class LogstashLayout implements Layout<String> {
 
     private final byte[] lineSeparatorBytes;
 
-    private final LogstashLayoutSerializationContextPool serializationContextPool;
+    private final Supplier<LogstashLayoutSerializationContext> serializationContextSupplier;
+
+    private final ThreadLocal<LogstashLayoutSerializationContext> serializationContextRef;
 
     private LogstashLayout(Builder builder) {
-
-        // Create StackTraceElement resolver.
+        this.lineSeparatorBytes = builder.lineSeparator.getBytes(CHARSET);
         ObjectMapper objectMapper = createObjectMapper(builder.objectMapperFactoryMethod);
         StrSubstitutor substitutor = builder.config.getStrSubstitutor();
-        TemplateResolver<StackTraceElement> stackTraceElementObjectResolver = null;
-        if (builder.stackTraceEnabled) {
-            StackTraceElementObjectResolverContext stackTraceElementObjectResolverContext =
-                    StackTraceElementObjectResolverContext
-                    .newBuilder()
-                    .setObjectMapper(objectMapper)
-                    .setSubstitutor(substitutor)
-                    .setEmptyPropertyExclusionEnabled(builder.emptyPropertyExclusionEnabled)
-                    .build();
-            String stackTraceElementTemplate = readStackTraceElementTemplate(builder);
-            stackTraceElementObjectResolver = TemplateResolvers.ofTemplate(stackTraceElementObjectResolverContext, stackTraceElementTemplate);
-        }
-
-        // Create LogEvent resolver.
-        String eventTemplate = readEventTemplate(builder);
-        int writerCapacity = builder.maxStringLength > 0
-                ? builder.maxStringLength
-                : builder.maxByteCount;
-        BufferedPrintWriterPool writerPool = new BufferedPrintWriterPool(builder.maxWriterPoolSize, writerCapacity);
-        FastDateFormat timestampFormat = readDateFormat(builder);
-        EventResolverContext resolverContext = EventResolverContext
-                .newBuilder()
-                .setObjectMapper(objectMapper)
-                .setSubstitutor(substitutor)
-                .setWriterPool(writerPool)
-                .setTimestampFormat(timestampFormat)
-                .setLocationInfoEnabled(builder.locationInfoEnabled)
-                .setStackTraceEnabled(builder.stackTraceEnabled)
-                .setStackTraceElementObjectResolver(stackTraceElementObjectResolver)
-                .setEmptyPropertyExclusionEnabled(builder.emptyPropertyExclusionEnabled)
-                .setMdcKeyPattern(builder.mdcKeyPattern)
-                .setNdcPattern(builder.ndcPattern)
-                .setAdditionalFields(builder.eventTemplateAdditionalFields.pairs)
-                .setMapMessageFormatterIgnored(builder.mapMessageFormatterIgnored)
-                .build();
-        this.eventResolver = TemplateResolvers.ofTemplate(resolverContext, eventTemplate);
-
-        // Create the serialization context pool.
-        this.lineSeparatorBytes = builder.lineSeparator.getBytes(CHARSET);
-        this.serializationContextPool = new LogstashLayoutSerializationContextPool(
-                objectMapper,
-                builder.maxByteCount,
-                builder.prettyPrintEnabled,
-                builder.emptyPropertyExclusionEnabled,
-                builder.maxStringLength,
-                builder.maxSerializationContextPoolSize);
-
+        TemplateResolver<StackTraceElement> stackTraceElementObjectResolver =
+                builder.stackTraceEnabled
+                        ? createStackTraceElementResolver(builder, objectMapper, substitutor)
+                        : null;
+        this.eventResolver = createEventResolver(builder, objectMapper, substitutor, stackTraceElementObjectResolver);
+        this.serializationContextSupplier = createSerializationContextSupplier(builder, objectMapper);
+        this.serializationContextRef = Constants.ENABLE_THREADLOCALS
+                ? ThreadLocal.withInitial(serializationContextSupplier)
+                : null;
     }
 
     private static ObjectMapper createObjectMapper(String objectMapperFactoryMethod) {
@@ -116,6 +88,59 @@ public class LogstashLayout implements Layout<String> {
         } catch (Exception error) {
             throw new RuntimeException(error);
         }
+    }
+
+    private static TemplateResolver<StackTraceElement> createStackTraceElementResolver(
+            Builder builder,
+            ObjectMapper objectMapper,
+            StrSubstitutor substitutor) {
+        StackTraceElementObjectResolverContext stackTraceElementObjectResolverContext =
+                StackTraceElementObjectResolverContext
+                        .newBuilder()
+                        .setObjectMapper(objectMapper)
+                        .setSubstitutor(substitutor)
+                        .setEmptyPropertyExclusionEnabled(builder.emptyPropertyExclusionEnabled)
+                        .build();
+        String stackTraceElementTemplate = readStackTraceElementTemplate(builder);
+        return TemplateResolvers.ofTemplate(stackTraceElementObjectResolverContext, stackTraceElementTemplate);
+    }
+
+    private TemplateResolver<LogEvent> createEventResolver(
+            Builder builder,
+            ObjectMapper objectMapper,
+            StrSubstitutor substitutor,
+            TemplateResolver<StackTraceElement> stackTraceElementObjectResolver) {
+        String eventTemplate = readEventTemplate(builder);
+        int writerCapacity = builder.maxStringLength > 0
+                ? builder.maxStringLength
+                : builder.maxByteCount;
+        FastDateFormat timestampFormat = readDateFormat(builder);
+        EventResolverContext resolverContext = EventResolverContext
+                .newBuilder()
+                .setObjectMapper(objectMapper)
+                .setSubstitutor(substitutor)
+                .setWriterCapacity(writerCapacity)
+                .setTimestampFormat(timestampFormat)
+                .setLocationInfoEnabled(builder.locationInfoEnabled)
+                .setStackTraceEnabled(builder.stackTraceEnabled)
+                .setStackTraceElementObjectResolver(stackTraceElementObjectResolver)
+                .setEmptyPropertyExclusionEnabled(builder.emptyPropertyExclusionEnabled)
+                .setMdcKeyPattern(builder.mdcKeyPattern)
+                .setNdcPattern(builder.ndcPattern)
+                .setAdditionalFields(builder.eventTemplateAdditionalFields.pairs)
+                .setMapMessageFormatterIgnored(builder.mapMessageFormatterIgnored)
+                .build();
+        return TemplateResolvers.ofTemplate(resolverContext, eventTemplate);
+    }
+
+    private static Supplier<LogstashLayoutSerializationContext>
+    createSerializationContextSupplier(Builder builder, ObjectMapper objectMapper) {
+        return LogstashLayoutSerializationContexts.createSupplier(
+                objectMapper,
+                builder.maxByteCount,
+                builder.prettyPrintEnabled,
+                builder.emptyPropertyExclusionEnabled,
+                builder.maxStringLength);
     }
 
     private static String readEventTemplate(Builder builder) {
@@ -151,42 +176,33 @@ public class LogstashLayout implements Layout<String> {
         throw new IllegalArgumentException("invalid locale: " + locale);
     }
 
-    // Exposed for tests.
-    LogstashLayoutSerializationContextPool getSerializationContextPool() {
-        return serializationContextPool;
-    }
-
     @Override
     public String toSerializable(LogEvent event) {
-        LogstashLayoutSerializationContext context = serializationContextPool.acquire();
+        LogstashLayoutSerializationContext context = getResetSerializationContext();
         try {
             encode(event, context);
-            String serializedEvent = context.getOutputStream().toString(CHARSET);
-            serializationContextPool.release(context);
-            return serializedEvent;
+            return context.getOutputStream().toString(CHARSET);
         } catch (Exception error) {
-            AutoCloseables.closeUnchecked(context);
+            reloadSerializationContext(context);
             throw new RuntimeException("failed serializing JSON", error);
         }
     }
 
     @Override
     public byte[] toByteArray(LogEvent event) {
-        LogstashLayoutSerializationContext context = serializationContextPool.acquire();
+        LogstashLayoutSerializationContext context = getResetSerializationContext();
         try {
             encode(event, context);
-            byte[] serializedEventBytes = context.getOutputStream().toByteArray();
-            serializationContextPool.release(context);
-            return serializedEventBytes;
+            return context.getOutputStream().toByteArray();
         } catch (Exception error) {
-            AutoCloseables.closeUnchecked(context);
+            reloadSerializationContext(context);
             throw new RuntimeException("failed serializing JSON", error);
         }
     }
 
     @Override
     public void encode(LogEvent event, ByteBufferDestination destination) {
-        LogstashLayoutSerializationContext context = serializationContextPool.acquire();
+        LogstashLayoutSerializationContext context = getResetSerializationContext();
         try {
             encode(event, context);
             ByteBuffer byteBuffer = context.getOutputStream().getByteBuffer();
@@ -195,10 +211,35 @@ public class LogstashLayout implements Layout<String> {
             synchronized (destination) {
                 ByteBufferDestinations.writeToUnsynchronized(byteBuffer, destination);
             }
-            serializationContextPool.release(context);
         } catch (Exception error) {
-            AutoCloseables.closeUnchecked(context);
+            reloadSerializationContext(context);
             throw new RuntimeException("failed serializing JSON", error);
+        }
+    }
+
+    // Visible for tests.
+    LogstashLayoutSerializationContext getSerializationContext() {
+        return Constants.ENABLE_THREADLOCALS
+                ? serializationContextRef.get()
+                : serializationContextSupplier.get();
+    }
+
+    private LogstashLayoutSerializationContext getResetSerializationContext() {
+        LogstashLayoutSerializationContext context;
+        if (Constants.ENABLE_THREADLOCALS) {
+            context = serializationContextRef.get();
+            context.reset();
+        } else {
+            context = serializationContextSupplier.get();
+        }
+        return context;
+    }
+
+    private void reloadSerializationContext(LogstashLayoutSerializationContext oldContext) {
+        AutoCloseables.closeUnchecked(oldContext);
+        if (Constants.ENABLE_THREADLOCALS) {
+            LogstashLayoutSerializationContext newContext = serializationContextSupplier.get();
+            serializationContextRef.set(newContext);
         }
     }
 
@@ -295,12 +336,6 @@ public class LogstashLayout implements Layout<String> {
 
         @PluginBuilderAttribute
         private int maxStringLength = 0;
-
-        @PluginBuilderAttribute
-        private int maxSerializationContextPoolSize = 50;
-
-        @PluginBuilderAttribute
-        private int maxWriterPoolSize = 50;
 
         @PluginBuilderAttribute
         private String objectMapperFactoryMethod = "com.fasterxml.jackson.databind.ObjectMapper.new";
@@ -474,24 +509,6 @@ public class LogstashLayout implements Layout<String> {
             return this;
         }
 
-        public int getMaxSerializationContextPoolSize() {
-            return maxSerializationContextPoolSize;
-        }
-
-        public Builder setMaxSerializationContextPoolSize(int maxSerializationContextPoolSize) {
-            this.maxSerializationContextPoolSize = maxSerializationContextPoolSize;
-            return this;
-        }
-
-        public int getMaxWriterPoolSize() {
-            return maxWriterPoolSize;
-        }
-
-        public Builder setMaxWriterPoolSize(int maxWriterPoolSize) {
-            this.maxWriterPoolSize = maxWriterPoolSize;
-            return this;
-        }
-
         public String getObjectMapperFactoryMethod() {
             return objectMapperFactoryMethod;
         }
@@ -531,12 +548,6 @@ public class LogstashLayout implements Layout<String> {
             }
             Validate.isTrue(maxByteCount > 0, "maxByteCount requires a non-zero positive integer");
             Validate.isTrue(maxStringLength >= 0, "maxStringLength requires a positive integer");
-            Validate.isTrue(
-                    maxSerializationContextPoolSize > 0,
-                    "maxSerializationContextPoolSize requires a non-zero positive integer");
-            Validate.isTrue(
-                    maxWriterPoolSize > 0,
-                    "maxWriterPoolSize requires a non-zero positive integer");
             Validate.notNull(objectMapperFactoryMethod, "objectMapperFactoryMethod");
         }
 

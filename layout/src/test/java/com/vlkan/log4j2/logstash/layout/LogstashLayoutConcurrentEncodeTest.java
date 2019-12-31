@@ -173,7 +173,6 @@ public class LogstashLayoutConcurrentEncodeTest {
         return new Thread(
                 () -> {
                     try {
-                        // noinspection InfiniteLoopStatement
                         for (int logEventIndex = threadIndex % LOG_EVENTS.length;
                              encodeFailureRef.get() == null && encodeCounter.incrementAndGet() < maxEncodeCount;
                              logEventIndex = (logEventIndex + 1) % LOG_EVENTS.length) {

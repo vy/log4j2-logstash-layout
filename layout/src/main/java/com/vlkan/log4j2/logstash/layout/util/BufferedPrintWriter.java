@@ -6,12 +6,12 @@ public final class BufferedPrintWriter extends PrintWriter {
 
     private final BufferedWriter bufferedWriter;
 
-    BufferedPrintWriter(BufferedWriter bufferedWriter) {
+    private BufferedPrintWriter(BufferedWriter bufferedWriter) {
         super(bufferedWriter, false);
         this.bufferedWriter = bufferedWriter;
     }
 
-    static BufferedPrintWriter ofCapacity(int capacity) {
+    public static BufferedPrintWriter ofCapacity(int capacity) {
         BufferedWriter bufferedWriter = new BufferedWriter(capacity);
         return new BufferedPrintWriter(bufferedWriter);
     }

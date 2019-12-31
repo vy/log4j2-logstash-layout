@@ -22,9 +22,9 @@ the following additional features:
 - [Usage](#usage)
 - [Predefined Templates](#templates)
 - [Features](#features)
-- [FAT JAR](#fat-jar)
 - [Appender Support](#appender-support)
 - [Performance](#performance)
+- [F.A.Q.](#faq)
 - [Contributors](#contributors)
 - [License](#license)
 
@@ -136,8 +136,6 @@ This generates an output as follows:
 | `lineSeparator` | String | used to separate log outputs (defaults to `System.lineSeparator()`) |
 | `maxByteCount` | int | used to cap the internal `byte[]` buffer used for serialization (defaults to 512 KiB) |
 | `maxStringLength`<sup>2</sup> | int | truncate string values longer than the specified limit (defaults to 0) |
-| `maxSerializationContextPoolSize` | int | number of cached serialization contexts, i.e., `JsonGenerator`, `byte[]` of size `maxByteCount`, etc. (defaults to 50) |
-| `maxWriterPoolSize`<sup>3</sup> | int | number of cached `Writer`s backed by `char[]` of size `maxStringLength` or `maxByteCount` (defaults to 50) |
 | `objectMapperFactoryMethod` | String | custom object mapper factory method (defaults to `com.fasterxml.jackson.databind.ObjectMapper.new`) |
 | `mapMessageFormatterIgnored` | boolean | as a temporary work around for [LOG4J2-2703](https://issues.apache.org/jira/browse/LOG4J2-2703), serialize `MapMessage`s using Jackson rather than `MapMessage#getFormattedMessage()` (defaults to `true`) |
 
@@ -161,9 +159,6 @@ input and one should always rely on `maxByteCount` for a hard limit.
 while formatting the `LogEvent`s. By default, `LogstashLayout` ships
 [`LogstashJsonEventLayoutV1.json`](layout/src/main/resources/LogstashJsonEventLayoutV1.json)
 providing [the official Logstash `JSONEventLayoutV1`](https://github.com/logstash/log4j-jsonevent-layout).
-
-<sup>3</sup> `maxWriterPoolSize` is only used while serializing stack traces
-into text, that is, for `stackTrace:text` directive.
 
 ```json
 {
@@ -298,21 +293,21 @@ Below is a feature comparison matrix between `LogstashLayout` and alternatives.
 
 | Feature | `LogstashLayout` | `JsonLayout` | `EcsLayout` |
 |---------|------------------|--------------|-------------|
-| Java version | 8 | 7<sup>4</sup> | 6 |
+| Java version | 8 | 7<sup>3</sup> | 6 |
 | Dependencies | Jackson | Jackson | None |
 | Full schema customization? | ✓ | ✕ | ✕ |
 | Timestamp customization? | ✓ | ✕ | ✕ |
 | (Almost) garbage-free? | ✓ | ✕ | ✓ |
-| Custom typed `Message` serialization? | ✓ | ✕ | ✓<sup>5</sup> |
+| Custom typed `Message` serialization? | ✓ | ✕ | ✓<sup>4</sup> |
 | Custom typed `MDC` value serialization? | ✓ | ✕ | ✕ |
 | Rendering stack traces as array? | ✓ | ✓ | ✓ |
 | Enabling/Disabling JSON pretty print? | ✓ | ✓ | ✕ |
 | Additional fields? | ✓ | ✓ | ✓ |
 
-<sup>4</sup> Log4j 2.4 and greater requires Java 7, versions 2.0-alpha1 to 2.3
+<sup>3</sup> Log4j 2.4 and greater requires Java 7, versions 2.0-alpha1 to 2.3
 required Java 6.
 
-<sup>5</sup> Only for `ObjectMessage`s and if Jackson is in the classpath.
+<sup>4</sup> Only for `ObjectMessage`s and if Jackson is in the classpath.
 
 <a name="fat-jar"></a>
 
@@ -383,8 +378,8 @@ The figures for serializing 1,000 `LogEvent`s at each operation are as follows.
         <thead>
             <tr>
                 <th>Benchmark</th>
-                <th colspan="2">ops/sec<sup>6</sup></th>
-                <th>B/op<sup>6</sup></th>
+                <th colspan="2">ops/sec<sup>5</sup></th>
+                <th>B/op<sup>5</sup></th>
             </tr>
         </thead>
         <tbody>
@@ -451,7 +446,7 @@ The figures for serializing 1,000 `LogEvent`s at each operation are as follows.
         </tbody>
     </table>
     <p id="footnotes">
-        <sup>6</sup> 99<sup>th</sup> percentile
+        <sup>5</sup> 99<sup>th</sup> percentile
     </p>
 </div>
 
@@ -479,6 +474,30 @@ Let us try to answer some common questions:
 - **How can one run the benchmark on his/her machine?** After a fresh
   `mvn clean package` within the source directory, run
   `layout-benchmark/benchmark.py`.
+
+- **What about thread-local allocations?** Even though Log4j 2 exposes a
+  `log4j2.enable.threadlocals` flag to toggle TLAs, neither `EcsLayout`, nor
+  Log4j 2 `JsonLayout` and `GelfLayout` honor it. Historically, `LogstashLayout`
+  used to have TLAs taking the `log4j2.enable.threadlocals` flag into account.
+  In version 0.18, we switched to simple memory-efficient object pools, though
+  that incurred extra synchronization costs. Since version 0.22,
+  `LogstashLayout` switched back to TLAs taking `log4j2.enable.threadlocals`
+  into account.
+
+<a name="faq"></a>
+
+# F.A.Q.
+
+- **How can one enable thread-local allocations?** For performance reasons,
+  it is highly recommended to turn TLAs on. For this purpose, you need to make
+  sure `log4j2.enable.threadlocals=true` and `log4j2.is.webapp=false`.
+
+- **Is there a fat JAR of the plugin?** Project also contains a
+  `log4j2-logstash-layout-fatjar` artifact which includes all its transitive
+  dependencies in a separate shaded package (to avoid the JAR Hell) with the
+  exception of `log4j-core`, that you need to include separately. Fat JAR might
+  come handy if you want to use this plugin along with certain applications,
+  e.g., Elasticsearch 5.x and 6.x versions, which requires Log4j 2.
 
 <a name="contributors"></a>
 

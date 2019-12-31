@@ -1,5 +1,7 @@
 ### (????-??-??) v0.22
 
+- Replace object pools with thread locals.
+
 - Add `locale` configuration.
 
 - Fix `JsonGenerator` state corruption in `ExceptionResolver` if

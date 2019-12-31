@@ -68,11 +68,42 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire-plugin.version}</version>
                 <configuration>
+                    <skip>true</skip>
                     <!-- Enforcing a non-UTF-8 encoding to check that the layout
                          indeed handles everything in UTF-8 without implicitly
                          relying on the system defaults. -->
                     <argLine>-Dfile.encoding=US-ASCII</argLine>
                 </configuration>
+                <executions>
+                    <!-- TLA-enabled execution -->
+                    <execution>
+                        <id>tla-enabled</id>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${maven.test.skip}</skip>
+                            <systemPropertyVariables>
+                                <log4j2.enable.threadlocals>true</log4j2.enable.threadlocals>
+                                <log4j2.is.webapp>false</log4j2.is.webapp>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </execution>
+                    <!-- TLA-disabled execution -->
+                    <execution>
+                        <id>tla-disabled</id>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${maven.test.skip}</skip>
+                            <systemPropertyVariables>
+                                <log4j2.enable.threadlocals>false</log4j2.enable.threadlocals>
+                                <log4j2.is.webapp>true</log4j2.is.webapp>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>

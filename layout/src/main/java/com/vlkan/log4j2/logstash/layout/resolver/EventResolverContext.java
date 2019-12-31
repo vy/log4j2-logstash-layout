@@ -1,7 +1,6 @@
 package com.vlkan.log4j2.logstash.layout.resolver;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vlkan.log4j2.logstash.layout.util.BufferedPrintWriterPool;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.lookup.StrSubstitutor;
@@ -17,7 +16,7 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
 
     private final StrSubstitutor substitutor;
 
-    private final BufferedPrintWriterPool writerPool;
+    private final int writerCapacity;
 
     private final FastDateFormat timestampFormat;
 
@@ -40,7 +39,7 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
     private EventResolverContext(Builder builder) {
         this.objectMapper = builder.objectMapper;
         this.substitutor = builder.substitutor;
-        this.writerPool = builder.writerPool;
+        this.writerCapacity = builder.writerCapacity;
         this.timestampFormat = builder.timestampFormat;
         this.locationInfoEnabled = builder.locationInfoEnabled;
         this.stackTraceEnabled = builder.stackTraceEnabled;
@@ -74,8 +73,8 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
         return substitutor;
     }
 
-    BufferedPrintWriterPool getWriterPool() {
-        return writerPool;
+    int getWriterCapacity() {
+        return writerCapacity;
     }
 
     FastDateFormat getTimestampFormat() {
@@ -125,7 +124,7 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
 
         private StrSubstitutor substitutor;
 
-        private BufferedPrintWriterPool writerPool;
+        private int writerCapacity;
 
         private FastDateFormat timestampFormat;
 
@@ -159,8 +158,8 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
             return this;
         }
 
-        public Builder setWriterPool(BufferedPrintWriterPool writerPool) {
-            this.writerPool = writerPool;
+        public Builder setWriterCapacity(int writerCapacity) {
+            this.writerCapacity = writerCapacity;
             return this;
         }
 
@@ -217,7 +216,7 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
         private void validate() {
             Validate.notNull(objectMapper, "objectMapper");
             Validate.notNull(substitutor, "substitutor");
-            Validate.notNull(writerPool, "writerPool");
+            Validate.isTrue(writerCapacity > 0, "writerCapacity requires a non-zero positive integer");
             Validate.notNull(timestampFormat, "timestampFormat");
             if (stackTraceEnabled) {
                 Validate.notNull(stackTraceElementObjectResolver, "stackTraceElementObjectResolver");
