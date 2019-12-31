@@ -111,7 +111,8 @@ class MessageResolver implements EventResolver {
 
         // Override the provided MapMessage formatter.
         if (context.isMapMessageFormatterIgnored() && message instanceof MapMessage) {
-            MapMessage mapMessage = (MapMessage) message;
+            @SuppressWarnings("unchecked")
+            MapMessage<?, Object> mapMessage = (MapMessage) message;
             writeMapMessage(jsonGenerator, mapMessage);
             return true;
         }
@@ -145,7 +146,7 @@ class MessageResolver implements EventResolver {
 
     }
 
-    private static void writeMapMessage(JsonGenerator jsonGenerator, MapMessage mapMessage) throws IOException {
+    private static void writeMapMessage(JsonGenerator jsonGenerator, MapMessage<?, Object> mapMessage) throws IOException {
         jsonGenerator.writeStartObject();
         mapMessage.forEach(MAP_MESSAGE_ENTRY_WRITER, jsonGenerator);
         jsonGenerator.writeEndObject();
