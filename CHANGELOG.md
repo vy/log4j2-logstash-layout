@@ -1,5 +1,7 @@
 ### (????-??-??) v0.22
 
+- Make formatted timestamp resolver GC-free.
+
 - Replace object pools with thread locals.
 
 - Add `locale` configuration.

@@ -3,10 +3,15 @@ package com.vlkan.log4j2.logstash.layout.resolver;
 import com.fasterxml.jackson.core.JsonGenerator;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.time.Instant;
+import org.apache.logging.log4j.core.util.Constants;
 import org.apache.logging.log4j.core.util.datetime.FastDateFormat;
 
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.Locale;
+import java.util.TimeZone;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,7 +33,9 @@ class TimestampResolver implements EventResolver {
         this.internalResolver = createInternalResolver(context, key);
     }
 
-    private static EventResolver createInternalResolver(EventResolverContext context, String key) {
+    private static EventResolver createInternalResolver(
+            EventResolverContext eventResolverContext,
+            String key) {
 
         // Parse key.
         String correctedKey = key != null ? key : "";
@@ -40,7 +47,7 @@ class TimestampResolver implements EventResolver {
         // Fallback to date-time formatting if key is empty.
         String operator = matcher.group(1);
         if (operator == null) {
-            return createFormatResolver(context);
+            return createFormatResolver(eventResolverContext);
         }
 
         // Fallback to millis/nanos, if key is satisfied.
@@ -64,46 +71,137 @@ class TimestampResolver implements EventResolver {
 
     }
 
-    private static EventResolver createFormatResolver(EventResolverContext context) {
-        StringBuilder initFormattedTimestampBuilder = new StringBuilder();
-        Calendar initCalendar = Calendar.getInstance(context.getTimeZone(), context.getLocale());
-        FastDateFormat timestampFormat = context.getTimestampFormat();
-        timestampFormat.format(initCalendar, initFormattedTimestampBuilder);
-        int formattedTimestampLength = initFormattedTimestampBuilder.length();
-        char[] initFormattedTimestampBuffer = new char[formattedTimestampLength];
-        initFormattedTimestampBuilder.getChars(0, formattedTimestampLength, initFormattedTimestampBuffer, 0);
-        return new EventResolver() {
+    /**
+     * Context for GC-free formatted timestamp resolvers.
+     */
+    private static final class FormatResolverContext {
 
-            private final Calendar calendar = initCalendar;
+        private final FastDateFormat timestampFormat;
 
-            private final StringBuilder formattedTimestampBuilder = initFormattedTimestampBuilder;
+        private final Calendar calendar;
 
-            private char[] formattedTimestampBuffer = initFormattedTimestampBuffer;
+        private final StringBuilder formattedTimestampBuilder;
 
-            @Override
-            public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
-                long timestampMillis = logEvent.getTimeMillis();
-                synchronized (this) {
+        private char[] formattedTimestampBuffer;
 
-                    // Format timestamp if it doesn't match the last cached one.
-                    if (calendar.getTimeInMillis() != timestampMillis) {
-                        formattedTimestampBuilder.setLength(0);
-                        calendar.setTimeInMillis(timestampMillis);
-                        timestampFormat.format(calendar, formattedTimestampBuilder);
-                        int formattedTimestampLength = formattedTimestampBuilder.length();
-                        if (formattedTimestampLength > formattedTimestampBuffer.length) {
-                            formattedTimestampBuffer = new char[formattedTimestampLength];
-                        }
-                        formattedTimestampBuilder.getChars(0, formattedTimestampLength, formattedTimestampBuffer, 0);
+        private FormatResolverContext(TimeZone timeZone, Locale locale, FastDateFormat timestampFormat) {
+            this.timestampFormat = timestampFormat;
+            this.formattedTimestampBuilder = new StringBuilder();
+            this.calendar = Calendar.getInstance(timeZone, locale);
+            timestampFormat.format(calendar, formattedTimestampBuilder);
+            int formattedTimestampLength = formattedTimestampBuilder.length();
+            this.formattedTimestampBuffer = new char[formattedTimestampLength];
+            formattedTimestampBuilder.getChars(0, formattedTimestampLength, formattedTimestampBuffer, 0);
+        }
+
+        private static FormatResolverContext fromEventResolverContext(EventResolverContext eventResolverContext) {
+            return new FormatResolverContext(
+                    eventResolverContext.getTimeZone(),
+                    eventResolverContext.getLocale(),
+                    eventResolverContext.getTimestampFormat());
+        }
+
+    }
+
+    /**
+     * GC-free formatted timestamp resolver.
+     */
+    private static abstract class ContextualFormatResolver implements EventResolver {
+
+        abstract FormatResolverContext acquireContext();
+
+        abstract void releaseContext();
+
+        @Override
+        public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
+            long timestampMillis = logEvent.getTimeMillis();
+            FormatResolverContext formatResolverContext = acquireContext();
+            try {
+
+                // Format timestamp if it doesn't match the last cached one.
+                if (formatResolverContext.calendar.getTimeInMillis() != timestampMillis) {
+                    formatResolverContext.formattedTimestampBuilder.setLength(0);
+                    formatResolverContext.calendar.setTimeInMillis(timestampMillis);
+                    formatResolverContext.timestampFormat.format(
+                            formatResolverContext.calendar,
+                            formatResolverContext.formattedTimestampBuilder);
+                    int formattedTimestampLength = formatResolverContext.formattedTimestampBuilder.length();
+                    if (formattedTimestampLength > formatResolverContext.formattedTimestampBuffer.length) {
+                        formatResolverContext.formattedTimestampBuffer = new char[formattedTimestampLength];
                     }
-
-                    // Write the formatted timestamp.
-                    jsonGenerator.writeString(formattedTimestampBuffer, 0, formattedTimestampBuilder.length());
-
+                    formatResolverContext.formattedTimestampBuilder.getChars(
+                            0,
+                            formattedTimestampLength,
+                            formatResolverContext.formattedTimestampBuffer,
+                            0);
                 }
-            }
 
-        };
+                // Write the formatted timestamp.
+                jsonGenerator.writeString(
+                        formatResolverContext.formattedTimestampBuffer,
+                        0,
+                        formatResolverContext.formattedTimestampBuilder.length());
+
+            } finally {
+                releaseContext();
+            }
+        }
+
+    }
+
+    /**
+     * GC-free formatted timestamp resolver by means of thread locals.
+     */
+    private static final class ThreadLocalFormatResolver extends ContextualFormatResolver {
+
+        private final ThreadLocal<FormatResolverContext> formatResolverContextRef;
+
+        private ThreadLocalFormatResolver(EventResolverContext eventResolverContext) {
+            this.formatResolverContextRef = ThreadLocal.withInitial(
+                    () -> FormatResolverContext.fromEventResolverContext(eventResolverContext));
+        }
+
+        @Override
+        FormatResolverContext acquireContext() {
+            return formatResolverContextRef.get();
+        }
+
+        @Override
+        void releaseContext() {}
+
+    }
+
+    /**
+     * GC-free formatted timestamp resolver by means of a shared context.
+     */
+    private static final class LockingFormatResolver extends ContextualFormatResolver {
+
+        private final FormatResolverContext formatResolverContext;
+
+        private final Lock lock = new ReentrantLock();
+
+        private LockingFormatResolver(EventResolverContext eventResolverContext) {
+            this.formatResolverContext =
+                    FormatResolverContext.fromEventResolverContext(eventResolverContext);
+        }
+
+        @Override
+        FormatResolverContext acquireContext() {
+            lock.lock();
+            return formatResolverContext;
+        }
+
+        @Override
+        void releaseContext() {
+            lock.unlock();
+        }
+
+    }
+
+    private static EventResolver createFormatResolver(EventResolverContext eventResolverContext) {
+        return Constants.ENABLE_THREADLOCALS
+                ? new ThreadLocalFormatResolver(eventResolverContext)
+                : new LockingFormatResolver(eventResolverContext);
     }
 
     private static EventResolver createDivisorResolver(double divisor) {
