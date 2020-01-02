@@ -38,6 +38,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -1313,6 +1314,70 @@ public class LogstashLayoutTest {
         assertThat(point(rootNode, "exceptionRootCauseStackTraceText").isNull()).isTrue();
         assertThat(point(rootNode, "requiredFieldTriggeringError").asBoolean()).isTrue();
 
+    }
+
+    @Test
+    public void test_timestamp_resolver() throws IOException {
+
+        // Create log events.
+        String logEvent1FormattedInstant = "2019-01-02T09:34:11Z";
+        LogEvent logEvent1 = createLogEventAtInstant(logEvent1FormattedInstant);
+        String logEvent2FormattedInstant = "2019-01-02T09:34:12Z";
+        LogEvent logEvent2 = createLogEventAtInstant(logEvent2FormattedInstant);
+        @SuppressWarnings("UnnecessaryLocalVariable")
+        String logEvent3FormattedInstant = logEvent2FormattedInstant;
+        LogEvent logEvent3 = createLogEventAtInstant(logEvent3FormattedInstant);
+        String logEvent4FormattedInstant = "2019-01-02T09:34:13Z";
+        LogEvent logEvent4 = createLogEventAtInstant(logEvent4FormattedInstant);
+
+        // Create the event template.
+        ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
+        eventTemplateRootNode.put("timestamp", "${json:timestamp}");
+        String eventTemplate = eventTemplateRootNode.toString();
+
+        // Create the layout.
+        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        LogstashLayout layout = LogstashLayout
+                .newBuilder()
+                .setConfiguration(configuration)
+                .setEventTemplate(eventTemplate)
+                .setTimeZoneId("UTC")
+                .setDateTimeFormatPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+                .build();
+
+        // Check the serialized 1st event.
+        String serializedLogEvent1 = layout.toSerializable(logEvent1);
+        JsonNode rootNode1 = OBJECT_MAPPER.readTree(serializedLogEvent1);
+        assertThat(point(rootNode1, "timestamp").asText()).isEqualTo(logEvent1FormattedInstant);
+
+        // Check the serialized 2nd event.
+        String serializedLogEvent2 = layout.toSerializable(logEvent2);
+        JsonNode rootNode2 = OBJECT_MAPPER.readTree(serializedLogEvent2);
+        assertThat(point(rootNode2, "timestamp").asText()).isEqualTo(logEvent2FormattedInstant);
+
+        // Check the serialized 3rd event.
+        String serializedLogEvent3 = layout.toSerializable(logEvent3);
+        JsonNode rootNode3 = OBJECT_MAPPER.readTree(serializedLogEvent3);
+        assertThat(point(rootNode3, "timestamp").asText()).isEqualTo(logEvent3FormattedInstant);
+
+        // Check the serialized 4th event.
+        String serializedLogEvent4 = layout.toSerializable(logEvent4);
+        JsonNode rootNode4 = OBJECT_MAPPER.readTree(serializedLogEvent4);
+        assertThat(point(rootNode4, "timestamp").asText()).isEqualTo(logEvent4FormattedInstant);
+
+    }
+
+    private static LogEvent createLogEventAtInstant(String formattedInstant) {
+        SimpleMessage message = new SimpleMessage("LogEvent at instant " + formattedInstant);
+        long instantEpochMillis = Instant.parse(formattedInstant).toEpochMilli();
+        MutableInstant instant = new MutableInstant();
+        instant.initFromEpochMilli(instantEpochMillis, 0);
+        return Log4jLogEvent
+                .newBuilder()
+                .setLoggerName(LogstashLayoutTest.class.getSimpleName())
+                .setMessage(message)
+                .setInstant(instant)
+                .build();
     }
 
 }

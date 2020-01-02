@@ -114,12 +114,16 @@ public class LogstashLayout implements Layout<String> {
         int writerCapacity = builder.maxStringLength > 0
                 ? builder.maxStringLength
                 : builder.maxByteCount;
-        FastDateFormat timestampFormat = readDateFormat(builder);
+        TimeZone timeZone = TimeZone.getTimeZone(builder.timeZoneId);
+        Locale locale = readLocale(builder.locale);
+        FastDateFormat timestampFormat = FastDateFormat.getInstance(builder.dateTimeFormatPattern, timeZone, locale);
         EventResolverContext resolverContext = EventResolverContext
                 .newBuilder()
                 .setObjectMapper(objectMapper)
                 .setSubstitutor(substitutor)
                 .setWriterCapacity(writerCapacity)
+                .setTimeZone(timeZone)
+                .setLocale(locale)
                 .setTimestampFormat(timestampFormat)
                 .setLocationInfoEnabled(builder.locationInfoEnabled)
                 .setStackTraceEnabled(builder.stackTraceEnabled)
@@ -155,12 +159,6 @@ public class LogstashLayout implements Layout<String> {
         return StringUtils.isBlank(template)
                 ? Uris.readUri(templateUri)
                 : template;
-    }
-
-    private static FastDateFormat readDateFormat(Builder builder) {
-        TimeZone timeZone = TimeZone.getTimeZone(builder.timeZoneId);
-        Locale locale = readLocale(builder.locale);
-        return FastDateFormat.getInstance(builder.dateTimeFormatPattern, timeZone, locale);
     }
 
     private static Locale readLocale(String locale) {

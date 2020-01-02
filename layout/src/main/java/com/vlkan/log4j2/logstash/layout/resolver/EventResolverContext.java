@@ -7,7 +7,9 @@ import org.apache.logging.log4j.core.lookup.StrSubstitutor;
 import org.apache.logging.log4j.core.util.KeyValuePair;
 import org.apache.logging.log4j.core.util.datetime.FastDateFormat;
 
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 public class EventResolverContext implements TemplateResolverContext<LogEvent, EventResolverContext> {
@@ -17,6 +19,10 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
     private final StrSubstitutor substitutor;
 
     private final int writerCapacity;
+
+    private final TimeZone timeZone;
+
+    private final Locale locale;
 
     private final FastDateFormat timestampFormat;
 
@@ -40,6 +46,8 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
         this.objectMapper = builder.objectMapper;
         this.substitutor = builder.substitutor;
         this.writerCapacity = builder.writerCapacity;
+        this.timeZone = builder.timeZone;
+        this.locale = builder.locale;
         this.timestampFormat = builder.timestampFormat;
         this.locationInfoEnabled = builder.locationInfoEnabled;
         this.stackTraceEnabled = builder.stackTraceEnabled;
@@ -75,6 +83,14 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
 
     int getWriterCapacity() {
         return writerCapacity;
+    }
+
+    TimeZone getTimeZone() {
+        return timeZone;
+    }
+
+    Locale getLocale() {
+        return locale;
     }
 
     FastDateFormat getTimestampFormat() {
@@ -126,6 +142,10 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
 
         private int writerCapacity;
 
+        private TimeZone timeZone;
+
+        private Locale locale;
+
         private FastDateFormat timestampFormat;
 
         private boolean locationInfoEnabled;
@@ -160,6 +180,16 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
 
         public Builder setWriterCapacity(int writerCapacity) {
             this.writerCapacity = writerCapacity;
+            return this;
+        }
+
+        public Builder setTimeZone(TimeZone timeZone) {
+            this.timeZone = timeZone;
+            return this;
+        }
+
+        public Builder setLocale(Locale locale) {
+            this.locale = locale;
             return this;
         }
 
@@ -217,6 +247,8 @@ public class EventResolverContext implements TemplateResolverContext<LogEvent, E
             Validate.notNull(objectMapper, "objectMapper");
             Validate.notNull(substitutor, "substitutor");
             Validate.isTrue(writerCapacity > 0, "writerCapacity requires a non-zero positive integer");
+            Validate.notNull(timeZone, "timeZone");
+            Validate.notNull(locale, "locale");
             Validate.notNull(timestampFormat, "timestampFormat");
             if (stackTraceEnabled) {
                 Validate.notNull(stackTraceElementObjectResolver, "stackTraceElementObjectResolver");

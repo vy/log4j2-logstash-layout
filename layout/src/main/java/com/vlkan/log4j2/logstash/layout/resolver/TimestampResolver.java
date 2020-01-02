@@ -6,6 +6,7 @@ import org.apache.logging.log4j.core.time.Instant;
 import org.apache.logging.log4j.core.util.datetime.FastDateFormat;
 
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -64,26 +65,42 @@ class TimestampResolver implements EventResolver {
     }
 
     private static EventResolver createFormatResolver(EventResolverContext context) {
+        StringBuilder initFormattedTimestampBuilder = new StringBuilder();
+        Calendar initCalendar = Calendar.getInstance(context.getTimeZone(), context.getLocale());
+        FastDateFormat timestampFormat = context.getTimestampFormat();
+        timestampFormat.format(initCalendar, initFormattedTimestampBuilder);
+        int formattedTimestampLength = initFormattedTimestampBuilder.length();
+        char[] initFormattedTimestampBuffer = new char[formattedTimestampLength];
+        initFormattedTimestampBuilder.getChars(0, formattedTimestampLength, initFormattedTimestampBuffer, 0);
         return new EventResolver() {
 
-            private volatile long lastTimestampMillis = -1;
+            private final Calendar calendar = initCalendar;
 
-            private volatile String lastTimestamp;
+            private final StringBuilder formattedTimestampBuilder = initFormattedTimestampBuilder;
+
+            private char[] formattedTimestampBuffer = initFormattedTimestampBuffer;
 
             @Override
             public void resolve(LogEvent logEvent, JsonGenerator jsonGenerator) throws IOException {
                 long timestampMillis = logEvent.getTimeMillis();
-                String timestamp;
                 synchronized (this) {
-                    if (lastTimestampMillis != timestampMillis) {
-                        lastTimestampMillis = timestampMillis;
-                        FastDateFormat timestampFormat = context.getTimestampFormat();
-                        timestamp = lastTimestamp = timestampFormat.format(timestampMillis);
-                    } else {
-                        timestamp = lastTimestamp;
+
+                    // Format timestamp if it doesn't match the last cached one.
+                    if (calendar.getTimeInMillis() != timestampMillis) {
+                        formattedTimestampBuilder.setLength(0);
+                        calendar.setTimeInMillis(timestampMillis);
+                        timestampFormat.format(calendar, formattedTimestampBuilder);
+                        int formattedTimestampLength = formattedTimestampBuilder.length();
+                        if (formattedTimestampLength > formattedTimestampBuffer.length) {
+                            formattedTimestampBuffer = new char[formattedTimestampLength];
+                        }
+                        formattedTimestampBuilder.getChars(0, formattedTimestampLength, formattedTimestampBuffer, 0);
                     }
+
+                    // Write the formatted timestamp.
+                    jsonGenerator.writeString(formattedTimestampBuffer, 0, formattedTimestampBuilder.length());
+
                 }
-                jsonGenerator.writeString(timestamp);
             }
 
         };
