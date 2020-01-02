@@ -16,21 +16,26 @@ import java.util.List;
 
 enum LogEventFixture {;
 
+    private static final int TIME_OVERLAPPING_CONSECUTIVE_EVENT_COUNT = 10;
+
     static List<LogEvent> createLiteLogEvents(int logEventCount) {
         List<LogEvent> logEvents = new ArrayList<>(logEventCount);
+        long startTimeMillis = System.currentTimeMillis();
         for (int logEventIndex = 0; logEventIndex < logEventCount; logEventIndex++) {
-            LogEvent logEvent = LogEventFixture.createLiteLogEvent(String.valueOf(logEventIndex));
+            String logEventId = String.valueOf(logEventIndex);
+            long logEventTimeMillis = createLogEventTimeMillis(startTimeMillis, logEventIndex);
+            LogEvent logEvent = LogEventFixture.createLiteLogEvent(logEventId, logEventTimeMillis);
             logEvents.add(logEvent);
         }
         return logEvents;
     }
 
-    private static LogEvent createLiteLogEvent(String id) {
-        SimpleMessage message = new SimpleMessage("Msg" + id);
+    private static LogEvent createLiteLogEvent(String id, long timeMillis) {
+        SimpleMessage message = new SimpleMessage("lite LogEvent message " + id);
         Level level = Level.DEBUG;
         String loggerFqcn = "f.q.c.n" + id;
         String loggerName = "a.B" + id;
-        long timeMillis = System.currentTimeMillis();
+        long nanoTime = timeMillis * 2;
         return Log4jLogEvent
                 .newBuilder()
                 .setLoggerName(loggerName)
@@ -38,19 +43,31 @@ enum LogEventFixture {;
                 .setLevel(level)
                 .setMessage(message)
                 .setTimeMillis(timeMillis)
+                .setNanoTime(nanoTime)
                 .build();
     }
 
     static List<LogEvent> createFullLogEvents(int logEventCount) {
         List<LogEvent> logEvents = new ArrayList<>(logEventCount);
+        long startTimeMillis = System.currentTimeMillis();
         for (int logEventIndex = 0; logEventIndex < logEventCount; logEventIndex++) {
-            LogEvent logEvent = LogEventFixture.createFullLogEvent(String.valueOf(logEventIndex), "Msg" + logEventIndex);
+            String logEventId = String.valueOf(logEventIndex);
+            long logEventTimeMillis = createLogEventTimeMillis(startTimeMillis, logEventIndex);
+            LogEvent logEvent = LogEventFixture.createFullLogEvent(logEventId, logEventTimeMillis);
             logEvents.add(logEvent);
         }
         return logEvents;
     }
 
-    private static LogEvent createFullLogEvent(String id, String message) {
+    private static long createLogEventTimeMillis(long startTimeMillis, int logEventIndex) {
+        // Create event time repeating every certain number of consecutive
+        // events. This is better aligned with the real-world use case and
+        // gives surface to timestamp formatter caches to perform their
+        // magic, which is implemented for almost all layouts.
+        return startTimeMillis + logEventIndex / TIME_OVERLAPPING_CONSECUTIVE_EVENT_COUNT;
+    }
+
+    private static LogEvent createFullLogEvent(String id, long timeMillis) {
 
         // Create exception.
         Exception sourceHelper = new Exception();
@@ -63,6 +80,7 @@ enum LogEventFixture {;
         ioException.addSuppressed(new IndexOutOfBoundsException("I am suppressed exception 2" + id));
 
         // Create rest of the event attributes.
+        SimpleMessage message = new SimpleMessage("full LogEvent message " + id);
         StringMap contextData = createContextData(id);
         ThreadContextStack contextStack = createContextStack(id);
         int threadId = id.hashCode();
@@ -71,7 +89,6 @@ enum LogEventFixture {;
         Level level = Level.DEBUG;
         String loggerFqcn = "f.q.c.n" + id;
         String loggerName = "a.B" + id;
-        long timeMillis = System.currentTimeMillis();
         long nanoTime = timeMillis * 2;
 
         return Log4jLogEvent
@@ -79,7 +96,7 @@ enum LogEventFixture {;
                 .setLoggerName(loggerName)
                 .setLoggerFqcn(loggerFqcn)
                 .setLevel(level)
-                .setMessage(new SimpleMessage(message))
+                .setMessage(message)
                 .setThrown(ioException)
                 .setContextData(contextData)
                 .setContextStack(contextStack)
