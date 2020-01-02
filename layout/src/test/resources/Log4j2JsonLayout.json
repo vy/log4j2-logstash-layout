@@ -1,5 +1,5 @@
 {
-  "instant": "${json:timestamp:nanos}",
+  "instant": "${json:timestamp:epoch}",
   "thread": "${json:thread:name}",
   "level": "${json:level}",
   "loggerName": "${json:logger:name}",

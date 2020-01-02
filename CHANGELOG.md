@@ -1,5 +1,8 @@
 ### (????-??-??) v0.22
 
+- Remove `timestamp:nanos` and `timestamp:millis` directives in favor of
+  `timestamp:epoch[:divisor=<divisor>[,integral]]` directive.
+
 - Make formatted timestamp resolver GC-free.
 
 - Replace object pools with thread locals.
@@ -13,7 +16,7 @@
 
 - Add `level:severity` and `level:severity:code` resolvers. (#48)
 
-- Add `timestamp:divisor=<divisor>` resolver. (#48)
+- Add `timestamp:epoch:divisor=<divisor>` resolver. (#48)
 
 ### (2019-10-15) v0.21
 

@@ -1198,14 +1198,18 @@ public class LogstashLayoutTest {
 
         // Create the event template.
         ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
-        String epochSecsFieldName = "epochSecs";
-        String epochMicrosFieldName = "epochMicros";
-        String epochMillisFieldName = "epochMillis";
-        String epochNanosFieldName = "epochNanos";
-        eventTemplateRootNode.put(epochSecsFieldName, "${json:timestamp:divisor=1e9}");
-        eventTemplateRootNode.put(epochMicrosFieldName, "${json:timestamp:divisor=1e6}");
-        eventTemplateRootNode.put(epochMillisFieldName, "${json:timestamp:divisor=1e3}");
-        eventTemplateRootNode.put(epochNanosFieldName, "${json:timestamp:divisor=1e0}");
+        ObjectNode epochSecsNode = eventTemplateRootNode.putObject("epochSecs");
+        epochSecsNode.put("double", "${json:timestamp:epoch:divisor=1e9}");
+        epochSecsNode.put("long", "${json:timestamp:epoch:divisor=1e9,integral}");
+        ObjectNode epochMicrosNode = eventTemplateRootNode.putObject("epochMicros");
+        epochMicrosNode.put("double", "${json:timestamp:epoch:divisor=1e6}");
+        epochMicrosNode.put("long", "${json:timestamp:epoch:divisor=1e6,integral}");
+        ObjectNode epochMillisNode = eventTemplateRootNode.putObject("epochMillis");
+        epochMillisNode.put("double", "${json:timestamp:epoch:divisor=1e3}");
+        epochMillisNode.put("long", "${json:timestamp:epoch:divisor=1e3,integral}");
+        ObjectNode epochNanosNode = eventTemplateRootNode.putObject("epochNanos");
+        epochNanosNode.put("double", "${json:timestamp:epoch:divisor=1e0}");
+        epochNanosNode.put("long", "${json:timestamp:epoch:divisor=1e0,integral}");
         String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
@@ -1223,14 +1227,15 @@ public class LogstashLayoutTest {
         double expectedEpochMicros = instantEpochSecond * 1e3 + instantEpochSecondNano / 1e6;
         double expectedEpochMillis = instantEpochSecond * 1e6 + instantEpochSecondNano / 1e3;
         double expectedEpochNanos = instantEpochSecond * 1e9 + instantEpochSecondNano / 1e0;
-        assertThat(point(rootNode, epochSecsFieldName).asDouble())
-                .isCloseTo(expectedEpochSecs, Percentage.withPercentage(0.01D));
-        assertThat(point(rootNode, epochMicrosFieldName).asDouble())
-                .isCloseTo(expectedEpochMicros, Percentage.withPercentage(0.01D));
-        assertThat(point(rootNode, epochMillisFieldName).asDouble())
-                .isCloseTo(expectedEpochMillis, Percentage.withPercentage(0.01D));
-        assertThat(point(rootNode, epochNanosFieldName).asDouble())
-                .isCloseTo(expectedEpochNanos, Percentage.withPercentage(0.01D));
+        Percentage errorMargin = Percentage.withPercentage(0.001D);
+        assertThat(point(rootNode, "epochSecs", "double").asDouble()).isCloseTo(expectedEpochSecs, errorMargin);
+        assertThat(point(rootNode, "epochSecs", "long").asLong()).isCloseTo((long) expectedEpochSecs, errorMargin);
+        assertThat(point(rootNode, "epochMicros", "double").asDouble()).isCloseTo(expectedEpochMicros, errorMargin);
+        assertThat(point(rootNode, "epochMicros", "long").asLong()).isCloseTo((long) expectedEpochMicros, errorMargin);
+        assertThat(point(rootNode, "epochMillis", "double").asDouble()).isCloseTo(expectedEpochMillis, errorMargin);
+        assertThat(point(rootNode, "epochMillis", "long").asLong()).isCloseTo((long) expectedEpochMillis, errorMargin);
+        assertThat(point(rootNode, "epochNanos", "double").asDouble()).isCloseTo(expectedEpochNanos, errorMargin);
+        assertThat(point(rootNode, "epochNanos", "long").asLong()).isCloseTo((long) expectedEpochNanos, errorMargin);
 
     }
 

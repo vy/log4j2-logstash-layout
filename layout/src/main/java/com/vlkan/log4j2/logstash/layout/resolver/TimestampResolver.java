@@ -16,17 +16,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 class TimestampResolver implements EventResolver {
-
-    private static final EventResolver MILLIS_RESOLVER = (logEvent, jsonGenerator) -> {
-        long timeMillis = logEvent.getTimeMillis();
-        jsonGenerator.writeNumber(timeMillis);
-    };
-
-    private static final EventResolver NANOS_RESOLVER = (logEvent, jsonGenerator) -> {
-        long nanoTime = logEvent.getNanoTime();
-        jsonGenerator.writeNumber(nanoTime);
-    };
-
     private final EventResolver internalResolver;
 
     TimestampResolver(EventResolverContext context, String key) {
@@ -37,37 +26,44 @@ class TimestampResolver implements EventResolver {
             EventResolverContext eventResolverContext,
             String key) {
 
+        // Fallback to date-time formatting if key is empty.
+        if (key == null || key.isEmpty()) {
+            return createFormatResolver(eventResolverContext);
+        }
+
         // Parse key.
-        String correctedKey = key != null ? key : "";
-        Matcher matcher = Pattern.compile("^(millis|nanos|divisor=(.+))?$").matcher(correctedKey);
+        Matcher matcher = Pattern.compile("^epoch(:divisor=([^,]+)(,integral)?)?$").matcher(key);
         if (!matcher.matches()) {
             throw new IllegalArgumentException("unknown key: " + key);
         }
 
-        // Fallback to date-time formatting if key is empty.
-        String operator = matcher.group(1);
-        if (operator == null) {
-            return createFormatResolver(eventResolverContext);
-        }
-
-        // Fallback to millis/nanos, if key is satisfied.
-        switch (operator) {
-            case "millis": return MILLIS_RESOLVER;
-            case "nanos": return NANOS_RESOLVER;
-        }
-
-        // Otherwise, read the divisor.
+        // Otherwise, read fields.
         String divisorString = matcher.group(2);
+        String integralString = matcher.group(3);
         double divisor;
-        try {
-            divisor = Double.parseDouble(divisorString);
-        } catch (NumberFormatException error) {
-            throw new IllegalArgumentException("invalid divisor: " + divisorString, error);
+        boolean integral;
+        if (divisorString == null) {
+            divisor = 1e0;
+            integral = false;
+        } else {
+
+            // Read divisor.
+            try {
+                divisor = Double.parseDouble(divisorString);
+            } catch (NumberFormatException error) {
+                throw new IllegalArgumentException("invalid divisor: " + divisorString, error);
+            }
+            if (Double.compare(0D, divisor) == 0) {
+                throw new IllegalArgumentException("invalid divisor: " + divisorString);
+            }
+
+            // Read integral.
+            integral = integralString != null;
+
         }
-        if (Double.compare(0D, divisor) == 0) {
-            throw new IllegalArgumentException("invalid divisor: " + divisorString);
-        }
-        return createDivisorResolver(divisor);
+
+        // Create the divisor resolver.
+        return createDivisorResolver(divisor, integral);
 
     }
 
@@ -204,33 +200,66 @@ class TimestampResolver implements EventResolver {
                 : new LockingFormatResolver(eventResolverContext);
     }
 
-    private static EventResolver createDivisorResolver(double divisor) {
+    private static final EventResolver NANOS_RESOLVER = (logEvent, jsonGenerator) -> {
+        Instant logEventInstant = logEvent.getInstant();
+        long epochNanos = Math.multiplyExact(1_000_000_000L, logEventInstant.getEpochSecond());
+        long number = Math.addExact(epochNanos, logEventInstant.getNanoOfSecond());
+        jsonGenerator.writeNumber(number);
+    };
+
+    private static final EventResolver MILLIS_DOUBLE_RESOLVER = (logEvent, jsonGenerator) -> {
+        Instant logEventInstant = logEvent.getInstant();
+        long epochMillis = logEventInstant.getEpochMillisecond();
+        jsonGenerator.writeNumber(epochMillis);
+    };
+
+    private static final EventResolver MILLIS_LONG_RESOLVER = (logEvent, jsonGenerator) -> {
+        Instant logEventInstant = logEvent.getInstant();
+        String encodedNumber = "" +
+                logEventInstant.getEpochMillisecond() +
+                '.' +
+                logEventInstant.getNanoOfMillisecond();
+        jsonGenerator.writeNumber(encodedNumber);
+    };
+
+    private static final EventResolver SECS_LONG_RESOLVER = (logEvent, jsonGenerator) -> {
+        Instant logEventInstant = logEvent.getInstant();
+        String encodedNumber = "" +
+                logEventInstant.getEpochSecond() +
+                '.' +
+                logEventInstant.getNanoOfSecond();
+        jsonGenerator.writeNumber(encodedNumber);
+    };
+
+    private static final EventResolver SECS_DOUBLE_RESOLVER = (logEvent, jsonGenerator) -> {
+        Instant logEventInstant = logEvent.getInstant();
+        long epochSecs = logEventInstant.getEpochSecond();
+        jsonGenerator.writeNumber(epochSecs);
+    };
+
+    private static EventResolver createDivisorResolver(double divisor, boolean integral) {
+
+        // Resolve to seconds?
         if (Double.compare(1e9D, divisor) == 0) {
-            return (logEvent, jsonGenerator) -> {
-                Instant logEventInstant = logEvent.getInstant();
-                String encodedNumber = "" +
-                        logEventInstant.getEpochSecond() +
-                        '.' +
-                        logEventInstant.getNanoOfSecond();
-                jsonGenerator.writeNumber(encodedNumber);
-            };
-        } else if (Double.compare(1e6D, divisor) == 0) {
-            return (logEvent, jsonGenerator) -> {
-                Instant logEventInstant = logEvent.getInstant();
-                String encodedNumber = "" +
-                        logEventInstant.getEpochMillisecond() +
-                        '.' +
-                        logEventInstant.getNanoOfMillisecond();
-                jsonGenerator.writeNumber(encodedNumber);
-            };
-        } else if (Double.compare(1e0D, divisor) == 0) {
-            return (logEvent, jsonGenerator) -> {
-                Instant logEventInstant = logEvent.getInstant();
-                long epochNanos = Math.multiplyExact(1_000_000_000L, logEventInstant.getEpochSecond());
-                long number = Math.addExact(epochNanos, logEventInstant.getNanoOfSecond());
-                jsonGenerator.writeNumber(number);
-            };
-        } else {
+            return integral
+                    ? SECS_DOUBLE_RESOLVER
+                    : SECS_LONG_RESOLVER;
+        }
+
+        // Resolve to milliseconds?
+        else if (Double.compare(1e6D, divisor) == 0) {
+            return integral
+                    ? MILLIS_DOUBLE_RESOLVER
+                    : MILLIS_LONG_RESOLVER;
+        }
+
+        // Resolve to nanoseconds?
+        else if (Double.compare(1e0D, divisor) == 0) {
+            return NANOS_RESOLVER;
+        }
+
+        // Unknown divisor, divide as is then.
+        else {
             return (logEvent, jsonGenerator) -> {
                 Instant logEventInstant = logEvent.getInstant();
                 double quotient =
@@ -240,9 +269,15 @@ class TimestampResolver implements EventResolver {
                         // [1] http://herbie.uwplse.org
                         1e9F * (logEventInstant.getEpochSecond() / divisor) +
                                 logEventInstant.getNanoOfSecond() / divisor;
-                jsonGenerator.writeNumber(quotient);
+                if (integral) {
+                    long integralQuotient = (long) quotient;
+                    jsonGenerator.writeNumber(integralQuotient);
+                } else {
+                    jsonGenerator.writeNumber(quotient);
+                }
             };
         }
+
     }
 
     static String getName() {

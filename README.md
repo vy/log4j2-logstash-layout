@@ -236,9 +236,9 @@ while rendering the JSON output.
 | `thread:name` | `logEvent.getThreadName()` |
 | `thread:priority` | `logEvent.getThreadPriority()` |
 | `timestamp` | `logEvent.getTimeMillis()` formatted using `dateTimeFormatPattern` and `timeZoneId` |
-| `timestamp:divisor=<divisor>` | epoch nanoseconds derived from `logEvent.getInstant()` divided by provided `divisor` (of type `double`) |
-| `timestamp:millis` | `logEvent.getTimeMillis()` |
-| `timestamp:nanos` | `logEvent.getNanoTime()` |
+| `timestamp:epoch` | epoch nanoseconds derived from `logEvent.getInstant()` |
+| `timestamp:epoch:divisor=<divisor>` | epoch nanoseconds derived from `logEvent.getInstant()` divided by provided `divisor` (of type `double`) |
+| `timestamp:epoch:divisor=<divisor>,integral` | epoch nanoseconds derived from `logEvent.getInstant()` divided by provided `divisor` (of type `double`) and casted to `long` |
 
 JSON field lookups are performed using the `${json:<variable-name>}` scheme
 where `<variable-name>` is defined as `<resolver-name>[:<resolver-key>]`.
