@@ -1,4 +1,6 @@
-### (????-??-??) v0.22
+### (2020-01-08) v1.0.0
+
+- Switched to semantic versioning.
 
 - Add Java 9 module name: `com.vlkan.log4j2.logstash.layout`.
 

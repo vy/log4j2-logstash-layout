@@ -1,7 +1,7 @@
 [INFO] Scanning for projects...
 [INFO] 
 [INFO] --------------< com.vlkan.log4j2:log4j2-logstash-layout >---------------
-[INFO] Building log4j2-logstash-layout 0.21-SNAPSHOT
+[INFO] Building log4j2-logstash-layout 1.0.0-SNAPSHOT
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
 [INFO] --- exec-maven-plugin:1.6.0:java (default-cli) @ log4j2-logstash-layout ---
