@@ -13,6 +13,8 @@
 - Fix `ArrayIndexOutOfBoundsException` thrown when `stackTrace:text` produces
   an output violating the truncation limit. (#57)
 
+- Add Java 9 module name: `com.vlkan.log4j2.logstash.layout`.
+
 ### (2019-10-15) v0.21
 
 - Add feature comparison matrix.

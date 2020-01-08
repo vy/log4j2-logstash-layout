@@ -52,6 +52,8 @@ in combination with a valid `log4j-core` dependency:
 </dependency>
 ```
 
+(Note that the Java 9 module name is `com.vlkan.log4j2.logstash.layout`.)
+
 Below you can find a sample `log4j2.xml` snippet employing `LogstashLayout`.
 
 ```xml

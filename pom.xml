@@ -45,7 +45,7 @@
         <url>http://github.com/vy/log4j2-logstash-layout</url>
         <connection>scm:git:git@github.com:vy/log4j2-logstash-layout.git</connection>
         <developerConnection>scm:git:git@github.com:vy/log4j2-logstash-layout.git</developerConnection>
-        <tag>v0.21</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
@@ -82,6 +82,7 @@
         <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
         <maven-compiler-plugin.version>3.6.1</maven-compiler-plugin.version>
         <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
+        <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
         <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
         <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
         <maven-shade-plugin.version>3.2.1</maven-shade-plugin.version>
@@ -183,6 +184,19 @@
                 <version>${versions-maven-plugin.version}</version>
                 <configuration>
                     <rulesUri>${project.baseUri}/maven-version-rules.xml</rulesUri>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>${maven-jar-plugin.version}</version>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Automatic-Module-Name>com.vlkan.log4j2.logstash.layout</Automatic-Module-Name>
+                        </manifestEntries>
+                    </archive>
                 </configuration>
             </plugin>
 
