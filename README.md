@@ -134,7 +134,7 @@ This generates an output as follows:
 | `stackTraceElementTemplate` | String | inline JSON template for rendering `StackTraceElement`s (has priority over `stackTraceElementTemplateUri`) |
 | `stackTraceElementTemplateUri` | String | JSON template for rendering `StackTraceElement`s (defaults to [`classpath:Log4j2StackTraceElementLayout.json`](layout/src/main/resources/Log4j2StackTraceElementLayout.json)) |
 | `lineSeparator` | String | used to separate log outputs (defaults to `System.lineSeparator()`) |
-| `maxByteCount` | int | used to cap the internal `byte[]` buffer used for serialization (defaults to 512 KiB) |
+| `maxByteCount` | int | used to cap the internal `byte[]` buffer used for serialization (defaults to 16 KiB) |
 | `maxStringLength`<sup>2</sup> | int | truncate string values longer than the specified limit (defaults to 0) |
 | `objectMapperFactoryMethod` | String | custom object mapper factory method (defaults to `com.fasterxml.jackson.databind.ObjectMapper.new`) |
 | `mapMessageFormatterIgnored` | boolean | as a temporary work around for [LOG4J2-2703](https://issues.apache.org/jira/browse/LOG4J2-2703), serialize `MapMessage`s using Jackson rather than `MapMessage#getFormattedMessage()` (defaults to `true`) |
@@ -360,7 +360,7 @@ To give an idea, we ran the benchmark with the following settings:
 - **`LogstashLayout4{Ecs,Json}Layout`** used default settings with the following exceptions:
   - **`emptyPropertyExclusionEnabled`:** `false`
   - **`stackTraceEnabled`:** `true`
-  - **`maxByteCount`:** 4096
+  - **`maxByteCount`:** (4096) 4KiB
 - **`JsonLayout`** used in two different flavors:
   - **`DefaultJsonLayout`:** default settings
   - **`CustomJsonLayout`:** default settings with an additional `"@version": 1`

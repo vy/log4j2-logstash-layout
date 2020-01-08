@@ -1,5 +1,7 @@
 ### (????-??-??) v0.22
 
+- Set `maxByteCount` to 16 KiB by default.
+
 - Set `emptyPropertyExclusionEnabled` to `false` by default.
 
 - Remove `timestamp:nanos` and `timestamp:millis` directives in favor of

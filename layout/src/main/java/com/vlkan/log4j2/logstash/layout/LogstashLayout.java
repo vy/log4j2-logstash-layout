@@ -330,7 +330,7 @@ public class LogstashLayout implements Layout<String> {
         private String lineSeparator = System.lineSeparator();
 
         @PluginBuilderAttribute
-        private int maxByteCount = 1024 * 512;  // 512 KiB
+        private int maxByteCount = 1024 * 16;  // 16 KiB
 
         @PluginBuilderAttribute
         private int maxStringLength = 0;
