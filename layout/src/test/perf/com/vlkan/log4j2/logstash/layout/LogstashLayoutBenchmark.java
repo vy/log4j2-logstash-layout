@@ -81,6 +81,16 @@ public class LogstashLayoutBenchmark {
     }
 
     @Benchmark
+    public static int fullLogstashLayout4GelfLayout(LogstashLayoutBenchmarkState state) {
+        return benchmark(state.getLogstashLayout4GelfLayout(), state.getFullLogEvents(), state.getByteBufferDestination());
+    }
+
+    @Benchmark
+    public static int liteLogstashLayout4GelfLayout(LogstashLayoutBenchmarkState state) {
+        return benchmark(state.getLogstashLayout4GelfLayout(), state.getLiteLogEvents(), state.getByteBufferDestination());
+    }
+
+    @Benchmark
     public static int fullDefaultJsonLayout(LogstashLayoutBenchmarkState state) {
         return benchmark(state.getDefaultJsonLayout(), state.getFullLogEvents(), state.getByteBufferDestination());
     }
@@ -108,6 +118,16 @@ public class LogstashLayoutBenchmark {
     @Benchmark
     public static int liteEcsLayout(LogstashLayoutBenchmarkState state) {
         return benchmark(state.getEcsLayout(), state.getLiteLogEvents(), state.getByteBufferDestination());
+    }
+
+    @Benchmark
+    public static int fullGelfLayout(LogstashLayoutBenchmarkState state) {
+        return benchmark(state.getGelfLayout(), state.getFullLogEvents(), state.getByteBufferDestination());
+    }
+
+    @Benchmark
+    public static int liteGelfLayout(LogstashLayoutBenchmarkState state) {
+        return benchmark(state.getGelfLayout(), state.getLiteLogEvents(), state.getByteBufferDestination());
     }
 
     private static int benchmark(Layout<String> layout, List<LogEvent> logEvents, ByteBufferDestination destination) {

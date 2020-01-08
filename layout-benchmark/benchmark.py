@@ -50,7 +50,7 @@ def run_benchmark():
     mvn_output_file = get_mvn_output_file()
     with open(mvn_output_file, "w") as mvn_output_file_handle:
         env = os.environ.copy()
-        env["MAVEN_OPTS"] = "-XX:+TieredCompilation -XX:+AggressiveOpts"
+        env["MAVEN_OPTS"] = "-XX:+TieredCompilation"
         popen = subprocess.Popen(
             ["taskset",
              "-c", "0",
@@ -60,6 +60,8 @@ def run_benchmark():
              "exec:java",
              "-Dlog4j2.garbagefreeThreadContextMap=true",
              "-Dlog4j2.enableDirectEncoders=true",
+             "-Dlog4j2.enable.threadlocals=true",
+             "-Dlog4j2.is.webapp=false",
              "-Dlog4j2.logstashLayoutBenchmark.jsonOutputFile={}".format(json_output_file)],
             env=env,
             bufsize=1,

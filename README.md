@@ -357,10 +357,15 @@ To give an idea, we ran the benchmark with the following settings:
 
 - **CPU:** Intel i7 2.70GHz (x86-64, confined `java` process to a single core
   using [`taskset -c 0`](http://www.man7.org/linux/man-pages/man1/taskset.1.html))
-- **JVM:** Java HotSpot 1.8.0_192 (`-XX:+TieredCompilation`, `-XX:+AggressiveOpts`)
-- **OS:** Xubuntu 18.04.3 (4.15.0-54-generic, x86-64)
-- **`LogstashLayout4{Ecs,Json}Layout`** used default settings with the following exceptions:
-  - **`emptyPropertyExclusionEnabled`:** `false`
+- **JVM:** OpenJDK 64-Bit, AdoptOpenJDK, build 25.232-b09
+  - `-XX:+TieredCompilation`
+  - `-Dlog4j2.garbagefreeThreadContextMap=true`
+  - `-Dlog4j2.enableDirectEncoders=true`
+  - `-Dlog4j2.enable.threadlocals=true`
+  - `-Dlog4j2.is.webapp=false`
+- **OS:** Xubuntu 18.04.3 (4.15.0-70-generic, x86-64)
+- **`LogstashLayout4{Ecs,Json,Gelf}Layout`** used default settings with the
+  following exceptions:
   - **`stackTraceEnabled`:** `true`
   - **`maxByteCount`:** (4096) 4KiB
 - **`JsonLayout`** used in two different flavors:
@@ -371,6 +376,8 @@ To give an idea, we ran the benchmark with the following settings:
 - **`EcsLayout`** used with the following configurations:
   - **`serviceName`:** `benchmark`
   - **`additionalFields`:** `new KeyValuePair[0]`
+- **`GelfLayout`** used with the following configurations:
+  - **`compressionType`:** `off`
 
 The figures for serializing 1,000 `LogEvent`s at each operation are as follows.
 (See [`layout-benchmark`](layout-benchmark) directory for the full report.)
@@ -385,65 +392,89 @@ The figures for serializing 1,000 `LogEvent`s at each operation are as follows.
             </tr>
         </thead>
         <tbody>
+            <tr data-benchmark="liteLogstashLayout4GelfLayout">
+                <td class="benchmark">liteLogstashLayout4GelfLayout</td>
+                <td class="op_rate">1,517,062</td>
+                <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉ (100%)</td>
+                <td class="gc_rate">0.0</td>
+            </tr>
             <tr data-benchmark="liteLogstashLayout4EcsLayout">
                 <td class="benchmark">liteLogstashLayout4EcsLayout</td>
-                <td class="op_rate">813,346</td>
-                <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉&nbsp;(100%)</td>
-                <td class="gc_rate">4,545.0</td>
+                <td class="op_rate">1,196,255</td>
+                <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉ (79%)</td>
+                <td class="gc_rate">0.0</td>
             </tr>
-            <tr data-benchmark="liteEcsLayout">
-                <td class="benchmark">liteEcsLayout</td>
-                <td class="op_rate">603,469</td>
-                <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉&nbsp;(74%)</td>
-                <td class="gc_rate">460.9</td>
+            <tr data-benchmark="liteGelfLayout">
+                <td class="benchmark">liteGelfLayout</td>
+                <td class="op_rate">1,184,922</td>
+                <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉ (78%)</td>
+                <td class="gc_rate">0.0</td>
             </tr>
             <tr data-benchmark="liteLogstashLayout4JsonLayout">
                 <td class="benchmark">liteLogstashLayout4JsonLayout</td>
-                <td class="op_rate">564,456</td>
-                <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉▉▉▉▉&nbsp;(69%)</td>
-                <td class="gc_rate">492.7</td>
+                <td class="op_rate">870,012</td>
+                <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉▉ (57%)</td>
+                <td class="gc_rate">0.0</td>
+            </tr>
+            <tr data-benchmark="liteEcsLayout">
+                <td class="benchmark">liteEcsLayout</td>
+                <td class="op_rate">836,648</td>
+                <td class="op_rate_bar">▉▉▉▉▉▉▉▉▉▉▉ (55%)</td>
+                <td class="gc_rate">0.0</td>
             </tr>
             <tr data-benchmark="liteDefaultJsonLayout">
                 <td class="benchmark">liteDefaultJsonLayout</td>
-                <td class="op_rate">294,590</td>
-                <td class="op_rate_bar">▉▉▉▉▉▉▉&nbsp;(36%)</td>
-                <td class="gc_rate">5,101,398.2</td>
+                <td class="op_rate">506,985</td>
+                <td class="op_rate_bar">▉▉▉▉▉▉▉ (33%)</td>
+                <td class="gc_rate">5,331,680.0</td>
             </tr>
             <tr data-benchmark="liteCustomJsonLayout">
                 <td class="benchmark">liteCustomJsonLayout</td>
-                <td class="op_rate">258,302</td>
-                <td class="op_rate_bar">▉▉▉▉▉▉▉&nbsp;(32%)</td>
-                <td class="gc_rate">5,516,833.5</td>
+                <td class="op_rate">446,243</td>
+                <td class="op_rate_bar">▉▉▉▉▉▉ (29%)</td>
+                <td class="gc_rate">5,740,400.0</td>
             </tr>
             <tr data-benchmark="fullLogstashLayout4JsonLayout">
                 <td class="benchmark">fullLogstashLayout4JsonLayout</td>
-                <td class="op_rate">70,755</td>
-                <td class="op_rate_bar">▉▉&nbsp;(9%)</td>
-                <td class="gc_rate">108,258.8</td>
+                <td class="op_rate">118,294</td>
+                <td class="op_rate_bar">▉▉ (8%)</td>
+                <td class="gc_rate">104,000.1</td>
+            </tr>
+            <tr data-benchmark="fullLogstashLayout4GelfLayout">
+                <td class="benchmark">fullLogstashLayout4GelfLayout</td>
+                <td class="op_rate">73,102</td>
+                <td class="op_rate_bar">▉ (5%)</td>
+                <td class="gc_rate">35,663,200.3</td>
             </tr>
             <tr data-benchmark="fullLogstashLayout4EcsLayout">
                 <td class="benchmark">fullLogstashLayout4EcsLayout</td>
-                <td class="op_rate">41,913</td>
-                <td class="op_rate_bar">▉&nbsp;(5%)</td>
-                <td class="gc_rate">35,690,881.3</td>
+                <td class="op_rate">60,569</td>
+                <td class="op_rate_bar">▉ (4%)</td>
+                <td class="gc_rate">35,631,200.4</td>
             </tr>
             <tr data-benchmark="fullEcsLayout">
                 <td class="benchmark">fullEcsLayout</td>
-                <td class="op_rate">16,594</td>
-                <td class="op_rate_bar">▉&nbsp;(2%)</td>
-                <td class="gc_rate">46,495,593.1</td>
+                <td class="op_rate">27,887</td>
+                <td class="op_rate_bar">▉ (2%)</td>
+                <td class="gc_rate">46,479,200.5</td>
+            </tr>
+            <tr data-benchmark="fullGelfLayout">
+                <td class="benchmark">fullGelfLayout</td>
+                <td class="op_rate">21,458</td>
+                <td class="op_rate_bar">▉ (1%)</td>
+                <td class="gc_rate">58,911,200.7</td>
             </tr>
             <tr data-benchmark="fullDefaultJsonLayout">
                 <td class="benchmark">fullDefaultJsonLayout</td>
-                <td class="op_rate">8,484</td>
-                <td class="op_rate_bar">▉&nbsp;(1%)</td>
-                <td class="gc_rate">234,422,375.7</td>
+                <td class="op_rate">13,513</td>
+                <td class="op_rate_bar">▉ (1%)</td>
+                <td class="gc_rate">234,102,401.5</td>
             </tr>
             <tr data-benchmark="fullCustomJsonLayout">
                 <td class="benchmark">fullCustomJsonLayout</td>
-                <td class="op_rate">8,456</td>
-                <td class="op_rate_bar">▉&nbsp;(1%)</td>
-                <td class="gc_rate">234,624,867.7</td>
+                <td class="op_rate">13,511</td>
+                <td class="op_rate_bar">▉ (1%)</td>
+                <td class="gc_rate">234,238,401.5</td>
             </tr>
         </tbody>
     </table>
@@ -460,7 +491,7 @@ Let us try to answer some common questions:
   `ObjectMapper`, which needs to walk over the class fields via reflection and
   perform heavy branching and intermediate object instantiation. On the
   contrary, `log4j2-logstash-layout` parses the given template once and
-  compiles an (almost) garbage- and (to a certain extent) branching-free
+  compiles a (mostly) garbage- and (to a certain extent) branching-free
   JSON generator employing Jackson `JsonGenerator`.
 
 - **Why is `log4j2-logstash-layout` is not totally garbage-free?**
@@ -474,7 +505,7 @@ Let us try to answer some common questions:
     `Long`, or `byte[]`.
 
 - **How can one run the benchmark on his/her machine?** After a fresh
-  `mvn clean package` within the source directory, run
+  `mvn clean verify` within the source directory, run
   `layout-benchmark/benchmark.py`.
 
 - **What about thread-local allocations?** Even though Log4j 2 exposes a

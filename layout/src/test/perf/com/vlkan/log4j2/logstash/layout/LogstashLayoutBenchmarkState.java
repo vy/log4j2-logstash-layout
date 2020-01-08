@@ -5,8 +5,10 @@ import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.DefaultConfiguration;
 import org.apache.logging.log4j.core.layout.ByteBufferDestination;
+import org.apache.logging.log4j.core.layout.GelfLayout;
 import org.apache.logging.log4j.core.layout.JsonLayout;
 import org.apache.logging.log4j.core.util.KeyValuePair;
+import org.apache.logging.log4j.core.util.NetUtils;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 
@@ -17,17 +19,23 @@ public class LogstashLayoutBenchmarkState {
 
     private static final Configuration CONFIGURATION = new DefaultConfiguration();
 
+    private static final int LOGSTASH_LAYOUT_MAX_BYTE_COUNT = 4096;
+
     private final ByteBufferDestination byteBufferDestination;
 
     private final LogstashLayout logstashLayout4JsonLayout;
 
     private final LogstashLayout logstashLayout4EcsLayout;
 
+    private final LogstashLayout logstashLayout4GelfLayout;
+
     private final JsonLayout defaultJsonLayout;
 
     private final JsonLayout customJsonLayout;
 
     private final EcsLayout ecsLayout;
+
+    private final GelfLayout gelfLayout;
 
     private final List<LogEvent> fullLogEvents;
 
@@ -37,9 +45,11 @@ public class LogstashLayoutBenchmarkState {
         this.byteBufferDestination = new BlackHoleByteBufferDestination(1024 * 512);
         this.logstashLayout4JsonLayout = createLogstashLayout4JsonLayout();
         this.logstashLayout4EcsLayout = createLogstashLayout4EcsLayout();
+        this.logstashLayout4GelfLayout = createLogstashLayout4GelfLayout();
         this.defaultJsonLayout = createDefaultJsonLayout();
         this.customJsonLayout = createCustomJsonLayout();
         this.ecsLayout = createEcsLayout();
+        this.gelfLayout = createGelfLayout();
         int logEventCount = 1_000;
         this.fullLogEvents = LogEventFixture.createFullLogEvents(logEventCount);
         this.liteLogEvents = LogEventFixture.createLiteLogEvents(logEventCount);
@@ -50,9 +60,8 @@ public class LogstashLayoutBenchmarkState {
                 .newBuilder()
                 .setConfiguration(CONFIGURATION)
                 .setEventTemplateUri("classpath:Log4j2JsonLayout.json")
-                .setEmptyPropertyExclusionEnabled(false)
                 .setStackTraceEnabled(true)
-                .setMaxByteCount(4096)
+                .setMaxByteCount(LOGSTASH_LAYOUT_MAX_BYTE_COUNT)
                 .build();
     }
 
@@ -66,10 +75,29 @@ public class LogstashLayoutBenchmarkState {
                 .newBuilder()
                 .setConfiguration(CONFIGURATION)
                 .setEventTemplateUri("classpath:EcsLayout.json")
-                .setEmptyPropertyExclusionEnabled(false)
                 .setStackTraceEnabled(true)
                 .setEventTemplateAdditionalFields(additionalFields)
-                .setMaxByteCount(4096)
+                .setMaxByteCount(LOGSTASH_LAYOUT_MAX_BYTE_COUNT)
+                .build();
+    }
+
+    private static LogstashLayout createLogstashLayout4GelfLayout() {
+        return LogstashLayout
+                .newBuilder()
+                .setConfiguration(CONFIGURATION)
+                .setEventTemplateUri("classpath:GelfLayout.json")
+                .setStackTraceEnabled(true)
+                .setMaxByteCount(LOGSTASH_LAYOUT_MAX_BYTE_COUNT)
+                .setEventTemplateAdditionalFields(LogstashLayout
+                        .EventTemplateAdditionalFields
+                        .newBuilder()
+                        .setPairs(new KeyValuePair[]{
+                                // Adding "host" as a constant rather than using
+                                // the "hostName" property lookup at runtime, which
+                                // is what GelfLayout does as well.
+                                new KeyValuePair("host", NetUtils.getLocalHostname())
+                        })
+                        .build())
                 .build();
     }
 
@@ -94,6 +122,14 @@ public class LogstashLayoutBenchmarkState {
                 .build();
     }
 
+    private static GelfLayout createGelfLayout() {
+        return GelfLayout
+                .newBuilder()
+                .setConfiguration(CONFIGURATION)
+                .setCompressionType(GelfLayout.CompressionType.OFF)
+                .build();
+    }
+
     ByteBufferDestination getByteBufferDestination() {
         return byteBufferDestination;
     }
@@ -106,6 +142,10 @@ public class LogstashLayoutBenchmarkState {
         return logstashLayout4EcsLayout;
     }
 
+    LogstashLayout getLogstashLayout4GelfLayout() {
+        return logstashLayout4GelfLayout;
+    }
+
     JsonLayout getDefaultJsonLayout() {
         return defaultJsonLayout;
     }
@@ -116,6 +156,10 @@ public class LogstashLayoutBenchmarkState {
 
     EcsLayout getEcsLayout() {
         return ecsLayout;
+    }
+
+    GelfLayout getGelfLayout() {
+        return gelfLayout;
     }
 
     List<LogEvent> getFullLogEvents() {
