@@ -521,7 +521,7 @@ Let us try to answer some common questions:
 
 # License
 
-Copyright &copy; 2017-2019 [Volkan Yazıcı](https://vlkan.com/)
+Copyright &copy; 2017-2020 [Volkan Yazıcı](https://vlkan.com/)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
