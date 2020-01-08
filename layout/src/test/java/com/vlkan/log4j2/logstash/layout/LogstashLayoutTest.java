@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.MissingNode;
+import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Level;
@@ -263,6 +264,7 @@ public class LogstashLayoutTest {
                 .newBuilder()
                 .setConfiguration(configuration)
                 .setEventTemplate(eventTemplate)
+                .setEmptyPropertyExclusionEnabled(true)
                 .build();
 
         // Create the log event with a MapMessage.
@@ -280,7 +282,7 @@ public class LogstashLayoutTest {
         JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
         assertThat(point(rootNode, "mapValue1").asText()).isEqualTo("val1");
         assertThat(point(rootNode, "mapValue2").asText()).isEqualTo("val2");
-        assertThat(point(rootNode, "nestedLookupEmptyValue").isMissingNode());
+        assertThat(point(rootNode, "nestedLookupEmptyValue")).isInstanceOf(MissingNode.class);
         assertThat(point(rootNode, "nestedLookupStaticValue").asText()).isEqualTo("Static Value");
 
     }
@@ -559,17 +561,17 @@ public class LogstashLayoutTest {
         // Create the layout.
         BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
         LogstashLayout layout = LogstashLayout
-            .newBuilder()
-            .setConfiguration(configuration)
-            .setEventTemplate(template)
-            .build();
+                .newBuilder()
+                .setConfiguration(configuration)
+                .setEventTemplate(template)
+                .build();
 
         // Check the serialized event.
         String serializedLogEvent = layout.toSerializable(logEvent);
         JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
         assertThat(point(rootNode, "name").asText()).isEqualTo(kwVal);
         assertThat(point(rootNode, "positionArg").asText()).isEqualTo(positionArg);
-        assertThat(point(rootNode, "notFoundArg")).isInstanceOf(MissingNode.class);
+        assertThat(point(rootNode, "notFoundArg")).isInstanceOf(NullNode.class);
 
     }
 
@@ -624,7 +626,7 @@ public class LogstashLayoutTest {
         assertThat(point(rootNode, mdcDirectlyAccessedKey).asText()).isEqualTo(mdcDirectlyAccessedValue);
         assertThat(point(rootNode, mdcFieldName, mdcPatternMatchedKey).asText()).isEqualTo(mdcPatternMatchedValue);
         assertThat(point(rootNode, mdcFieldName, mdcPatternMismatchedKey)).isInstanceOf(MissingNode.class);
-        assertThat(point(rootNode, mdcDirectlyAccessedNullPropertyKey)).isInstanceOf(MissingNode.class);
+        assertThat(point(rootNode, mdcDirectlyAccessedNullPropertyKey)).isInstanceOf(NullNode.class);
 
     }
 
@@ -659,7 +661,7 @@ public class LogstashLayoutTest {
         String serializedLogEvent = layout.toSerializable(logEvent);
         JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
         assertThat(point(rootNode, "mapValue1").asText()).isEqualTo("val1");
-        assertThat(point(rootNode, "mapValue2").isMissingNode()).isTrue();
+        assertThat(point(rootNode, "mapValue2")).isInstanceOf(MissingNode.class);
 
     }
 
@@ -731,10 +733,10 @@ public class LogstashLayoutTest {
                 // Check property and MDC fields.
                 JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
                 assertThat(point(rootNode, mdcEmptyKey1).asText()).isEmpty();
-                assertThat(point(rootNode, mdcEmptyKey2).isNull()).isTrue();
+                assertThat(point(rootNode, mdcEmptyKey2)).isInstanceOf(NullNode.class);
                 assertThat(point(rootNode, mdcFieldName)).isInstanceOf(ObjectNode.class);
                 assertThat(point(rootNode, mdcFieldName, mdcEmptyKey1).asText()).isEmpty();
-                assertThat(point(rootNode, mdcFieldName, mdcEmptyKey2).isNull()).isTrue();
+                assertThat(point(rootNode, mdcFieldName, mdcEmptyKey2)).isInstanceOf(NullNode.class);
                 assertThat(point(rootNode, emptyProperty1Name).asText()).isEmpty();
 
                 // Check "blankObject": {"emptyArray": []} field.
@@ -1017,7 +1019,6 @@ public class LogstashLayoutTest {
                 .newBuilder()
                 .setConfiguration(configuration)
                 .setEventTemplate(eventTemplate)
-                .setEmptyPropertyExclusionEnabled(false)
                 .setMaxStringLength(maxStringLength)
                 .build();
 
@@ -1306,17 +1307,16 @@ public class LogstashLayoutTest {
                 .newBuilder()
                 .setConfiguration(configuration)
                 .setEventTemplate(eventTemplate)
-                .setEmptyPropertyExclusionEnabled(false)
                 .setStackTraceEnabled(true)
                 .build();
 
         // Check the serialized event.
         String serializedLogEvent = layout.toSerializable(logEvent);
         JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
-        assertThat(point(rootNode, "exceptionStackTrace").isNull()).isTrue();
-        assertThat(point(rootNode, "exceptionStackTraceText").isNull()).isTrue();
-        assertThat(point(rootNode, "exceptionRootCauseStackTrace").isNull()).isTrue();
-        assertThat(point(rootNode, "exceptionRootCauseStackTraceText").isNull()).isTrue();
+        assertThat(point(rootNode, "exceptionStackTrace")).isInstanceOf(NullNode.class);
+        assertThat(point(rootNode, "exceptionStackTraceText")).isInstanceOf(NullNode.class);
+        assertThat(point(rootNode, "exceptionRootCauseStackTrace")).isInstanceOf(NullNode.class);
+        assertThat(point(rootNode, "exceptionRootCauseStackTraceText")).isInstanceOf(NullNode.class);
         assertThat(point(rootNode, "requiredFieldTriggeringError").asBoolean()).isTrue();
 
     }

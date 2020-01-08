@@ -294,7 +294,7 @@ public class LogstashLayout implements Layout<String> {
         private boolean stackTraceEnabled = false;
 
         @PluginBuilderAttribute
-        private boolean emptyPropertyExclusionEnabled = true;
+        private boolean emptyPropertyExclusionEnabled = false;
 
         @PluginBuilderAttribute
         private String dateTimeFormatPattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZZZ";

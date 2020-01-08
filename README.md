@@ -122,7 +122,7 @@ This generates an output as follows:
 | `prettyPrintEnabled` | boolean | enables pretty-printer (defaults to `false`) |
 | `locationInfoEnabled` | boolean | includes the filename and line number in the output (defaults to `false`) |
 | `stackTraceEnabled` | boolean | includes stack traces (defaults to `false`) |
-| `emptyPropertyExclusionEnabled` | boolean | exclude empty and null properties (defaults to `true`) |
+| `emptyPropertyExclusionEnabled` | boolean | exclude empty and null properties (defaults to `false`) |
 | `dateTimeFormatPattern` | String | timestamp formatter pattern (defaults to `yyyy-MM-dd'T'HH:mm:ss.SSSZZZ`) |
 | `timeZoneId` | String | time zone id (defaults to `TimeZone.getDefault().getID()`) |
 | `locale` | String | locale in one of the following forms: `<language>`, `<language>_<country>`, or `<language>_<country>_<variant>` (defaults to `Locale.getDefault()`) |
