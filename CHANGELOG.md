@@ -1,5 +1,7 @@
 ### (????-??-??) v0.22
 
+- Add Java 9 module name: `com.vlkan.log4j2.logstash.layout`.
+
 - Set `maxByteCount` to 16 KiB by default.
 
 - Set `emptyPropertyExclusionEnabled` to `false` by default.

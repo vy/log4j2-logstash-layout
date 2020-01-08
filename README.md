@@ -42,7 +42,7 @@ Add the `log4j2-logstash-layout` dependency to your POM file
 </dependency>
 ```
 
-together with a valid `log4j-core` dependency:
+in combination with a valid `log4j-core` dependency:
 
 ```xml
 <dependency>
@@ -51,6 +51,8 @@ together with a valid `log4j-core` dependency:
     <version>${log4j2.version}</version>
 </dependency>
 ```
+
+(Note that the Java 9 module name is `com.vlkan.log4j2.logstash.layout`.)
 
 Below you can find a sample `log4j2.xml` snippet employing `LogstashLayout`.
 
