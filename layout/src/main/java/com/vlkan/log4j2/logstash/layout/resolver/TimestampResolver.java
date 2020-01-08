@@ -1,6 +1,7 @@
 package com.vlkan.log4j2.logstash.layout.resolver;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.vlkan.log4j2.logstash.layout.util.JsonGenerators;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.time.Instant;
 import org.apache.logging.log4j.core.util.Constants;
@@ -200,6 +201,34 @@ class TimestampResolver implements EventResolver {
                 : new LockingFormatResolver(eventResolverContext);
     }
 
+    private static final EventResolver SECS_LONG_RESOLVER = (logEvent, jsonGenerator) -> {
+        Instant logEventInstant = logEvent.getInstant();
+        long epochSecs = logEventInstant.getEpochSecond();
+        jsonGenerator.writeNumber(epochSecs);
+    };
+
+    private static final EventResolver SECS_DOUBLE_RESOLVER = (logEvent, jsonGenerator) -> {
+        Instant logEventInstant = logEvent.getInstant();
+        JsonGenerators.writeDouble(
+                jsonGenerator,
+                logEventInstant.getEpochSecond(),
+                logEventInstant.getNanoOfSecond());
+    };
+
+    private static final EventResolver MILLIS_LONG_RESOLVER = (logEvent, jsonGenerator) -> {
+        Instant logEventInstant = logEvent.getInstant();
+        long epochMillis = logEventInstant.getEpochMillisecond();
+        jsonGenerator.writeNumber(epochMillis);
+    };
+
+    private static final EventResolver MILLIS_DOUBLE_RESOLVER = (logEvent, jsonGenerator) -> {
+        Instant logEventInstant = logEvent.getInstant();
+        JsonGenerators.writeDouble(
+                jsonGenerator,
+                logEventInstant.getEpochMillisecond(),
+                logEventInstant.getNanoOfMillisecond());
+    };
+
     private static final EventResolver NANOS_RESOLVER = (logEvent, jsonGenerator) -> {
         Instant logEventInstant = logEvent.getInstant();
         long epochNanos = Math.multiplyExact(1_000_000_000L, logEventInstant.getEpochSecond());
@@ -207,50 +236,20 @@ class TimestampResolver implements EventResolver {
         jsonGenerator.writeNumber(number);
     };
 
-    private static final EventResolver MILLIS_DOUBLE_RESOLVER = (logEvent, jsonGenerator) -> {
-        Instant logEventInstant = logEvent.getInstant();
-        long epochMillis = logEventInstant.getEpochMillisecond();
-        jsonGenerator.writeNumber(epochMillis);
-    };
-
-    private static final EventResolver MILLIS_LONG_RESOLVER = (logEvent, jsonGenerator) -> {
-        Instant logEventInstant = logEvent.getInstant();
-        String encodedNumber = "" +
-                logEventInstant.getEpochMillisecond() +
-                '.' +
-                logEventInstant.getNanoOfMillisecond();
-        jsonGenerator.writeNumber(encodedNumber);
-    };
-
-    private static final EventResolver SECS_LONG_RESOLVER = (logEvent, jsonGenerator) -> {
-        Instant logEventInstant = logEvent.getInstant();
-        String encodedNumber = "" +
-                logEventInstant.getEpochSecond() +
-                '.' +
-                logEventInstant.getNanoOfSecond();
-        jsonGenerator.writeNumber(encodedNumber);
-    };
-
-    private static final EventResolver SECS_DOUBLE_RESOLVER = (logEvent, jsonGenerator) -> {
-        Instant logEventInstant = logEvent.getInstant();
-        long epochSecs = logEventInstant.getEpochSecond();
-        jsonGenerator.writeNumber(epochSecs);
-    };
-
     private static EventResolver createDivisorResolver(double divisor, boolean integral) {
 
         // Resolve to seconds?
         if (Double.compare(1e9D, divisor) == 0) {
             return integral
-                    ? SECS_DOUBLE_RESOLVER
-                    : SECS_LONG_RESOLVER;
+                    ? SECS_LONG_RESOLVER
+                    : SECS_DOUBLE_RESOLVER;
         }
 
         // Resolve to milliseconds?
         else if (Double.compare(1e6D, divisor) == 0) {
             return integral
-                    ? MILLIS_DOUBLE_RESOLVER
-                    : MILLIS_LONG_RESOLVER;
+                    ? MILLIS_LONG_RESOLVER
+                    : MILLIS_DOUBLE_RESOLVER;
         }
 
         // Resolve to nanoseconds?
