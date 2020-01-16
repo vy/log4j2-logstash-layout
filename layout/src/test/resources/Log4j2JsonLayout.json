@@ -1,5 +1,8 @@
 {
-  "instant": "${json:timestamp:epoch}",
+  "instant": {
+    "epochSecond": "${json:timestamp:epoch:divisor=1e9,integral}",
+    "nanoOfSecond": 0
+  },
   "thread": "${json:thread:name}",
   "level": "${json:level}",
   "loggerName": "${json:logger:name}",
