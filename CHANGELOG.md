@@ -1,3 +1,7 @@
+### (2020-01-21) v1.0.1
+
+- Fix NPE in `StringTruncatingGeneratorDelegate`. (#53)
+
 ### (2020-01-08) v1.0.0
 
 - Switched to semantic versioning.

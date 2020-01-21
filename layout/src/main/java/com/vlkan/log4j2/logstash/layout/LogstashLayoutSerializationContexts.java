@@ -125,7 +125,9 @@ enum LogstashLayoutSerializationContexts {;
 
         @Override
         public void writeString(String text) throws IOException {
-            if (maxStringLength <= 0 || maxStringLength >= text.length()) {
+            if (text == null) {
+                writeNull();
+            } else if (maxStringLength <= 0 || maxStringLength >= text.length()) {
                 super.writeString(text);
             } else {
                 StringReader textReader = new StringReader(text);

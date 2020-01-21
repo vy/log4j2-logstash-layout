@@ -1014,19 +1014,24 @@ public class LogstashLayoutTest {
         int maxStringLength = 30;
         String truncatedMessage = StringUtils.repeat('m', maxStringLength);
         SimpleMessage message = new SimpleMessage(truncatedMessage + 'M');
+        Throwable thrown = new RuntimeException();
         LogEvent logEvent = Log4jLogEvent
                 .newBuilder()
                 .setLoggerName(LogstashLayoutTest.class.getSimpleName())
                 .setLevel(Level.INFO)
                 .setMessage(message)
+                .setThrown(thrown)
                 .build();
 
         // Create the event template node with map values.
         ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
-        eventTemplateRootNode.put("message", "${json:message}");
+        String messageKey = "message";
+        eventTemplateRootNode.put(messageKey, "${json:message}");
         String truncatedKey = StringUtils.repeat("k", maxStringLength);
         String truncatedValue = StringUtils.repeat("v", maxStringLength);
         eventTemplateRootNode.put(truncatedKey + "K", truncatedValue + "V");
+        String nullValueKey = "nullValueKey";
+        eventTemplateRootNode.put(nullValueKey, "${json:exception:message}");
         String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
@@ -1041,8 +1046,9 @@ public class LogstashLayoutTest {
         // Check serialized event.
         String serializedLogEvent = layout.toSerializable(logEvent);
         JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
-        assertThat(point(rootNode, "message").asText()).isEqualTo(truncatedMessage);
+        assertThat(point(rootNode, messageKey).asText()).isEqualTo(truncatedMessage);
         assertThat(point(rootNode, truncatedKey).asText()).isEqualTo(truncatedValue);
+        assertThat(point(rootNode, nullValueKey).isNull()).isTrue();
 
     }
 
