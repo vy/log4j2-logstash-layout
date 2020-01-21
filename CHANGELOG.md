@@ -4,6 +4,8 @@
 
 - Fix handling of non-`String` values in `map` directive. (#61)
 
+- Fix NPE in `StringTruncatingGeneratorDelegate`. (#53)
+
 ### (2019-10-15) v0.21
 
 - Add feature comparison matrix.

@@ -480,6 +480,7 @@ Let us try to answer some common questions:
 - [John Ament](https://github.com/johnament)
 - [Jonathan Guéhenneux](https://github.com/Achaaab)
 - [justinsaliba](https://github.com/justinsaliba)
+- [Maurice Zeijen](https://github.com/mzeijen)
 - [Michael K. Edwards](https://github.com/mkedwards)
 - [Mikael Strand](https://github.com/MikaelStrand)
 - [Rafa Gómez](https://github.com/rgomezcasas)
