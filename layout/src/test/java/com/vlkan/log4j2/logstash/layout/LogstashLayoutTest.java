@@ -1420,4 +1420,39 @@ public class LogstashLayoutTest {
 
     }
 
+    @Test
+    public void test_maxStringLength_with_emptyPropertyExclusionEnabled() throws Exception {
+
+        // Create the event template.
+        ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
+        eventTemplateRootNode.put("message", "${json:message}");
+        String eventTemplate = eventTemplateRootNode.toString();
+
+        // Create the layout.
+        int maxStringLength = eventTemplate.length();
+        Configuration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        LogstashLayout layout = LogstashLayout
+                .newBuilder()
+                .setConfiguration(configuration)
+                .setEventTemplate(eventTemplate)
+                .setMaxStringLength(maxStringLength)
+                .setEmptyPropertyExclusionEnabled(true)
+                .build();
+
+        // Create the log event.
+        SimpleMessage message = new SimpleMessage(StringUtils.repeat('m', maxStringLength) + 'x');
+        LogEvent logEvent = Log4jLogEvent
+                .newBuilder()
+                .setLoggerName(LogstashLayoutTest.class.getSimpleName())
+                .setMessage(message)
+                .build();
+
+        // Check the serialized event.
+        String serializedLogEvent = layout.toSerializable(logEvent);
+        JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
+        String expectedMessage = message.getFormattedMessage().substring(0, maxStringLength);
+        assertThat(point(rootNode, "message").asText()).isEqualTo(expectedMessage);
+
+    }
+
 }

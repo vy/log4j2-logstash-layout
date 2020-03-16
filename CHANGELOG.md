@@ -6,6 +6,10 @@
 
 - Fix NPE in `StringTruncatingGeneratorDelegate`. (#53)
 
+- Implement work around for FasterXML/jackson-core#609 triggered when
+  `maxStringLength` is used in combination with
+  `emptyPropertyExclusionEnabled=true`. (#55)
+
 ### (2019-10-15) v0.21
 
 - Add feature comparison matrix.

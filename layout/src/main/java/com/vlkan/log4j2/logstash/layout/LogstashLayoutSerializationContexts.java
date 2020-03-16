@@ -91,11 +91,12 @@ enum LogstashLayoutSerializationContexts {;
             if (prettyPrintEnabled) {
                 jsonGenerator.setPrettyPrinter(PRETTY_PRINTER);
             }
-            if (emptyPropertyExclusionEnabled) {
-                jsonGenerator = new FilteringGeneratorDelegate(jsonGenerator, NullExcludingTokenFilter.INSTANCE, true, true);
-            }
             if (maxStringLength > 0) {
                 jsonGenerator = new StringTruncatingGeneratorDelegate(jsonGenerator, maxStringLength);
+            }
+            // TokenFilter has to come last due to FasterXML/jackson-core#609.
+            if (emptyPropertyExclusionEnabled) {
+                jsonGenerator = new FilteringGeneratorDelegate(jsonGenerator, NullExcludingTokenFilter.INSTANCE, true, true);
             }
             return jsonGenerator;
         } catch (IOException error) {
