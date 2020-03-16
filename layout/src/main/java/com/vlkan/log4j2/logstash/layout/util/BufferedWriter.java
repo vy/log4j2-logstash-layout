@@ -8,9 +8,12 @@ public final class BufferedWriter extends Writer {
 
     private int position;
 
+    private boolean overflow;
+
     BufferedWriter(int capacity) {
         this.buffer = new char[capacity];
         this.position = 0;
+        this.overflow = false;
     }
 
     char[] getBuffer() {
@@ -25,10 +28,23 @@ public final class BufferedWriter extends Writer {
         return buffer.length;
     }
 
+    boolean isOverflow() {
+        return overflow;
+    }
+
     @Override
     public void write(char[] source, int offset, int length) {
-        System.arraycopy(source, offset, buffer, position, length);
-        position += length;
+        if (!overflow) {
+            int limit = buffer.length - position;
+            if (length > limit) {
+                overflow = true;
+                System.arraycopy(source, offset, buffer, position, limit);
+                position = buffer.length;
+            } else {
+                System.arraycopy(source, offset, buffer, position, length);
+                position += length;
+            }
+        }
     }
 
     @Override
@@ -37,6 +53,7 @@ public final class BufferedWriter extends Writer {
     @Override
     public void close() {
         position = 0;
+        overflow = false;
     }
 
 }

@@ -1455,4 +1455,39 @@ public class LogstashLayoutTest {
 
     }
 
+    @Test
+    public void test_StackTraceTextResolver_with_maxStringLength() throws Exception {
+
+        // Create the event template.
+        ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
+        eventTemplateRootNode.put("stackTrace", "${json:exception:stackTrace:text}");
+        String eventTemplate = eventTemplateRootNode.toString();
+
+        // Create the layout.
+        int maxStringLength = eventTemplate.length();
+        Configuration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        LogstashLayout layout = LogstashLayout
+                .newBuilder()
+                .setConfiguration(configuration)
+                .setEventTemplate(eventTemplate)
+                .setMaxStringLength(maxStringLength)
+                .setStackTraceEnabled(true)
+                .build();
+
+        // Create the log event.
+        SimpleMessage message = new SimpleMessage("foo");
+        LogEvent logEvent = Log4jLogEvent
+                .newBuilder()
+                .setLoggerName(LogstashLayoutTest.class.getSimpleName())
+                .setMessage(message)
+                .setThrown(NonAsciiUtf8MethodNameContainingException.INSTANCE)
+                .build();
+
+        // Check the serialized event.
+        String serializedLogEvent = layout.toSerializable(logEvent);
+        JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
+        assertThat(point(rootNode, "stackTrace").asText()).isNotBlank();
+
+    }
+
 }

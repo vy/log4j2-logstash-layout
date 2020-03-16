@@ -28,6 +28,10 @@ public final class BufferedPrintWriter extends PrintWriter {
         return bufferedWriter.getCapacity();
     }
 
+    public boolean isOverflow() {
+        return bufferedWriter.isOverflow();
+    }
+
     @Override
     public void close() {
         bufferedWriter.close();

@@ -10,6 +10,9 @@
   `maxStringLength` is used in combination with
   `emptyPropertyExclusionEnabled=true`. (#55)
 
+- Fix `ArrayIndexOutOfBoundsException` thrown when `stackTrace:text` produces
+  an output violating the truncation limit. (#57)
+
 ### (2019-10-15) v0.21
 
 - Add feature comparison matrix.
