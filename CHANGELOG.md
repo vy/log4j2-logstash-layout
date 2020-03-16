@@ -1,3 +1,8 @@
+### (2020-??-??) v1.0.2
+
+- Fix `ArrayIndexOutOfBoundsException` thrown when `stackTrace:text` produces
+  an output violating the truncation limit. (#57)
+
 ### (2020-01-21) v1.0.1
 
 - Fix NPE in `StringTruncatingGeneratorDelegate`. (#53)

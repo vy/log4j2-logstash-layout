@@ -538,6 +538,7 @@ Let us try to answer some common questions:
 
 - [bakomchik](https://github.com/bakomchik)
 - [chrissydee](https://github.com/chrissydee)
+- [Daniel Lundsgaard Skovenborg](https://github.com/waldeinburg)
 - [Eric Schwartz](https://github.com/emschwar)
 - [Felix Barnsteiner](https://github.com/felixbarny)
 - [Johann Schmitz](https://github.com/ercpe)
