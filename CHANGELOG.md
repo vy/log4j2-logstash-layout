@@ -3,6 +3,10 @@
 - Fix `ArrayIndexOutOfBoundsException` thrown when `stackTrace:text` produces
   an output violating the truncation limit. (#57)
 
+- Implement work around for FasterXML/jackson-core#609 triggered when
+  `maxStringLength` is used in combination with
+  `emptyPropertyExclusionEnabled=true`. (#55)
+
 ### (2020-01-21) v1.0.1
 
 - Fix NPE in `StringTruncatingGeneratorDelegate`. (#53)

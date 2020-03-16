@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.MissingNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import joptsimple.internal.Strings;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Marker;
@@ -32,7 +33,6 @@ import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.DefaultConfiguration;
 import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilderFactory;
-import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 import org.apache.logging.log4j.core.impl.Log4jLogEvent;
 import org.apache.logging.log4j.core.layout.ByteBufferDestination;
 import org.apache.logging.log4j.core.lookup.MainMapLookup;
@@ -245,7 +245,7 @@ public class LogstashLayoutTest {
         String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
-        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        Configuration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
         String timeZoneId = TimeZone.getTimeZone("Europe/Amsterdam").getID();
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
@@ -275,7 +275,7 @@ public class LogstashLayoutTest {
         String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
-        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        Configuration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
                 .setConfiguration(configuration)
@@ -312,7 +312,7 @@ public class LogstashLayoutTest {
         String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
-        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        Configuration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
                 .setConfiguration(configuration)
@@ -403,7 +403,7 @@ public class LogstashLayoutTest {
         String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
-        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        Configuration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
                 .setConfiguration(configuration)
@@ -449,7 +449,7 @@ public class LogstashLayoutTest {
         String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
-        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        Configuration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
                 .setConfiguration(configuration)
@@ -493,7 +493,7 @@ public class LogstashLayoutTest {
         String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
-        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        Configuration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
                 .setConfiguration(configuration)
@@ -529,7 +529,7 @@ public class LogstashLayoutTest {
     private void test_lineSeparator_suffix(LogEvent logEvent, boolean prettyPrintEnabled) {
 
         // Create the layout.
-        BuiltConfiguration config = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        Configuration config = ConfigurationBuilderFactory.newConfigurationBuilder().build();
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
                 .setConfiguration(config)
@@ -575,7 +575,7 @@ public class LogstashLayoutTest {
         String template = templateRootNode.toString();
 
         // Create the layout.
-        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        Configuration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
                 .setConfiguration(configuration)
@@ -627,7 +627,7 @@ public class LogstashLayoutTest {
         String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
-        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        Configuration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
                 .setConfiguration(configuration)
@@ -665,7 +665,7 @@ public class LogstashLayoutTest {
         String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
-        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        Configuration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
                 .setConfiguration(configuration)
@@ -789,7 +789,7 @@ public class LogstashLayoutTest {
         String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
-        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        Configuration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
                 .setConfiguration(configuration)
@@ -823,7 +823,7 @@ public class LogstashLayoutTest {
         String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
-        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        Configuration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
                 .setConfiguration(configuration)
@@ -874,7 +874,7 @@ public class LogstashLayoutTest {
         String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
-        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        Configuration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
                 .setConfiguration(configuration)
@@ -912,7 +912,7 @@ public class LogstashLayoutTest {
         String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
-        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        Configuration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
                 .setConfiguration(configuration)
@@ -956,7 +956,7 @@ public class LogstashLayoutTest {
     public void test_toSerializable_toByteArray_encode_outputs() {
 
         // Create the layout.
-        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        Configuration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
                 .setConfiguration(configuration)
@@ -1035,7 +1035,7 @@ public class LogstashLayoutTest {
         String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
-        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        Configuration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
                 .setConfiguration(configuration)
@@ -1098,7 +1098,7 @@ public class LogstashLayoutTest {
         String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
-        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        Configuration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
                 .setConfiguration(configuration)
@@ -1133,7 +1133,7 @@ public class LogstashLayoutTest {
         String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
-        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        Configuration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
                 .setObjectMapperFactoryMethod("com.vlkan.log4j2.logstash.layout.LogstashLayoutTest.getCustomObjectMapper")
@@ -1175,7 +1175,7 @@ public class LogstashLayoutTest {
         String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
-        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        Configuration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
         KeyValuePair additionalField1 = new KeyValuePair("message", "${json:message}");
         KeyValuePair additionalField2 = new KeyValuePair("@version", "1");
         KeyValuePair[] additionalFieldPairs = {additionalField1, additionalField2};
@@ -1236,7 +1236,7 @@ public class LogstashLayoutTest {
         String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
-        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        Configuration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
                 .setConfiguration(configuration)
@@ -1272,7 +1272,7 @@ public class LogstashLayoutTest {
         String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
-        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        Configuration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
                 .setConfiguration(configuration)
@@ -1324,7 +1324,7 @@ public class LogstashLayoutTest {
         String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
-        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        Configuration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
                 .setConfiguration(configuration)
@@ -1363,7 +1363,7 @@ public class LogstashLayoutTest {
         String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
-        BuiltConfiguration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        Configuration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
         LogstashLayout layout = LogstashLayout
                 .newBuilder()
                 .setConfiguration(configuration)
@@ -1439,6 +1439,41 @@ public class LogstashLayoutTest {
         String serializedLogEvent = layout.toSerializable(logEvent);
         JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
         assertThat(point(rootNode, "stackTrace").asText()).isNotBlank();
+
+    }
+
+    @Test
+    public void test_maxStringLength_with_emptyPropertyExclusionEnabled() throws Exception {
+
+        // Create the event template.
+        ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
+        eventTemplateRootNode.put("message", "${json:message}");
+        String eventTemplate = eventTemplateRootNode.toString();
+
+        // Create the layout.
+        int maxStringLength = eventTemplate.length();
+        Configuration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        LogstashLayout layout = LogstashLayout
+                .newBuilder()
+                .setConfiguration(configuration)
+                .setEventTemplate(eventTemplate)
+                .setMaxStringLength(maxStringLength)
+                .setEmptyPropertyExclusionEnabled(true)
+                .build();
+
+        // Create the log event.
+        SimpleMessage message = new SimpleMessage(Strings.repeat('m', maxStringLength) + 'x');
+        LogEvent logEvent = Log4jLogEvent
+                .newBuilder()
+                .setLoggerName(LogstashLayoutTest.class.getSimpleName())
+                .setMessage(message)
+                .build();
+
+        // Check the serialized event.
+        String serializedLogEvent = layout.toSerializable(logEvent);
+        JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
+        String expectedMessage = message.getFormattedMessage().substring(0, maxStringLength);
+        assertThat(point(rootNode, "message").asText()).isEqualTo(expectedMessage);
 
     }
 
