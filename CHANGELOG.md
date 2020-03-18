@@ -1,4 +1,4 @@
-### (2020-??-??) v1.0.2
+### (2020-03-18) v1.0.2
 
 - Fix `ArrayIndexOutOfBoundsException` thrown when `stackTrace:text` produces
   an output violating the truncation limit. (#57)
