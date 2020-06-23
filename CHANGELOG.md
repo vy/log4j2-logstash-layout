@@ -2,6 +2,8 @@
 
 - Try to dump the cause when stack trace serialization fails.
 
+- Fix handling of non-`String` values in `map` directive. (#61)
+
 ### (2019-10-15) v0.21
 
 - Add feature comparison matrix.

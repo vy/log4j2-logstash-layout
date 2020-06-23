@@ -1,3 +1,19 @@
+/*
+ * Copyright 2017-2020 Volkan Yazıcı
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permits and
+ * limitations under the License.
+ */
+
 package com.vlkan.log4j2.logstash.layout.resolver;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -111,7 +127,8 @@ class MessageResolver implements EventResolver {
 
         // Override the provided MapMessage formatter.
         if (context.isMapMessageFormatterIgnored() && message instanceof MapMessage) {
-            MapMessage mapMessage = (MapMessage) message;
+            @SuppressWarnings("unchecked")
+            MapMessage<?, Object> mapMessage = (MapMessage<?, Object>) message;
             writeMapMessage(jsonGenerator, mapMessage);
             return true;
         }
@@ -145,7 +162,7 @@ class MessageResolver implements EventResolver {
 
     }
 
-    private static void writeMapMessage(JsonGenerator jsonGenerator, MapMessage mapMessage) throws IOException {
+    private static void writeMapMessage(JsonGenerator jsonGenerator, MapMessage<?, Object> mapMessage) throws IOException {
         jsonGenerator.writeStartObject();
         mapMessage.forEach(MAP_MESSAGE_ENTRY_WRITER, jsonGenerator);
         jsonGenerator.writeEndObject();

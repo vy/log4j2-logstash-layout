@@ -17,7 +17,7 @@ public class MapResolverFactory implements EventResolverFactory<MapResolver> {
 
     @Override
     public MapResolver create(EventResolverContext context, String key) {
-        return new MapResolver(context, key);
+        return new MapResolver(key);
     }
 
 }

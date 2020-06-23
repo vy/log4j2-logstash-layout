@@ -310,6 +310,7 @@ public class LogstashLayoutTest {
         // Create the event template.
         ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
         eventTemplateRootNode.put("message", "${json:message:json}");
+        eventTemplateRootNode.put("map", "${json:map:key2}");
         String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
@@ -339,6 +340,7 @@ public class LogstashLayoutTest {
         assertThat(point(rootNode, "message", "key1").asText()).isEqualTo("val1");
         assertThat(point(rootNode, "message", "key2").asLong()).isEqualTo(0xDEADBEEF);
         assertThat(point(rootNode, "message", "key3", "key3.1").asText()).isEqualTo("val3.1");
+        assertThat(point(rootNode, "map").asLong()).isEqualTo(0xDEADBEEF);
 
     }
 
