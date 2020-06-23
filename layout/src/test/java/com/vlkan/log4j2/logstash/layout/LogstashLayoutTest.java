@@ -57,6 +57,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -284,7 +285,10 @@ public class LogstashLayoutTest {
                 .build();
 
         // Create the log event with a MapMessage.
-        MapMessage mapMessage = new MapMessage().with("key1", "val1").with("key2", "val2").with("key3", Collections.singletonMap("foo", "bar"));
+        MapMessage<?, ?> mapMessage = new StringMapMessage()
+                .with("key1", "val1")
+                .with("key2", "val2")
+                .with("key3", Collections.singletonMap("foo", "bar"));
         LogEvent logEvent = Log4jLogEvent
                 .newBuilder()
                 .setLoggerName(LogstashLayoutTest.class.getSimpleName())
@@ -309,6 +313,7 @@ public class LogstashLayoutTest {
         // Create the event template.
         ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
         eventTemplateRootNode.put("message", "${json:message:json}");
+        eventTemplateRootNode.put("map", "${json:map:key2}");
         String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
@@ -320,7 +325,7 @@ public class LogstashLayoutTest {
                 .build();
 
         // Create the log event with a MapMessage.
-        MapMessage mapMessage = new MapMessage()
+        MapMessage<?, ?> mapMessage = new StringMapMessage()
                 .with("key1", "val1")
                 .with("key2", 0xDEADBEEF)
                 .with("key3", Collections.singletonMap("key3.1", "val3.1"));
@@ -338,6 +343,7 @@ public class LogstashLayoutTest {
         assertThat(point(rootNode, "message", "key1").asText()).isEqualTo("val1");
         assertThat(point(rootNode, "message", "key2").asLong()).isEqualTo(0xDEADBEEF);
         assertThat(point(rootNode, "message", "key3", "key3.1").asText()).isEqualTo("val3.1");
+        assertThat(point(rootNode, "map").asLong()).isEqualTo(0xDEADBEEF);
 
     }
 
@@ -650,7 +656,9 @@ public class LogstashLayoutTest {
     public void test_MapResolver() throws IOException {
 
         // Create the log event.
-        MapMessage message = new MapMessage().with("key1", "val1");
+        MapMessage<?, ?> message = new StringMapMessage()
+                .with("key1", "val1")
+                .with("key2", Arrays.asList(1, 2));
         LogEvent logEvent = Log4jLogEvent
                 .newBuilder()
                 .setLoggerName(LogstashLayoutTest.class.getSimpleName())
@@ -661,7 +669,8 @@ public class LogstashLayoutTest {
         // Create the event template node with map values.
         ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
         eventTemplateRootNode.put("mapValue1", "${json:map:key1}");
-        eventTemplateRootNode.put("mapValue2", "${json:map:noExist}");
+        eventTemplateRootNode.put("mapValue2", "${json:map:key2}");
+        eventTemplateRootNode.put("mapValue3", "${json:map:noExist}");
         String eventTemplate = eventTemplateRootNode.toString();
 
         // Create the layout.
@@ -677,7 +686,10 @@ public class LogstashLayoutTest {
         String serializedLogEvent = layout.toSerializable(logEvent);
         JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
         assertThat(point(rootNode, "mapValue1").asText()).isEqualTo("val1");
-        assertThat(point(rootNode, "mapValue2")).isInstanceOf(MissingNode.class);
+        assertThat(point(rootNode, "mapValue2").isArray()).isTrue();
+        assertThat(point(rootNode, "mapValue2").get(0).asInt()).isEqualTo(1);
+        assertThat(point(rootNode, "mapValue2").get(1).asInt()).isEqualTo(2);
+        assertThat(point(rootNode, "mapValue3")).isInstanceOf(MissingNode.class);
 
     }
 

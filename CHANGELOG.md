@@ -1,3 +1,7 @@
+### (2020-??-??) v1.0.3
+
+- Fix handling of non-`String` values in `map` directive. (#61)
+
 ### (2020-03-18) v1.0.2
 
 - Fix `ArrayIndexOutOfBoundsException` thrown when `stackTrace:text` produces

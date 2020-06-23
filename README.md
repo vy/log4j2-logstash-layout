@@ -542,6 +542,7 @@ Let us try to answer some common questions:
 - [Eric Schwartz](https://github.com/emschwar)
 - [Felix Barnsteiner](https://github.com/felixbarny)
 - [Johann Schmitz](https://github.com/ercpe)
+- [John Ament](https://github.com/johnament)
 - [Jonathan Guéhenneux](https://github.com/Achaaab)
 - [justinsaliba](https://github.com/justinsaliba)
 - [Maurice Zeijen](https://github.com/mzeijen)

@@ -128,7 +128,7 @@ class MessageResolver implements EventResolver {
         // Override the provided MapMessage formatter.
         if (context.isMapMessageFormatterIgnored() && message instanceof MapMessage) {
             @SuppressWarnings("unchecked")
-            MapMessage<?, Object> mapMessage = (MapMessage) message;
+            MapMessage<?, Object> mapMessage = (MapMessage<?, Object>) message;
             writeMapMessage(jsonGenerator, mapMessage);
             return true;
         }
