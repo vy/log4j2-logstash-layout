@@ -1,4 +1,4 @@
-### (2020-??-??) v1.0.3
+### (2020-06-30) v1.0.3
 
 - Fix handling of non-`String` values in `map` directive. (#61)
 
