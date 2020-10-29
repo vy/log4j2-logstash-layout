@@ -1,0 +1,48 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Maven caching
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Setup JDK 8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 8
+          java-package: jdk
+          architecture: x64
+
+      - name: Build with Maven
+        run: ./mvnw -V -B -e "-DtrimStackTrace=false" "-Dmaven.test.failure.ignore=true" "-Dsurefire.rerunFailingTestsCount=1" verify
+
+      - name: Publish test results
+        uses: scacap/action-surefire-report@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          check_name: Test Report (${{ matrix.os }})
+          report_paths: '**/*-reports/TEST-*.xml'
+
+      - name: Upload test reports
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-reports-${{ matrix.os }}
+          path: '**/*-reports'
