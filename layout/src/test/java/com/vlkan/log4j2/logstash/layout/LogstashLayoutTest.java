@@ -47,10 +47,12 @@ import org.apache.logging.log4j.util.SortedArrayStringMap;
 import org.apache.logging.log4j.util.StringMap;
 import org.assertj.core.data.Percentage;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -1352,6 +1354,111 @@ public class LogstashLayoutTest {
         assertThat(point(rootNode, "exceptionRootCauseStackTrace")).isInstanceOf(NullNode.class);
         assertThat(point(rootNode, "exceptionRootCauseStackTraceText")).isInstanceOf(NullNode.class);
         assertThat(point(rootNode, "requiredFieldTriggeringError").asBoolean()).isTrue();
+
+    }
+
+    @Test
+    public void test_StackTraceTextResolver_against_printStackTrace_failures() throws IOException {
+
+        // Create a throwable with failing printStackTrace().
+        Throwable orgThrowable = new Error("this should not be printed");
+        Throwable unprintableThrowable = Mockito.spy(orgThrowable);
+        Throwable printableThrowable = new RuntimeException("some printStackTrace() failure");
+        Mockito
+                .doThrow(printableThrowable)
+                .when(unprintableThrowable)
+                .printStackTrace(Mockito.any(PrintWriter.class));
+
+        // Create the log event.
+        SimpleMessage message = new SimpleMessage("testing unprintable throwables");
+        LogEvent logEvent = Log4jLogEvent
+                .newBuilder()
+                .setLoggerName(LogstashLayoutTest.class.getSimpleName())
+                .setMessage(message)
+                .setLevel(Level.ERROR)
+                .setThrown(unprintableThrowable)
+                .build();
+
+        // Create the event template.
+        ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
+        eventTemplateRootNode.put("exceptionStackTraceText", "${json:exception:stackTrace:text}");
+        String eventTemplate = eventTemplateRootNode.toString();
+
+        // Create the layout.
+        Configuration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        LogstashLayout layout = LogstashLayout
+                .newBuilder()
+                .setConfiguration(configuration)
+                .setEventTemplate(eventTemplate)
+                .setStackTraceEnabled(true)
+                .build();
+
+        // Check the serialized event.
+        String serializedLogEvent = layout.toSerializable(logEvent);
+        JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
+        assertThat(point(rootNode, "exceptionStackTraceText").asText())
+                .contains(printableThrowable.getMessage())
+                .doesNotContain(unprintableThrowable.getMessage());
+
+    }
+
+    @Test
+    public void test_StackTraceObjectResolver_against_getStackTrace_failures() throws IOException {
+
+        // Create a throwable to reuse its stack trace elements.
+        StackTraceElement[] stackTraceElements =
+                new Exception("failure to provide stack trace elements")
+                        .getStackTrace();
+        assertThat(stackTraceElements.length).isGreaterThan(3);
+
+        // Create a throwable with accessible stack trace elements.
+        Throwable accessibleThrowableRoot =
+                new RuntimeException("failure with accessible stack trace elements");
+        StackTraceElement[] accessibleThrowableStackTraceElements =
+                Arrays.copyOfRange(stackTraceElements, 1, stackTraceElements.length);
+        Throwable accessibleThrowable = Mockito.spy(accessibleThrowableRoot);
+        Mockito
+                .when(accessibleThrowable.getStackTrace())
+                .thenReturn(accessibleThrowableStackTraceElements);
+
+        // Create a throwable with inaccessible stack trace elements.
+        Throwable inaccessibleThrowableRoot =
+                new Exception("failure with inaccessible stack trace elements");
+        Throwable inaccessibleThrowable = Mockito.spy(inaccessibleThrowableRoot);
+        Mockito
+                .doThrow(accessibleThrowable)
+                .when(inaccessibleThrowable)
+                .getStackTrace();
+
+        // Create the log event.
+        SimpleMessage message = new SimpleMessage("testing unprintable throwables");
+        LogEvent logEvent = Log4jLogEvent
+                .newBuilder()
+                .setLoggerName(LogstashLayoutTest.class.getSimpleName())
+                .setMessage(message)
+                .setLevel(Level.ERROR)
+                .setThrown(inaccessibleThrowable)
+                .build();
+
+        // Create the event template.
+        ObjectNode eventTemplateRootNode = JSON_NODE_FACTORY.objectNode();
+        eventTemplateRootNode.put("exceptionStackTrace", "${json:exception:stackTrace}");
+        String eventTemplate = eventTemplateRootNode.toString();
+
+        // Create the layout.
+        Configuration configuration = ConfigurationBuilderFactory.newConfigurationBuilder().build();
+        LogstashLayout layout = LogstashLayout
+                .newBuilder()
+                .setConfiguration(configuration)
+                .setEventTemplate(eventTemplate)
+                .setStackTraceEnabled(true)
+                .build();
+
+        // Check the serialized event.
+        String serializedLogEvent = layout.toSerializable(logEvent);
+        JsonNode rootNode = OBJECT_MAPPER.readTree(serializedLogEvent);
+        assertThat(point(rootNode, "exceptionStackTrace").size())
+                .isEqualTo(accessibleThrowableStackTraceElements.length);
 
     }
 

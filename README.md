@@ -532,6 +532,16 @@ Let us try to answer some common questions:
   come handy if you want to use this plugin along with certain applications,
   e.g., Elasticsearch 5.x and 6.x versions, which requires Log4j 2.
 
+- **Why do I get irrelevant stack traces from
+  `exception[RootCause]:stackTrace[:text]` directives?** `LogstashLayout`
+  uses `Throwable#printStackTrace(PrintWriter)` and `Throwable#getStackTrace()`
+  methods to resolve these directives. Under certain circumstances, these
+  methods may throw exception as well. Put another way, trying to access the
+  stack trace of an exception might cause another exception. In such a case,
+  `LogstashLayout` continues the directive resolution using the new exception
+  and keeps on repeating until it manages to resolve a stack trace to at least
+  provide some insight into the underlying cause.
+
 <a name="contributors"></a>
 
 # Contributors

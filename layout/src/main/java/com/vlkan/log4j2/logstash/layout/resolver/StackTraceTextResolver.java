@@ -39,7 +39,21 @@ class StackTraceTextResolver implements StackTraceResolver {
     @Override
     public void resolve(Throwable throwable, JsonGenerator jsonGenerator) throws IOException {
         BufferedPrintWriter writer = getResetWriter();
-        throwable.printStackTrace(writer);
+        Throwable lastThrowable = throwable;
+        while (true) {
+            try {
+                lastThrowable.printStackTrace(writer);
+                break;
+            }
+            // It is indeed not a good practice to catch `Throwable`s, but what
+            // one should do while trying to dump the stack trace of a failure?
+            // Hence, if `Throwable#printStackTrace(PrintWriter)` fails for some
+            // reason, at least try to dump the reason of the failure.
+            catch (Throwable newThrowable) {
+                writer.close();
+                lastThrowable = newThrowable;
+            }
+        }
         jsonGenerator.writeString(writer.getBuffer(), 0, writer.getPosition());
     }
 

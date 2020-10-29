@@ -1,3 +1,7 @@
+### (2020-10-29) v1.0.4
+
+- Try to dump the cause when stack trace serialization fails.
+
 ### (2020-06-30) v1.0.3
 
 - Fix handling of non-`String` values in `map` directive. (#61)
