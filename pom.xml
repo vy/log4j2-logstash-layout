@@ -68,14 +68,14 @@
         <java.version>1.8</java.version>
 
         <!-- library versions -->
-        <assertj-core.version>3.13.2</assertj-core.version>
-        <commons-lang3.version>3.9</commons-lang3.version>
-        <ecs-layout.version>0.1.1</ecs-layout.version>
-        <jackson.version>2.9.10</jackson.version>
-        <jmh.version>1.21</jmh.version>
-        <junit.version>4.13-beta-3</junit.version>
-        <log4j2.version>2.12.1</log4j2.version>
-        <mockito.version>3.5.15</mockito.version>
+        <assertj-core.version>3.18.0</assertj-core.version>
+        <commons-lang3.version>3.11</commons-lang3.version>
+        <ecs-layout.version>0.5.2</ecs-layout.version>
+        <jackson.version>[2.10.2,)</jackson.version>
+        <jmh.version>1.26</jmh.version>
+        <junit.version>4.13.1</junit.version>
+        <log4j2.version>2.13.3</log4j2.version>
+        <mockito.version>3.6.0</mockito.version>
 
         <!-- plugin versions -->
         <build-helper-maven-plugin.version>3.0.0</build-helper-maven-plugin.version>
@@ -84,9 +84,10 @@
         <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
         <maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
         <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
-        <maven-shade-plugin.version>3.0.0</maven-shade-plugin.version>
+        <maven-shade-plugin.version>3.2.1</maven-shade-plugin.version>
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
         <maven-surefire-plugin.version>3.0.0-M3</maven-surefire-plugin.version>
+        <versions-maven-plugin.version>2.8.1</versions-maven-plugin.version>
 
     </properties>
 
@@ -173,6 +174,15 @@
                     <compilerArgs>
                         <arg>-Xlint:unchecked</arg>
                     </compilerArgs>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>${versions-maven-plugin.version}</version>
+                <configuration>
+                    <rulesUri>${project.baseUri}/maven-version-rules.xml</rulesUri>
                 </configuration>
             </plugin>
 
