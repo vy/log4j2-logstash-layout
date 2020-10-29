@@ -1,3 +1,19 @@
+/*
+ * Copyright 2017-2020 Volkan Yazıcı
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permits and
+ * limitations under the License.
+ */
+
 package com.vlkan.log4j2.logstash.layout;
 
 import com.fasterxml.jackson.core.JsonFactory;
@@ -10,11 +26,11 @@ import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.core.util.JsonGeneratorDelegate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vlkan.log4j2.logstash.layout.util.ByteBufferOutputStream;
-import org.apache.logging.log4j.util.Supplier;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringReader;
+import java.util.function.Supplier;
 
 enum LogstashLayoutSerializationContexts {;
 
@@ -109,7 +125,9 @@ enum LogstashLayoutSerializationContexts {;
 
         @Override
         public void writeString(String text) throws IOException {
-            if (maxStringLength <= 0 || maxStringLength >= text.length()) {
+            if (text == null) {
+                writeNull();
+            } else if (maxStringLength <= 0 || maxStringLength >= text.length()) {
                 super.writeString(text);
             } else {
                 StringReader textReader = new StringReader(text);

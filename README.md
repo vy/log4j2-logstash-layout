@@ -42,7 +42,7 @@ Add the `log4j2-logstash-layout` dependency to your POM file
 </dependency>
 ```
 
-together with a valid `log4j-core` dependency:
+in combination with a valid `log4j-core` dependency:
 
 ```xml
 <dependency>
@@ -451,7 +451,7 @@ Let us try to answer some common questions:
   `ObjectMapper`, which needs to walk over the class fields via reflection and
   perform heavy branching and intermediate object instantiation. On the
   contrary, `log4j2-logstash-layout` parses the given template once and
-  compiles an (almost) garbage- and (to a certain extent) branching-free
+  compiles a (mostly) garbage- and (to a certain extent) branching-free
   JSON generator employing Jackson `JsonGenerator`.
 
 - **Why is `log4j2-logstash-layout` is not totally garbage-free?**
@@ -465,7 +465,7 @@ Let us try to answer some common questions:
     `Long`, or `byte[]`.
 
 - **How can one run the benchmark on his/her machine?** After a fresh
-  `mvn clean package` within the source directory, run
+  `mvn clean verify` within the source directory, run
   `layout-benchmark/benchmark.py`.
 
 <a name="contributors"></a>
@@ -488,7 +488,7 @@ Let us try to answer some common questions:
 
 # License
 
-Copyright &copy; 2017-2019 [Volkan Yazıcı](https://vlkan.com/)
+Copyright &copy; 2017-2020 [Volkan Yazıcı](https://vlkan.com/)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

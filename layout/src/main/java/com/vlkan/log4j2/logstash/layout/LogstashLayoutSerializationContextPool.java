@@ -1,10 +1,10 @@
 package com.vlkan.log4j2.logstash.layout;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.logging.log4j.util.Supplier;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.function.Supplier;
 
 class LogstashLayoutSerializationContextPool {
 

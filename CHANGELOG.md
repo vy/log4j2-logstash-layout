@@ -1,3 +1,7 @@
+### (2020-10-29) v0.21.1
+
+- Try to dump the cause when stack trace serialization fails.
+
 ### (2019-10-15) v0.21
 
 - Add feature comparison matrix.
