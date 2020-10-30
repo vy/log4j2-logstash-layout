@@ -1,3 +1,7 @@
+### (2020-10-30) v1.0.5
+
+- Fix Java 8 compatibility issues. (#69)
+
 ### (2020-10-29) v1.0.4
 
 - Try to dump the cause when stack trace serialization fails.

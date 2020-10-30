@@ -123,7 +123,8 @@ public class LogstashLayoutJsonGeneratorStateResetTest {
         Assertions.assertThat(outputContext.inRoot()).isTrue();
         Assertions.assertThat(outputContext.inObject()).isFalse();
         Assertions.assertThat(outputContext.inArray()).isFalse();
-        Assertions.assertThat(byteBuffer.position()).isEqualTo(0);
+        //noinspection RedundantCast (for Java 8 compatibility)
+        Assertions.assertThat(((Buffer) byteBuffer).position()).isEqualTo(0);
     }
 
     private interface ThrowingFunction<I, O> {

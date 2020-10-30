@@ -30,6 +30,8 @@ import com.vlkan.log4j2.logstash.layout.util.ByteBufferOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringReader;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
 import java.util.function.Supplier;
 
 enum LogstashLayoutSerializationContexts {;
@@ -72,7 +74,9 @@ enum LogstashLayoutSerializationContexts {;
 
                 @Override
                 public void reset() {
-                    outputStream.getByteBuffer().clear();
+                    ByteBuffer byteBuffer = outputStream.getByteBuffer();
+                    // noinspection RedundantCast (for Java 8 compatibility)
+                    ((Buffer) byteBuffer).clear();
                 }
 
             };
