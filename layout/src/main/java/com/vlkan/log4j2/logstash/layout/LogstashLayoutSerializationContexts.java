@@ -75,7 +75,7 @@ enum LogstashLayoutSerializationContexts {;
                 @Override
                 public void reset() {
                     ByteBuffer byteBuffer = outputStream.getByteBuffer();
-                    // noinspection RedundantCast
+                    // noinspection RedundantCast (for Java 8 compatibility)
                     ((Buffer) byteBuffer).clear();
                 }
 

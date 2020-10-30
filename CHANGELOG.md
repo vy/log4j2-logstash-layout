@@ -1,4 +1,4 @@
-### (2020-10-30) v0.21.2
+### (2020-10-30) v0.21.3
 
 - Fix Java 8 compatibility issues. (#69)
 

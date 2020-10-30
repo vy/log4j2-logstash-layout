@@ -1,7 +1,7 @@
 package com.vlkan.log4j2.logstash.layout.util;
 
-
 import java.io.OutputStream;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
@@ -34,14 +34,16 @@ public class ByteBufferOutputStream extends OutputStream {
     }
 
     public byte[] toByteArray() {
-        int size = byteBuffer.position();
+        @SuppressWarnings("RedundantCast")  // for Java 8 compatibility
+        int size = ((Buffer) byteBuffer).position();
         byte[] buffer = new byte[size];
         System.arraycopy(byteBuffer.array(), 0, buffer, 0, size);
         return buffer;
     }
 
     public String toString(Charset charset) {
-        return new String(byteBuffer.array(), 0, byteBuffer.position(), charset);
+        // noinspection RedundantCast (for Java 8 compatibility)
+        return new String(byteBuffer.array(), 0, ((Buffer) byteBuffer).position(), charset);
     }
 
 }
