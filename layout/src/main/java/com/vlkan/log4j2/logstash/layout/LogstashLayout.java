@@ -21,6 +21,7 @@ import org.apache.logging.log4j.core.util.datetime.FastDateFormat;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -107,7 +108,7 @@ public class LogstashLayout implements Layout<String> {
             String methodName = objectMapperFactoryMethod.substring(splitterIndex + 1);
             Class<?> clazz = Class.forName(className);
             if ("new".equals(methodName)) {
-                return (ObjectMapper) clazz.newInstance();
+                return (ObjectMapper) clazz.getDeclaredConstructor().newInstance();
             } else {
                 Method method = clazz.getMethod(methodName);
                 return (ObjectMapper) method.invoke(null);
@@ -175,7 +176,8 @@ public class LogstashLayout implements Layout<String> {
         try {
             encode(event, context);
             ByteBuffer byteBuffer = context.getOutputStream().getByteBuffer();
-            byteBuffer.flip();
+            // noinspection RedundantCast (for Java 8 compatibility)
+            ((Buffer) byteBuffer).flip();
             // noinspection SynchronizationOnLocalVariableOrMethodParameter
             synchronized (destination) {
                 ByteBufferDestinations.writeToUnsynchronized(byteBuffer, destination);
@@ -192,7 +194,9 @@ public class LogstashLayout implements Layout<String> {
         eventResolver.resolve(event, jsonGenerator);
         jsonGenerator.flush();
         ByteBufferOutputStream outputStream = context.getOutputStream();
-        if (outputStream.getByteBuffer().position() == 0) {
+        ByteBuffer byteBuffer = outputStream.getByteBuffer();
+        // noinspection RedundantCast (for Java 8 compatibility)
+        if (((Buffer) byteBuffer).position() == 0) {
             outputStream.write(EMPTY_OBJECT_JSON_BYTES);
         }
         outputStream.write(lineSeparatorBytes);
