@@ -1,3 +1,11 @@
+**`log4j2-logstash-layout` is not maintained anymore! Since Log4j 2.14.0, it is
+superseded by `log4j-layout-template-json` shipping
+[`JsonTemplateLayout`](https://logging.apache.org/log4j/2.x/manual/json-template-layout.html),
+which is a successor of `LogstashLayout`. We strongly advise all `LogstashLayout`
+users to migrate to `JsonTemplateLayout`. We will do our best to bring bug fixes
+to `LogstashLayout`, but all the new development efforts will be focused on
+`JsonTemplateLayout`.**
+
 [![Actions Status](https://github.com/vy/log4j2-logstash-layout/workflows/CI/badge.svg)](https://github.com/vy/log4j2-logstash-layout/actions)
 [![Maven Central](https://img.shields.io/maven-central/v/com.vlkan.log4j2/log4j2-logstash-layout-parent.svg)](https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.vlkan.log4j2%22)
 [![License](https://img.shields.io/github/license/vy/log4j2-logstash-layout.svg)](https://www.apache.org/licenses/LICENSE-2.0.txt)
