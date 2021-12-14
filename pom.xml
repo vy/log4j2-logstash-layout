@@ -74,7 +74,7 @@
         <jackson.version>[2.10.2,)</jackson.version>
         <jmh.version>1.26</jmh.version>
         <junit.version>4.13.1</junit.version>
-        <log4j2.version>2.13.3</log4j2.version>
+        <log4j2.version>2.16.0</log4j2.version>
         <mockito.version>3.6.0</mockito.version>
 
         <!-- plugin versions -->
