@@ -69,7 +69,7 @@
 
         <!-- library versions -->
         <assertj-core.version>3.18.0</assertj-core.version>
-        <commons-lang3.version>3.11</commons-lang3.version>
+        <commons-lang3.version>3.18.0</commons-lang3.version>
         <ecs-layout.version>0.5.2</ecs-layout.version>
         <jackson.version>[2.10.2,)</jackson.version>
         <jmh.version>1.26</jmh.version>
